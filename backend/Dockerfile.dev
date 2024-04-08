@@ -1,0 +1,28 @@
+# Selecting base image
+FROM node:21-alpine
+
+# Selecting Work directory
+WORKDIR /usr/src/app
+
+# Specifiying development environment
+ENV NODE_ENV=development
+
+# Copying the dependency file
+COPY pnpm-lock.yaml .
+COPY package.json .
+
+# Installing pnpm
+RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.shrc" SHELL="$(which sh)" sh
+RUN npm install -g pnpm
+
+# Installing the dependencies
+RUN pnpm install
+
+# Copying rest of the files
+COPY . .
+
+# Make a non-root user
+#RUN adduser -D grihabhoomiuser && echo "grihabhoomiuser:MBrcFRcgHyM/gXTMBjL4CA==" | chpasswd
+
+# Change to grihabhoomiuser
+#USER grihabhoomiuser

@@ -1,0 +1,401 @@
+{
+  "id": "754fcff0-fc2b-40ba-9652-91d6aa9fb018",
+  "prevId": "9a4334fe-5e1a-4cb6-b721-a01b81e70f50",
+  "version": "5",
+  "dialect": "pg",
+  "tables": {
+    "property": {
+      "name": "property",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "seller_id": {
+          "name": "seller_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to_rent": {
+          "name": "to_rent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "close_landmark": {
+          "name": "close_landmark",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "property_type",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Flat'"
+        },
+        "available_from": {
+          "name": "available_from",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "available_till": {
+          "name": "available_till",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "negotiable": {
+          "name": "negotiable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "property_status",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Sale'"
+        },
+        "listed_at": {
+          "name": "listed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "featured": {
+          "name": "featured",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "expires_on": {
+          "name": "expires_on",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "views": {
+          "name": "views",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        }
+      },
+      "indexes": {
+        "seller_id_index": {
+          "name": "seller_id_index",
+          "columns": [
+            "seller_id"
+          ],
+          "isUnique": false
+        },
+        "landmark_index": {
+          "name": "landmark_index",
+          "columns": [
+            "close_landmark"
+          ],
+          "isUnique": false
+        },
+        "title_index": {
+          "name": "title_index",
+          "columns": [
+            "title"
+          ],
+          "isUnique": false
+        },
+        "availbe_from_index": {
+          "name": "availbe_from_index",
+          "columns": [
+            "available_from"
+          ],
+          "isUnique": false
+        },
+        "featured_index": {
+          "name": "featured_index",
+          "columns": [
+            "featured"
+          ],
+          "isUnique": false
+        },
+        "address_index": {
+          "name": "address_index",
+          "columns": [
+            "address"
+          ],
+          "isUnique": false
+        },
+        "price_index": {
+          "name": "price_index",
+          "columns": [
+            "price"
+          ],
+          "isUnique": false
+        },
+        "property_type_index": {
+          "name": "property_type_index",
+          "columns": [
+            "property_type"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "property_seller_id_users_id_fk": {
+          "name": "property_seller_id_users_id_fk",
+          "tableFrom": "property",
+          "tableTo": "users",
+          "columnsFrom": [
+            "seller_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dob": {
+          "name": "dob",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profile_pic_url": {
+          "name": "profile_pic_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "second_email": {
+          "name": "second_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "verified": {
+          "name": "verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_admin": {
+          "name": "is_admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_agent": {
+          "name": "is_agent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'VIEWER'"
+        },
+        "last_active": {
+          "name": "last_active",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "email_index": {
+          "name": "email_index",
+          "columns": [
+            "email"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "users_phone_unique": {
+          "name": "users_phone_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "phone"
+          ]
+        }
+      }
+    }
+  },
+  "enums": {
+    "property_status": {
+      "name": "property_status",
+      "values": {
+        "Sale": "Sale",
+        "Hold": "Hold",
+        "Sold": "Sold"
+      }
+    },
+    "property_type": {
+      "name": "property_type",
+      "values": {
+        "House": "House",
+        "Flat": "Flat",
+        "Apartment": "Apartment",
+        "Land": "Land",
+        "Building": "Building"
+      }
+    },
+    "user_role": {
+      "name": "user_role",
+      "values": {
+        "ADMIN": "ADMIN",
+        "MODERATOR": "MODERATOR",
+        "VIEWER": "VIEWER"
+      }
+    }
+  },
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

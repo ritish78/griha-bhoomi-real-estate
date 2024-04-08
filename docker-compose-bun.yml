@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  bun-backend:
+    container_name: bun-griha-bhoomi-backend
+    environment:
+      - NODE_ENV=development
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.bundev
+    env_file:
+      - ./backend/.env.local
+    ports:
+      - 5000:5000
+    networks:
+      - griha-bhoomi
+    volumes:
+      - ./backend:/usr/src/app/backend
+      - /usr/src/app/backend/node_modules
+    depends_on:
+      - postgres
+    command: bun run bundev
+
+  postgres:
+    container_name: db_postgres
+    image: postgres:16.2-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: password123
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DATABASE: postgres
+    networks:
+      - griha-bhoomi
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  redis:
+    container_name: redis
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.local
+    ports:
+      - 6379:6379
+    networks:
+      - griha-bhoomi
+
+  adminer:
+    container_name: adminer
+    image: adminer:4.8.1
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: db_postgres
+    networks:
+      - griha-bhoomi
+    ports:
+      - 8085:8080
+
+networks:
+  griha-bhoomi:
+
+volumes:
+  postgres-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: E:\databases\griha-bhoomi

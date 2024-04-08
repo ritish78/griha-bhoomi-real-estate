@@ -1,0 +1,17 @@
+# Selecting base image
+FROM oven/bun:1.1
+
+# Selecting Work directory
+WORKDIR /usr/src/app
+
+# Specifiying development environment
+ENV NODE_ENV=development
+
+# Copying the dependency file
+COPY package.json .
+
+# Installing the dependencies
+RUN bun install
+
+# Copying rest of the files
+COPY . .
