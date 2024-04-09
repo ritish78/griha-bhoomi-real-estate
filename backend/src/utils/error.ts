@@ -34,3 +34,9 @@ export class RateLimitError extends GenericError {
     super("RateLimitError", 429, message);
   }
 }
+
+export class NotFoundError extends GenericError {
+  constructor(message: string) {
+    super("ResourceNotFound", 404, message);
+  }
+}

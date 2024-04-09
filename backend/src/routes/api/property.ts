@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { addProperty } from "src/controller/property/propertyController";
 import { newPropertySchema } from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
@@ -26,58 +26,64 @@ const router = Router();
  * @param expiresOn     String - Date in string where the listing expires on the website
  * @returns             Response or NextFunction
  */
-router.route("/new").post(onlyIfLoggedIn, validateRequest(newPropertySchema), async (req, res, next) => {
-  const userId = req.session.userId;
-  try {
-    const {
-      title,
-      description,
-      toRent,
-      address,
-      closeLandmark,
-      propertyType,
-      availableFrom,
-      availableTill,
-      price,
-      negotiable,
-      imageUrl,
-      status,
-      expiresOn
-    } = req.body;
-    console.log(userId, title, description);
+router
+  .route("/new")
+  .post(
+    onlyIfLoggedIn,
+    validateRequest(newPropertySchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      const userId = req.session.userId;
+      try {
+        const {
+          title,
+          description,
+          toRent,
+          address,
+          closeLandmark,
+          propertyType,
+          availableFrom,
+          availableTill,
+          price,
+          negotiable,
+          imageUrl,
+          status,
+          expiresOn
+        } = req.body;
+        console.log(userId, title, description);
 
-    //In this below addProperty function, TypeScript throws error as userId
-    //can be undefined. However that should not be the case as we already have
-    //`onlyIfLoggedIn` middleware which will throw AuthError if userId is not present
-    //The way to solve it could be to add `!` in the above line where we have;
-    //const userId = req.session.userId!;
-    //Howerver, let's add a if clause to check if userId isn't null or undefined
-    //even if it should not be possible.
-    if (!userId) {
-      throw new AuthError("Could not verify the user! Please sign in to perfom this action!");
+        //In this below addProperty function, TypeScript throws error as userId
+        //can be undefined. However that should not be the case as we already have
+        //`onlyIfLoggedIn` middleware which will throw AuthError if userId is not present
+        //The way to solve it could be to add `!` in the above line where we have;
+        //const userId = req.session.userId!;
+        //Howerver, let's add a if clause to check if userId isn't null or undefined
+        //even if it should not be possible.
+        if (!userId) {
+          throw new AuthError("Could not verify the user! Please sign in to perfom this action!");
+        }
+
+        await addProperty(
+          userId,
+          title,
+          description,
+          toRent,
+          address,
+          closeLandmark,
+          propertyType,
+          availableFrom,
+          availableTill,
+          price,
+          negotiable,
+          imageUrl,
+          status,
+          expiresOn ? expiresOn : new Date()
+        );
+
+        return res.status(201).send({ message: "New Property added!" });
+      } catch (error) {
+        next(error);
+      }
     }
-
-    await addProperty(
-      userId,
-      title,
-      description,
-      toRent,
-      address,
-      closeLandmark,
-      propertyType,
-      availableFrom,
-      availableTill,
-      price,
-      negotiable,
-      imageUrl,
-      status,
-      expiresOn ? expiresOn : new Date()
-    );
-
-    return res.status(201).send({ message: "New Property added!" });
-  } catch (error) {
-    next(error);
-  }
-});
+  );
 
 export default router;

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { GenericError, AuthError } from "src/utils/error";
+import { GenericError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
 
 /**
@@ -23,8 +23,20 @@ export const errorHandler = (error: unknown, req: Request, res: Response, next: 
       error: error.message,
       stack: error.stack
     });
-    if (error instanceof AuthError) {
-      return res.redirect("/login");
+
+    // if (error instanceof AuthError) {
+    //   return res.redirect("/login");
+    // }
+
+    //Logging if the User visits a page which returns 404
+    //Some bots or real users visit page which can be logged
+    //to view the metrics of what page they want to visit
+    if (error instanceof NotFoundError) {
+      logger.notFound(`${error.name} (${new Date().toISOString()})`, {
+        error: error.message,
+        stack: error.stack,
+        cause: error.cause
+      });
     }
 
     return res.status(error.statusCode).send({
