@@ -1,10 +1,15 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { addProperty, getPropertyById, seedProperty } from "src/controller/property/propertyController";
+import {
+  addProperty,
+  getPropertyById,
+  searchPropertyByKeyword,
+  seedProperty
+} from "src/controller/property/propertyController";
 import { newPropertySchema } from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
 import { validateRequest } from "src/middleware/validateRequest";
-import { Property } from "src/model/property";
-import { AuthError, NotFoundError } from "src/utils/error";
+// import { Property } from "src/model/property";
+import { AuthError, BadRequestError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
 import { dummyPropertyData } from "seed";
 
@@ -129,7 +134,7 @@ router
  */
 router.route("/:propertyId").get(async (req: Request, res: Response) => {
   console.log("Property search by id", req.params.propertyId);
-  const propertyById: Property = await getPropertyById(req.params.propertyId);
+  const propertyById = await getPropertyById(req.params.propertyId);
 
   if (!propertyById) {
     logger.notFound(
@@ -137,7 +142,7 @@ router.route("/:propertyId").get(async (req: Request, res: Response) => {
       {
         userId: req.session.userId,
         email: req.session.email,
-        ip: req.ip
+        ip: req.socket.remoteAddress
       },
       true
     );
@@ -148,7 +153,33 @@ router.route("/:propertyId").get(async (req: Request, res: Response) => {
 });
 
 /**
- * Search property by title and/or description
+ * @route               /api/v1/property/search/title?keyword=value
+ * @eg                  /api/v1/property/search/title?keyword=beach
+ * @method              GET
+ * @desc                Search property by title and/or description
+ * @reqParams           string - propertyId
  */
+router.route("/search/title").get(async (req: Request, res: Response) => {
+  const keyword = req.query.keyword as string;
+
+  logger.info(
+    `Searched property using term: ${keyword}`,
+    {
+      keyword,
+      userId: req.session.userId,
+      userEmail: req.session.email,
+      ip: req.socket.remoteAddress
+    },
+    true
+  );
+
+  if (keyword && keyword.trim().length > 1) {
+    const propertyByKeyword = await searchPropertyByKeyword(keyword);
+
+    return res.status(200).send(propertyByKeyword);
+  } else {
+    throw new BadRequestError("Please enter valid string to search!");
+  }
+});
 
 export default router;

@@ -3,6 +3,7 @@ import cookies from "cookie-parser";
 import cors from "cors";
 import session from "express-session";
 import RedisStore from "connect-redis";
+import helmet from "helmet";
 
 import redisClient from "./db/redis";
 
@@ -28,6 +29,8 @@ declare module "express-session" {
   }
 }
 
+app.use(helmet());
+app.disable("X-Powered-By");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookies());

@@ -1,7 +1,12 @@
+import { sql } from "drizzle-orm";
 import slugify from "slugify";
 import db from "src/db";
 
-import { preparedGetPropertyById, preparedInsertProperty } from "src/db/preparedStatement";
+import {
+  preparedGetPropertyById,
+  // preparedGetPropertyByKeyword,
+  preparedInsertProperty
+} from "src/db/preparedStatement";
 import { property } from "src/model/property";
 
 import logger from "src/utils/logger";
@@ -121,10 +126,46 @@ export const addProperty = async (
 
 /**
  * @param propertyId  string - property id of the searched property
+ * @returns property
  */
 export const getPropertyById = async (propertyId: string) => {
   console.log("Searching for property of id:", propertyId);
   const [propertyById] = await preparedGetPropertyById.execute({ propertyId });
 
   return propertyById;
+};
+
+/**
+ *
+ * @param keyword   string - keyword to search the title and description column in postgres
+ * @returns         Property[] object
+ */
+export const searchPropertyByKeyword = async (keyword: string) => {
+  console.log("Searching for property by keyword: ", keyword);
+
+  //Let's say that user searched for `beach traditional`
+  //How would we search for the property in the database?
+  //In this implementation we are going to query in `search_vector` column which is generated
+  //for every row and is stored alongside other fields. We use `to_tsvector` function provided by Postgres
+  //We have setup to rank the row by title, description, close_landmark and address
+  //Let's remove the space with pipe symbol to search it as we need to
+  //supply this to postgres `beach | traditional`. The pipe is `OR` opeator
+  //If we wanted to have both `beach` and `traditional` in the same property listing,
+  //we would have to supply this to postgres `beach & traditional`.
+  const normalisedKeyword = keyword.trim().replace(" ", " | ");
+
+  //I had prepeared a statement `preparedGetPropertyByKeyword` which was supposed to be executed
+  //to get the property by keyword, however it did not work as intended as I was not able to pass
+  //value of `keyword` into the `sql.placeholder("keyword")`
+  try {
+    const propertyByKeyword = await db.execute(
+      sql`SELECT *, ts_rank(search_vector, to_tsquery('english', ${normalisedKeyword})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) ORDER BY rank desc;`
+    );
+    return propertyByKeyword.rows;
+  } catch (error) {
+    logger.error(`${error.message} - (${new Date().toISOString()})`, {
+      error: error.message,
+      stack: error.stack
+    });
+  }
 };

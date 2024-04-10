@@ -89,9 +89,17 @@ export const preparedInsertProperty = db
   })
   .prepare("insert-property");
 
+/**
+ * @param propertyId string - id of the property to fetch from postgres
+ */
 export const preparedGetPropertyById = db
   .select()
   .from(property)
   .where(eq(property.id, sql.placeholder("propertyId")))
   .limit(1)
   .prepare("get-property-by-id");
+
+/**
+ * @param keyword string - keyword to search the title and description
+ */
+export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, ts_rank(search_vector, to_tsquery('english', ${sql.placeholder("keyword")})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${sql.placeholder("keyword")}) ORDER BY rank desc;`;
