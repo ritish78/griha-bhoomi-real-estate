@@ -1,14 +1,32 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { addProperty } from "src/controller/property/propertyController";
+import { addProperty, getPropertyById, seedProperty } from "src/controller/property/propertyController";
 import { newPropertySchema } from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
 import { validateRequest } from "src/middleware/validateRequest";
-import { AuthError } from "src/utils/error";
+import { Property } from "src/model/property";
+import { AuthError, NotFoundError } from "src/utils/error";
+import logger from "src/utils/logger";
+import { dummyPropertyData } from "seed";
 
 const router = Router();
 
 /**
- * @route               /api/v1/auth/property/new
+ * @route       /api/v1/property/seed-property
+ * @method      POST
+ * @desc        Seed dummy property into postgresql db
+ */
+router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
+  try {
+    await seedProperty(dummyPropertyData);
+    res.status(201).send({ message: "Property info seeded successfully!" });
+  } catch (error) {
+    console.log("Error while seeding the property to database!");
+    res.status(500).send({ message: "Could not seed property info to database!" });
+  }
+});
+
+/**
+ * @route               /api/v1/property/new
  * @method              POST
  * @desc                Add new property listing
  * @param title         String - Title of the listing of the property
@@ -62,6 +80,23 @@ router
           throw new AuthError("Could not verify the user! Please sign in to perfom this action!");
         }
 
+        // await db.insert(property).values({
+        //   sellerId: userId,
+        //   title,
+        //   slug: title,
+        //   description,
+        //   toRent,
+        //   address,
+        //   closeLandmark,
+        //   propertyType,
+        //   availableFrom,
+        //   availableTill,
+        //   price,
+        //   negotiable,
+        //   imageUrl,
+        //   status,
+        //   expiresOn: expiresOn ? expiresOn : new Date()
+        // });
         await addProperty(
           userId,
           title,
@@ -85,5 +120,35 @@ router
       }
     }
   );
+
+/**
+ * @route               /api/v1/property/:propertyId
+ * @method              GET
+ * @desc                Get property using its id
+ * @reqParams           string - propertyId
+ */
+router.route("/:propertyId").get(async (req: Request, res: Response) => {
+  console.log("Property search by id", req.params.propertyId);
+  const propertyById: Property = await getPropertyById(req.params.propertyId);
+
+  if (!propertyById) {
+    logger.notFound(
+      `Property ID: ${req.params.propertyId} - (${new Date().toISOString()})`,
+      {
+        userId: req.session.userId,
+        email: req.session.email,
+        ip: req.ip
+      },
+      true
+    );
+    throw new NotFoundError(`Property of id ${req.params.propertyId} not found!`);
+  }
+
+  return res.status(200).send(propertyById);
+});
+
+/**
+ * Search property by title and/or description
+ */
 
 export default router;

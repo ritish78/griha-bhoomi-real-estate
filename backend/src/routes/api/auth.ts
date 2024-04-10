@@ -4,6 +4,9 @@ import { registerSchema, loginSchema } from "src/controller/auth/authSchema";
 
 import { registerUser, authUser } from "src/controller/auth/authController";
 import { validateRequest } from "src/middleware/validateRequest";
+import { onlyIfLoggedIn } from "src/middleware/authCheck";
+import { BadRequestError } from "src/utils/error";
+import logger from "src/utils/logger";
 
 const router = Router();
 
@@ -79,5 +82,24 @@ router
       next(error);
     }
   });
+
+/**
+ * @route       /api/v1/auth/logout
+ * @method      POST
+ * @desc        Logout the user by removing the session from the store
+ * @access      Public
+ */
+router.route("/logout").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
+  req.session.destroy((error) => {
+    if (error) {
+      logger.debug("Failed to logout user in logout endpoint", { req, error }, true);
+      throw new BadRequestError("Could not logout the user!");
+    } else {
+      res.clearCookie("connect.sid");
+      return res.status(200).send({ message: "Logged out sucessfully!" });
+      // res.redirect("/");
+    }
+  });
+});
 
 export default router;

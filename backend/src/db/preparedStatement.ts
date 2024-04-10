@@ -77,9 +77,21 @@ export const preparedInsertProperty = db
     availableTill: sql.placeholder("availableTill"),
     price: sql.placeholder("price"),
     negotiable: sql.placeholder("negotiable"),
-    imageUrl: sql.placeholder("imageUrl"),
+    imageUrl: [
+      "https://placehold.co/600x400",
+      "https://placehold.co/800x800",
+      "https://placehold.co/1200x1000"
+    ],
+    // imageUrl: sql.placeholder("imageUrl"),
     status: sql.placeholder("status"),
     expiresOn: sql.placeholder("expiresOn"),
     views: 1
   })
   .prepare("insert-property");
+
+export const preparedGetPropertyById = db
+  .select()
+  .from(property)
+  .where(eq(property.id, sql.placeholder("propertyId")))
+  .limit(1)
+  .prepare("get-property-by-id");

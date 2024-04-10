@@ -12,8 +12,16 @@ import {
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
 
-export const PropertyType = pgEnum("property_type", ["House", "Flat", "Apartment", "Land", "Building"]);
-export const PropertyStatus = pgEnum("property_status", ["Sale", "Hold", "Sold"]);
+export const PropertyType = pgEnum("property_type", [
+  "House",
+  "Mansion",
+  "Flat",
+  "Apartment",
+  "Land",
+  "Villa",
+  "Building"
+]);
+export const PropertyStatus = pgEnum("property_status", ["Sale", "Rent", "Hold", "Sold"]);
 
 /**
  * Creating a table of name property. It is the listing of
@@ -38,13 +46,13 @@ export const property = pgTable(
     availableTill: timestamp("available_till", { mode: "string" }),
     price: varchar("price", { length: 12 }),
     negotiable: boolean("negotiable").default(false).notNull(),
-    imageUrl: text("image_url"),
+    imageUrl: text("image_url").array(),
     status: PropertyStatus("status").default("Sale").notNull(),
     listedAt: timestamp("listed_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
     featured: boolean("featured").default(false),
     expiresOn: timestamp("expires_on", { mode: "string" }),
-    views: integer("views")
+    views: integer("views").default(1)
   },
   (table) => {
     return {
@@ -55,7 +63,7 @@ export const property = pgTable(
       featuredIndex: index("featured_index").on(table.featured),
       addressIndex: index("address_index").on(table.address),
       priceIndex: index("price_index").on(table.price),
-      PropertyType: index("property_type_index").on(table.propertyType)
+      propertyTypeIndex: index("property_type_index").on(table.propertyType)
     };
   }
 );

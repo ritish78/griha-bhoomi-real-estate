@@ -1,8 +1,45 @@
 import slugify from "slugify";
+import db from "src/db";
 
-import { preparedInsertProperty } from "src/db/preparedStatement";
+import { preparedGetPropertyById, preparedInsertProperty } from "src/db/preparedStatement";
+import { property } from "src/model/property";
 
 import logger from "src/utils/logger";
+
+/**
+ * @param dummyPropertyData array of property
+ */
+export const seedProperty = async (dummyPropertyData) => {
+  await db.transaction(async (tx) => {
+    for (const row of dummyPropertyData) {
+      try {
+        await tx.insert(property).values([
+          {
+            sellerId: row.sellerId,
+            title: row.title,
+            slug: row.title,
+            description: row.description,
+            toRent: row.toRent,
+            address: row.address,
+            closeLandmark: row.closeLandmark,
+            propertyType: row.propertyType,
+            availableFrom: row.availableFrom,
+            availableTill: row.availableTill,
+            price: row.price,
+            negotiable: row.negotiable,
+            imageUrl: row.imageUrl,
+            status: row.status,
+            expiresOn: row.expiresOn,
+            views: 1
+          }
+        ]);
+      } catch (error) {
+        console.log(`Error inserting row: ${JSON.stringify(row)}`);
+        console.log(error);
+      }
+    }
+  });
+};
 
 /**
  * @route               /api/v1/auth/property/new
@@ -80,4 +117,14 @@ export const addProperty = async (
     },
     true
   );
+};
+
+/**
+ * @param propertyId  string - property id of the searched property
+ */
+export const getPropertyById = async (propertyId: string) => {
+  console.log("Searching for property of id:", propertyId);
+  const [propertyById] = await preparedGetPropertyById.execute({ propertyId });
+
+  return propertyById;
 };
