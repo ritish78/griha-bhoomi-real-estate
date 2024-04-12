@@ -11,6 +11,7 @@ import {
   integer
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
+// import { tsvector } from "src/utils/tsvector";
 
 export const PropertyType = pgEnum("property_type", [
   "House",
@@ -44,7 +45,7 @@ export const property = pgTable(
     propertyType: PropertyType("property_type").default("Flat").notNull(),
     availableFrom: timestamp("available_from", { mode: "string" }).notNull(),
     availableTill: timestamp("available_till", { mode: "string" }),
-    price: varchar("price", { length: 12 }),
+    price: integer("price").notNull(),
     negotiable: boolean("negotiable").default(false).notNull(),
     imageUrl: text("image_url").array(),
     status: PropertyStatus("status").default("Sale").notNull(),
@@ -53,6 +54,9 @@ export const property = pgTable(
     featured: boolean("featured").default(false),
     expiresOn: timestamp("expires_on", { mode: "string" }),
     views: integer("views").default(1)
+    // searchVector: tsvector("search_vector", {
+    //   sources: ["title", "description", "address", "close_landmark"]
+    // })
   },
   (table) => {
     return {

@@ -1,5 +1,5 @@
 import db from ".";
-import { sql, eq } from "drizzle-orm";
+import { sql, eq, desc, count } from "drizzle-orm";
 
 import { user } from "src/model/user";
 import { property } from "src/model/property";
@@ -103,3 +103,16 @@ export const preparedGetPropertyById = db
  * @param keyword string - keyword to search the title and description
  */
 export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, ts_rank(search_vector, to_tsquery('english', ${sql.placeholder("keyword")})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${sql.placeholder("keyword")}) ORDER BY rank desc;`;
+
+export const getListOfProperties = db
+  .select()
+  .from(property)
+  .orderBy(desc(property.listedAt))
+  .limit(sql.placeholder("limit"))
+  .offset(sql.placeholder("offset"))
+  .prepare("get-number-of-properties");
+
+export const getTotalNumberOfProperties = db
+  .select({ count: count() })
+  .from(property)
+  .prepare("get-count-of-properties");

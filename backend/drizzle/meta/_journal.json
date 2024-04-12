@@ -1,0 +1,27 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1712891811376,
+      "tag": "0000_unique_micromacro",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712922382865,
+      "tag": "0001_abandoned_master_chief",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712922961436,
+      "tag": "0002_omniscient_shiver_man",
+      "breakpoints": true
+    }
+  ]
+}

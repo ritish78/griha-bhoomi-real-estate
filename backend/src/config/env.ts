@@ -41,7 +41,10 @@ const environmentVariableSchema = z.object({
   //Rate limit variables
   WINDOW_SIZE_IN_SECONDS: z.number().gte(30),
   MAX_NUMBER_OF_REQUESTS_AUTH_USER_PER_WINDOW_SIZE: z.number().gte(1),
-  MAX_NUMBER_OF_REQUESTS_NOT_LOGGEDIN_USER_PER_WINDOW_SIZE: z.number().gte(1)
+  MAX_NUMBER_OF_REQUESTS_NOT_LOGGEDIN_USER_PER_WINDOW_SIZE: z.number().gte(1),
+
+  //Number of properties in one page
+  PROPERTY_COUNT_LIMIT_PER_PAGE: z.number().gte(5)
 });
 
 /**

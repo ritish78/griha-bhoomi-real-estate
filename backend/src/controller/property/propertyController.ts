@@ -1,8 +1,10 @@
-import { sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import slugify from "slugify";
+import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import db from "src/db";
 
 import {
+  getListOfProperties,
   preparedGetPropertyById,
   // preparedGetPropertyByKeyword,
   preparedInsertProperty
@@ -59,7 +61,7 @@ export const seedProperty = async (dummyPropertyData) => {
  * @param propertyType  String - House | Flat | Apartment | Land | Building
  * @param availableFrom String - Date in string from when the property is for sale or rent
  * @param availableTill String - Date in string till the date where property is available
- * @param price         String - Price of the property
+ * @param price         integer - Price of the property
  * @param negotiable    Boolean - Is property negotiable
  * @param imageUrl      String[] - Array of image url
  * @param status        String - Sale | Hold | Sold
@@ -76,7 +78,7 @@ export const addProperty = async (
   propertyType: string,
   availableFrom: string,
   availableTill: string,
-  price: string,
+  price: number,
   negotiable: boolean,
   imageUrl: string[],
   status: string,
@@ -135,12 +137,108 @@ export const getPropertyById = async (propertyId: string) => {
   return propertyById;
 };
 
+export const filterProperties = async (filters) => {
+  try {
+    //These are the fields that the users can search. It can be queried from url
+    //so we are not following camel case to name the fields. Users can just type
+    //and search using the api without having to remember which letter to capitalize
+    const validFilterOptions: string[] = [
+      "keyword",
+      "torent",
+      "address",
+      "closelandmark",
+      "propertytype",
+      "availablefrom",
+      "availabletill",
+      "price",
+      "minprice",
+      "maxprice",
+      "pricerange",
+      "negotiable",
+      "status",
+      "listedAt",
+      "updatedAt",
+      "sortby",
+      "order"
+    ];
+    const mapFilterOptions = new Map();
+    for (const key in filters) {
+      //The search query needs to be within the above filterProducts. User might search using `&test=ok`
+      //and we might use it to query against the database. So, we only allow what can be queried
+      //We also don't allow users to searches with same filter options twice in same request
+      //Also if the user has provided the value for the query as well
+      if (validFilterOptions.includes(key) && !mapFilterOptions.has(key) && filters[key].trim()) {
+        mapFilterOptions.set(key, filters[key]);
+      }
+    }
+
+    console.log("Filter Map: ", mapFilterOptions);
+    console.log("Filter Map Length: ", mapFilterOptions.size);
+
+    //if the length of query is 0, that is user has only visited the page
+    //we return -1 to the api route handler which will then redirect the user
+    //to `/api/v1/property?page=1`
+    if (mapFilterOptions.size === 0) {
+      return -1;
+    }
+
+    //if the filter is only one `keyword` then we return them with the function
+    //that we have created below named `searchPropertyByKeyword`
+    if (mapFilterOptions.size === 1 && filters.keyword) {
+      const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), 0);
+      return listOfProperties;
+    }
+
+    const filteredProperties = await db
+      .select()
+      .from(property)
+      .where(
+        and(
+          mapFilterOptions.get("torent") ? eq(property.toRent, mapFilterOptions.get("torent")) : undefined,
+          mapFilterOptions.get("propertytype")
+            ? eq(property.propertyType, mapFilterOptions.get("propertytype"))
+            : undefined,
+          mapFilterOptions.get("availablefrom")
+            ? gte(property.availableFrom, mapFilterOptions.get("availablefrom"))
+            : undefined,
+          mapFilterOptions.get("availabletill")
+            ? lte(property.availableTill, mapFilterOptions.get("availabletill"))
+            : undefined,
+          mapFilterOptions.get("price") ? eq(property.price, mapFilterOptions.get("price")) : undefined,
+          mapFilterOptions.get("minprice")
+            ? gte(property.price, mapFilterOptions.get("minprice"))
+            : undefined,
+          mapFilterOptions.get("maxprice") ? lte(property.price, mapFilterOptions.get("price")) : undefined,
+          mapFilterOptions.get("pricerange")
+            ? and(
+                gte(property.price, mapFilterOptions.get("pricerange").split("-")[0]),
+                lte(property.price, mapFilterOptions.get("pricerange").split("-")[1])
+              )
+            : undefined,
+          mapFilterOptions.get("negotiable")
+            ? eq(property.negotiable, mapFilterOptions.get("negotiable"))
+            : undefined,
+          mapFilterOptions.get("status") ? eq(property.status, mapFilterOptions.get("status")) : undefined,
+          mapFilterOptions.get("listedat")
+            ? gte(property.listedAt, mapFilterOptions.get("listedat"))
+            : undefined,
+          mapFilterOptions.get("updatedat")
+            ? gte(property.updatedAt, mapFilterOptions.get("updatedat"))
+            : undefined
+        )
+      );
+
+    return filteredProperties;
+  } catch (error) {
+    console.log("Error occurred while filtering results!");
+  }
+};
+
 /**
- *
  * @param keyword   string - keyword to search the title and description column in postgres
  * @returns         Property[] object
  */
-export const searchPropertyByKeyword = async (keyword: string) => {
+export const searchPropertyByKeyword = async (keyword: string, offset: number) => {
   console.log("Searching for property by keyword: ", keyword);
 
   //Let's say that user searched for `beach traditional`
@@ -159,9 +257,36 @@ export const searchPropertyByKeyword = async (keyword: string) => {
   //value of `keyword` into the `sql.placeholder("keyword")`
   try {
     const propertyByKeyword = await db.execute(
-      sql`SELECT *, ts_rank(search_vector, to_tsquery('english', ${normalisedKeyword})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) ORDER BY rank desc;`
+      sql`SELECT *, ts_rank(search_vector, to_tsquery('english', ${normalisedKeyword})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) ORDER BY rank desc OFFSET ${offset * PROPERTY_COUNT_LIMIT_PER_PAGE} LIMIT ${PROPERTY_COUNT_LIMIT_PER_PAGE};`
     );
-    return propertyByKeyword.rows;
+    const numberOfResults = await db.execute(
+      sql`SELECT COUNT(*) FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword});`
+    );
+
+    return { numberOfProperties: numberOfResults.rows[0].count, properties: propertyByKeyword.rows };
+  } catch (error) {
+    logger.error(`${error.message} - (${new Date().toISOString()})`, {
+      error: error.message,
+      stack: error.stack
+    });
+  }
+};
+
+/**
+ *
+ * @param offset number - start position to fetch the property
+ * @returns Properties[]
+ */
+export const getListOfPropertiesByPagination = async (offset: number) => {
+  try {
+    const listOfProperties = await getListOfProperties.execute({
+      limit: PROPERTY_COUNT_LIMIT_PER_PAGE,
+      offset
+    });
+
+    console.log("List of properties: ", listOfProperties);
+
+    return listOfProperties;
   } catch (error) {
     logger.error(`${error.message} - (${new Date().toISOString()})`, {
       error: error.message,

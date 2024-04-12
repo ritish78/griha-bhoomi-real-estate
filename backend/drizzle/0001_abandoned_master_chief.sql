@@ -1,0 +1,1 @@
+ALTER TABLE "property" ADD COLUMN "search_vector" tsvector generated always as (to_tsvector('english', title || ' ' || description || ' ' || address || ' ' || close_landmark)) stored;

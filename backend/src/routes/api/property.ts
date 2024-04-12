@@ -1,17 +1,20 @@
 import { Router, Request, Response, NextFunction } from "express";
 import {
   addProperty,
+  filterProperties,
+  getListOfPropertiesByPagination,
   getPropertyById,
-  searchPropertyByKeyword,
   seedProperty
 } from "src/controller/property/propertyController";
 import { newPropertySchema } from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
 import { validateRequest } from "src/middleware/validateRequest";
 // import { Property } from "src/model/property";
-import { AuthError, BadRequestError, NotFoundError } from "src/utils/error";
+import { AuthError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
 import { dummyPropertyData } from "seed";
+import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
+import { getTotalNumberOfProperties } from "src/db/preparedStatement";
 
 const router = Router();
 
@@ -127,6 +130,73 @@ router
   );
 
 /**
+ * @route       /api/v1/property
+ * @eg          /api/v1/property?page=2
+ * @method      GET
+ * @desc        Get properties for homepage and retrieving can be offset as well.
+ */
+router.route("/").get(async (req: Request, res: Response) => {
+  //First we get the number of page that we are in
+  //If the user is in `localhost:5000/api/v1/property` we say that they are in first page
+  //and limit the first 10 results. To get to the next page `?page=2` needs to be supplied
+  const currentPageNumber: number = Number(req.query.page) || 1;
+
+  const numberOfProperties = await getTotalNumberOfProperties.execute();
+  const numberOfPages: number = Math.ceil(numberOfProperties[0].count / PROPERTY_COUNT_LIMIT_PER_PAGE);
+
+  //If the user tries to visit page number below 1 than the number
+  //of pages in the website, we redirect them back to page 1
+  if (currentPageNumber <= 0) {
+    return res.redirect("/api/v1/property?page=1");
+  }
+
+  //If the user tires to visit page number more than number of pages
+  //in the website, we redirect them to the last page number
+  if (currentPageNumber > numberOfPages) {
+    return res.redirect(`/api/v1/property?page=${numberOfPages}`);
+  }
+
+  //Then we get the list of properties according to the page that the user is in
+  const properties = await getListOfPropertiesByPagination(
+    (currentPageNumber - 1) * PROPERTY_COUNT_LIMIT_PER_PAGE
+  );
+
+  return res.status(200).send({ currentPageNumber, numberOfPages, properties });
+});
+
+/**
+ * @route               /api/v1/property/filter?keyword=value
+ * @eg                  /api/v1/property/filter?keyword=beach OR /api/v1/property?keyword=beach+traditional
+ * @method              GET
+ * @desc                Search property by title and/or description
+ * @reqParams           string - propertyId
+ */
+router.route("/filter").get(async (req: Request, res: Response) => {
+  const filters = req.query;
+  console.log("The selected filters are: ", filters);
+
+  logger.info(
+    `Searched property using filters: ${filters}`,
+    {
+      filters,
+      userId: req.session.userId,
+      userEmail: req.session.email,
+      ip: req.socket.remoteAddress
+    },
+    true
+  );
+
+  const propertyList = await filterProperties(filters);
+
+  //If the user does not provide any search query then the above function
+  //returns -1. In that case, we can redirect the user to `/api/v1/property?page=1`
+  if (propertyList === -1) {
+    return res.redirect("/api/v1/property?page=1");
+  }
+  return res.status(200).send(propertyList);
+});
+
+/**
  * @route               /api/v1/property/:propertyId
  * @method              GET
  * @desc                Get property using its id
@@ -150,36 +220,6 @@ router.route("/:propertyId").get(async (req: Request, res: Response) => {
   }
 
   return res.status(200).send(propertyById);
-});
-
-/**
- * @route               /api/v1/property/search/title?keyword=value
- * @eg                  /api/v1/property/search/title?keyword=beach
- * @method              GET
- * @desc                Search property by title and/or description
- * @reqParams           string - propertyId
- */
-router.route("/search/title").get(async (req: Request, res: Response) => {
-  const keyword = req.query.keyword as string;
-
-  logger.info(
-    `Searched property using term: ${keyword}`,
-    {
-      keyword,
-      userId: req.session.userId,
-      userEmail: req.session.email,
-      ip: req.socket.remoteAddress
-    },
-    true
-  );
-
-  if (keyword && keyword.trim().length > 1) {
-    const propertyByKeyword = await searchPropertyByKeyword(keyword);
-
-    return res.status(200).send(propertyByKeyword);
-  } else {
-    throw new BadRequestError("Please enter valid string to search!");
-  }
 });
 
 export default router;
