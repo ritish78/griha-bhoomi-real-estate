@@ -45,6 +45,16 @@ export const preparedInsertUser = db
   .prepare("insert-user");
 
 /**
+ * @params userId   string - ID of the user
+ * @returns User    returns user of the provided id or []
+ */
+export const preparedGetUserById = db
+  .select()
+  .from(user)
+  .where(eq(user.id, sql.placeholder("userId")))
+  .prepare("get-user-by-id");
+
+/**
  * @param sellerId      string - ID in uuid format of the current user
  * @param title         string - Title of the listing of the property
  * @param slug          string - Slug of the title
@@ -104,6 +114,11 @@ export const preparedGetPropertyById = db
  */
 export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, ts_rank(search_vector, to_tsquery('english', ${sql.placeholder("keyword")})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${sql.placeholder("keyword")}) ORDER BY rank desc;`;
 
+/**
+ * @param limit   number - number of properties to fetch from database
+ * @param offset  number - skip this many number of properties
+ * @returns       Property[]
+ */
 export const getListOfProperties = db
   .select()
   .from(property)
@@ -112,7 +127,15 @@ export const getListOfProperties = db
   .offset(sql.placeholder("offset"))
   .prepare("get-number-of-properties");
 
+/**
+ * @returns   number - count of the total number of properties in the database
+ */
 export const getTotalNumberOfProperties = db
   .select({ count: count() })
   .from(property)
   .prepare("get-count-of-properties");
+
+export const preparedDeletePropertyById = db
+  .delete(property)
+  .where(eq(property.id, sql.placeholder("propertyId")))
+  .prepare("delete-property-by-id");

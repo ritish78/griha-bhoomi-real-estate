@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import {
   addProperty,
+  deletePropertyById,
   filterProperties,
   getListOfPropertiesByPagination,
   getPropertyById,
@@ -10,7 +11,7 @@ import { newPropertySchema } from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
 import { validateRequest } from "src/middleware/validateRequest";
 // import { Property } from "src/model/property";
-import { AuthError, NotFoundError } from "src/utils/error";
+import { AuthError, ForbiddenError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
 import { dummyPropertyData } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
@@ -22,6 +23,7 @@ const router = Router();
  * @route       /api/v1/property/seed-property
  * @method      POST
  * @desc        Seed dummy property into postgresql db
+ * @access      Auth User
  */
 router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
   try {
@@ -37,6 +39,7 @@ router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Re
  * @route               /api/v1/property/new
  * @method              POST
  * @desc                Add new property listing
+ * @access              Auth User
  * @param title         String - Title of the listing of the property
  * @param description   String - Description of the property
  * @param toRent        Boolean - Is property for rent?
@@ -134,6 +137,7 @@ router
  * @eg          /api/v1/property?page=2
  * @method      GET
  * @desc        Get properties for homepage and retrieving can be offset as well.
+ * @access      Public
  */
 router.route("/").get(async (req: Request, res: Response) => {
   //First we get the number of page that we are in
@@ -170,6 +174,7 @@ router.route("/").get(async (req: Request, res: Response) => {
  * @method              GET
  * @desc                Search property by title and/or description
  * @reqParams           string - propertyId
+ * @access              Public
  */
 router.route("/filter").get(async (req: Request, res: Response) => {
   const filters = req.query;
@@ -201,8 +206,9 @@ router.route("/filter").get(async (req: Request, res: Response) => {
  * @method              GET
  * @desc                Get property using its id
  * @reqParams           string - propertyId
+ * @access              Public
  */
-router.route("/:propertyId").get(async (req: Request, res: Response) => {
+router.route("/:propertyId").get(async (req: Request, res: Response, next: NextFunction) => {
   console.log("Property search by id", req.params.propertyId);
   const propertyById = await getPropertyById(req.params.propertyId);
 
@@ -216,10 +222,56 @@ router.route("/:propertyId").get(async (req: Request, res: Response) => {
       },
       true
     );
-    throw new NotFoundError(`Property of id ${req.params.propertyId} not found!`);
+    next(new NotFoundError(`Property of id ${req.params.propertyId} not found!`));
   }
 
   return res.status(200).send(propertyById);
 });
+
+/**
+ * @route               /api/v1/property/:propertyId
+ * @method              DELETE
+ * @desc                Delete property using its id
+ * @reqParams           string - propertyId
+ * @access              Auth User | Admin
+ */
+router
+  .route("/:propertyId")
+  .delete(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
+    const currentUserId = req.session.userId;
+    const propertyIdToBeDeleted = req.params.propertyId;
+    console.log(propertyIdToBeDeleted);
+
+    //Logging into the log file before making any changes
+    logger.info(
+      `Property deletion action started of id ${propertyIdToBeDeleted} by user of id ${currentUserId}`,
+      { currentUserId, propertyIdToBeDeleted, useremail: req.session.email, ip: req.socket.remoteAddress }
+    );
+
+    //currentUserId should exists as we have `onlyIfLoggedIn` middleware but TypeScript insists
+    //that currentUserId can be undefined, so we can cast it to string to remove the error
+    //but let's check if the id for the current user exists, just in case!
+    if (!currentUserId) {
+      throw new AuthError("User is not logged in! Login to perform this action!");
+    }
+    const deletedProperty = await deletePropertyById(currentUserId, propertyIdToBeDeleted);
+
+    if (deletedProperty === 1) {
+      return res.status(200).send({ message: "Property deleted successfully!" });
+    } else if (deletedProperty === -1) {
+      throw new ForbiddenError("User is not authorized to perform this action!");
+    } else {
+      logger.notFound(
+        `Property to delete ID: ${req.params.propertyId} - (${new Date().toISOString()})`,
+        {
+          userId: req.session.userId,
+          email: req.session.email,
+          ip: req.socket.remoteAddress
+        },
+        true
+      );
+      next(new NotFoundError("Property to delete does not exists!"));
+    }
+  });
 
 export default router;

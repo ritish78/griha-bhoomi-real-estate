@@ -5,13 +5,17 @@ import db from "src/db";
 
 import {
   getListOfProperties,
+  preparedDeletePropertyById,
   preparedGetPropertyById,
   // preparedGetPropertyByKeyword,
   preparedInsertProperty
 } from "src/db/preparedStatement";
 import { property } from "src/model/property";
+import { user } from "src/model/user";
+import { NotFoundError } from "src/utils/error";
 
 import logger from "src/utils/logger";
+import { getUserById } from "../auth/authController";
 
 /**
  * @param dummyPropertyData array of property
@@ -371,5 +375,53 @@ export const getListOfPropertiesByPagination = async (offset: number) => {
       error: error.message,
       stack: error.stack
     });
+  }
+};
+
+/**
+ * @param userId      string - id of the user that is sending delete request
+ * @param propertyId  string - id of property to delete
+ * @returns           1 if deleted successfully
+ */
+export const deletePropertyById = async (userId: string, propertyId: string) => {
+  try {
+    const propertyById = await getPropertyById(propertyId);
+
+    /**
+     * Is it better to throw NotFoundError and say that the property does not exists!
+     * Or instead, we throw AuthError and say that the user is not authorized to delete the property.
+     * We might have private listing of property which user might know exists because
+     * they might be sending delete requests with property id that might not exists
+     */
+    if (!propertyById) {
+      // throw new NotFoundError("Property to delete does not exists!");
+      // throw new AuthError("User is not authorized to perform this action!");
+      return 0;
+    }
+
+    //Now let's check if the user is same as the user created the listing.
+    //If the property listing and the user who provided the command to delete
+    //is the same user then we delete the property.
+    if (propertyById.sellerId === userId) {
+      await preparedDeletePropertyById.execute({ propertyId });
+      return 1;
+    }
+
+    //Now if the user isn't the user who created the listing then it leaves
+    //if the user is admin of some kind. If the user is admin, then we allow
+    //them to delete the property listing
+    const userById = await getUserById(userId);
+    if (userById.isAdmin || userById.role === "MODERATOR") {
+      await preparedDeletePropertyById.execute({ propertyId });
+      return 1;
+    }
+
+    //If the user who sent the delete request is neither an admin or moderator
+    //and the user is not the same user who created the property listing
+    //then we just skip it and throw ForbiddenError with status code 403 in the api handler
+    return -1;
+  } catch (error) {
+    console.error("Error occurred while trying to delete property of id: ", propertyId);
+    logger.error("Error deleting property", { userId, propertyId }, true);
   }
 };

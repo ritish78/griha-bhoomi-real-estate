@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 
-import { preparedGetUserByEmail, preparedInsertUser } from "src/db/preparedStatement";
+import { preparedGetUserByEmail, preparedGetUserById, preparedInsertUser } from "src/db/preparedStatement";
 
 import hashPassword from "src/utils/hashPassword";
 import { AuthError, BadRequestError } from "src/utils/error";
@@ -21,6 +21,12 @@ export const getUserByEmail = async (email: string) => {
   //https://orm.drizzle.team/docs/rqb#prepared-statements
   const [userFromDatabase] = await preparedGetUserByEmail.execute({ email });
   console.log("User: ", userFromDatabase);
+  return userFromDatabase;
+};
+
+export const getUserById = async (id: string) => {
+  const [userFromDatabase] = await preparedGetUserById.execute({ id });
+
   return userFromDatabase;
 };
 
