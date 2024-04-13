@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, ilike, lte, sql } from "drizzle-orm";
 import slugify from "slugify";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import db from "src/db";
@@ -137,6 +137,10 @@ export const getPropertyById = async (propertyId: string) => {
   return propertyById;
 };
 
+/**
+ * @param filters filters object from req.params
+ * @returns Properties[] or -1 if no filter is provided
+ */
 export const filterProperties = async (filters) => {
   try {
     //These are the fields that the users can search. It can be queried from url
@@ -163,11 +167,25 @@ export const filterProperties = async (filters) => {
     ];
     const mapFilterOptions = new Map();
     for (const key in filters) {
-      //The search query needs to be within the above filterProducts. User might search using `&test=ok`
+      //The search query needs to be within the above `filterOptions`. User might search using `&test=ok`
       //and we might use it to query against the database. So, we only allow what can be queried
       //We also don't allow users to searches with same filter options twice in same request
-      //Also if the user has provided the value for the query as well
+      //Also if the user has provided the value for the query then only we take it for
       if (validFilterOptions.includes(key) && !mapFilterOptions.has(key) && filters[key].trim()) {
+        //We are skipping if `torent` or `negotiable` key is provided and something other than true or false is provided
+        if (
+          (key === "torent" || key === "negotiable") &&
+          !(filters[key] == "true" || filters[key] == "false")
+        ) {
+          continue;
+        }
+        //If user provides `ascending` or `descending` in full
+        if (key === "order" && filters[key].toLowerCase().startsWith("asc")) {
+          mapFilterOptions.set(key, "ASC");
+        }
+        if (key === "order" && filters[key].toLowerCase().startsWith("desc")) {
+          mapFilterOptions.set(key, "DESC");
+        }
         mapFilterOptions.set(key, filters[key]);
       }
     }
@@ -185,15 +203,30 @@ export const filterProperties = async (filters) => {
     //if the filter is only one `keyword` then we return them with the function
     //that we have created below named `searchPropertyByKeyword`
     if (mapFilterOptions.size === 1 && filters.keyword) {
-      const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), 0);
+      const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), filters?.page || 0);
       return listOfProperties;
     }
 
+    //To get the number of filtered properties, we use one select() from dizzle where we
+    //get the count and also the list of properties from where() clause.
     const filteredProperties = await db
-      .select()
+      .select({
+        listOfProperties: property,
+        numberOfFilteredProperties: sql<number>`count(*) over()`
+        // tsrank: sql`ts_rank(search_vector, to_tsquery('english', '${mapFilterOptions.get("keyword").replace(" ", " | ")}')) as rank`
+      })
       .from(property)
       .where(
         and(
+          // mapFilterOptions.get("keyword")
+          //   ? sql`search_vector @@ to_tsquery('english', '${mapFilterOptions.get("keyword").replace(" ", " | ")}')`
+          //   : undefined,
+          // Currently, tsvector search is not implemented in Drizzle and the above method did not work
+          // It is in progress and will be implemented soon. So, need to look back in the future when searching
+          // using keyword like how it is implemented in `searchPropertyByKeyword`
+          mapFilterOptions.get("keyword")
+            ? ilike(property.title, `%${mapFilterOptions.get("keyword")}%`)
+            : undefined,
           mapFilterOptions.get("torent") ? eq(property.toRent, mapFilterOptions.get("torent")) : undefined,
           mapFilterOptions.get("propertytype")
             ? eq(property.propertyType, mapFilterOptions.get("propertytype"))
@@ -226,9 +259,48 @@ export const filterProperties = async (filters) => {
             ? gte(property.updatedAt, mapFilterOptions.get("updatedat"))
             : undefined
         )
-      );
+      )
+      .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
+      .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
 
-    return filteredProperties;
+    console.log("Filtered properties", filteredProperties);
+
+    //We are returning in the shape of:
+    /**
+     * {
+     *   "currentPage":"3",
+     *   "numberOfPages":8,
+     *   "listOfFilteredProperties": [
+     *          { //...Properties object}
+     *    ]
+     * }
+     */
+    //Why are we mapping filteredProperties when returning the listOfFilteredProperties?
+    //It is a list of properties and when we get it from the database, we get it in the shape of:
+    //Reference this discussion on github: https://github.com/drizzle-team/drizzle-orm/discussions/610
+    /**
+     * {
+     *   "currentPage": "1",
+     *   "numberOfPages": 2,
+     *   "listOfFilteredProperties": [
+     *      { listOfProperties: {
+     *            //...PropertiesObject ,
+     *            "numberOfFilteredProperties": "2"
+     *      } },
+     *      { listOfProperties: {
+     *            //...PropertiesObject ,
+     *            "numberOfFilteredProperties": "2"
+     *      } },
+     *   ]
+     * }
+     */
+    return {
+      currentPage: filters.page ? filters.page : 1,
+      numberOfPages: Math.ceil(
+        filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE
+      ),
+      listOfFilteredProperties: filteredProperties.map((result) => result.listOfProperties)
+    };
   } catch (error) {
     console.log("Error occurred while filtering results!");
   }
@@ -256,14 +328,21 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
   //to get the property by keyword, however it did not work as intended as I was not able to pass
   //value of `keyword` into the `sql.placeholder("keyword")`
   try {
+    //Here there are two database query which is inefficient. Will merge the `filterProperties` and this function
+    //once searching by ts_vector gets implemented.
     const propertyByKeyword = await db.execute(
-      sql`SELECT *, ts_rank(search_vector, to_tsquery('english', ${normalisedKeyword})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) ORDER BY rank desc OFFSET ${offset * PROPERTY_COUNT_LIMIT_PER_PAGE} LIMIT ${PROPERTY_COUNT_LIMIT_PER_PAGE};`
+      sql`SELECT *, ts_rank(search_vector, to_tsquery('english', ${normalisedKeyword})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) ORDER BY rank desc OFFSET ${(offset - 1) * 2} LIMIT ${2};`
     );
     const numberOfResults = await db.execute(
       sql`SELECT COUNT(*) FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword});`
     );
 
-    return { numberOfProperties: numberOfResults.rows[0].count, properties: propertyByKeyword.rows };
+    return {
+      currentPage: Number(offset),
+      numberOfPages: Math.ceil((numberOfResults.rows[0].count as number) / 2),
+      numberOfProperties: Number(numberOfResults.rows[0].count),
+      properties: propertyByKeyword.rows
+    };
   } catch (error) {
     logger.error(`${error.message} - (${new Date().toISOString()})`, {
       error: error.message,

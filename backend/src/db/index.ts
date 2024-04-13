@@ -69,6 +69,6 @@ pool.on("release", () => {
 
 // const db = drizzle(client);
 
-const db = drizzle(pool);
+const db = drizzle(pool, { logger: true });
 
 export default db;

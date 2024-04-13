@@ -176,7 +176,7 @@ router.route("/filter").get(async (req: Request, res: Response) => {
   console.log("The selected filters are: ", filters);
 
   logger.info(
-    `Searched property using filters: ${filters}`,
+    `Searched property using filters`,
     {
       filters,
       userId: req.session.userId,
