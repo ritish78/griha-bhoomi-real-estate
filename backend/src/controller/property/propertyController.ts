@@ -11,11 +11,9 @@ import {
   preparedInsertProperty
 } from "src/db/preparedStatement";
 import { property } from "src/model/property";
-import { user } from "src/model/user";
-import { NotFoundError } from "src/utils/error";
 
 import logger from "src/utils/logger";
-import { getUserById } from "../auth/authController";
+import { isAdmin } from "src/utils/isAdmin";
 
 /**
  * @param dummyPropertyData array of property
@@ -299,7 +297,7 @@ export const filterProperties = async (filters) => {
      * }
      */
     return {
-      currentPage: filters.page ? filters.page : 1,
+      currentPage: filters.page ? Number(filters.page) : 1,
       numberOfPages: Math.ceil(
         filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE
       ),
@@ -410,8 +408,8 @@ export const deletePropertyById = async (userId: string, propertyId: string) => 
     //Now if the user isn't the user who created the listing then it leaves
     //if the user is admin of some kind. If the user is admin, then we allow
     //them to delete the property listing
-    const userById = await getUserById(userId);
-    if (userById.isAdmin || userById.role === "MODERATOR") {
+    const currentUserIsAdmin = await isAdmin(userId);
+    if (currentUserIsAdmin) {
       await preparedDeletePropertyById.execute({ propertyId });
       return 1;
     }
@@ -424,4 +422,37 @@ export const deletePropertyById = async (userId: string, propertyId: string) => 
     console.error("Error occurred while trying to delete property of id: ", propertyId);
     logger.error("Error deleting property", { userId, propertyId }, true);
   }
+};
+
+export const updatePropertyById = async (propertyId, currentUserId: string, propertyFieldsToUpdate) => {
+  const propertyById = await getPropertyById(propertyId);
+
+  //If property by its id does not exists we return 0 which we will use in the api handler
+  //to throw NotFoundError with the status code of 404.
+  if (!propertyById) {
+    return 0;
+  }
+
+  //If the property listing is created by the current user then we allow the update to happen
+  if (propertyById.sellerId === currentUserId) {
+    await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
+    return 1;
+  }
+
+  /**
+   * If we are checking property's seller id is same as the current user id in the previous statement
+   * then we might also use is currentuseradmin checking on the same if statement.
+   * That might mean second query to the database which might not be needed. We exit out on that
+   * if statement if the current user is the user that is providing the update fields.
+   */
+  const currentUserIsAdmin = await isAdmin(currentUserId);
+  if (currentUserIsAdmin) {
+    await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
+    return 1;
+  }
+
+  //If the user who sent the request to update the property is neither the user who posted
+  //the listing and isn't admin then we return -1 back to api handler where we throw
+  //ForbiddenError with the status code of 403.
+  return -1;
 };

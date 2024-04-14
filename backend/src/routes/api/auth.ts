@@ -59,8 +59,8 @@ router
   .post(validateRequest(loginSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       //Like in register route, we first destructure the body to get the required fields
-      const { email, password } = req.body;
-      console.log({ email, password });
+      const { email, password, test } = req.body;
+      console.log({ email, password, test });
 
       //Calling authUser controller which is responsible for doing checks
       //and if the user exists, we get the user back with their details

@@ -13,15 +13,7 @@ import {
 import { user } from "./user";
 // import { tsvector } from "src/utils/tsvector";
 
-export const PropertyType = pgEnum("property_type", [
-  "House",
-  "Mansion",
-  "Flat",
-  "Apartment",
-  "Land",
-  "Villa",
-  "Building"
-]);
+export const PropertyType = pgEnum("property_type", ["House", "Land"]);
 export const PropertyStatus = pgEnum("property_status", ["Sale", "Rent", "Hold", "Sold"]);
 
 /**
@@ -36,13 +28,14 @@ export const property = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     sellerId: uuid("seller_id").references(() => user.id),
+    propertyTypeId: uuid("property_type_id"),
     title: varchar("title", { length: 255 }).notNull(),
     slug: varchar("slug", { length: 255 }).notNull(),
     description: text("description").notNull(),
     toRent: boolean("to_rent").notNull(),
     address: varchar("address", { length: 255 }),
     closeLandmark: varchar("close_landmark", { length: 255 }),
-    propertyType: PropertyType("property_type").default("Flat").notNull(),
+    propertyType: PropertyType("property_type").default("House").notNull(),
     availableFrom: timestamp("available_from", { mode: "string" }).notNull(),
     availableTill: timestamp("available_till", { mode: "string" }),
     price: integer("price").notNull(),

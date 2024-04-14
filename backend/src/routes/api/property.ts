@@ -5,9 +5,10 @@ import {
   filterProperties,
   getListOfPropertiesByPagination,
   getPropertyById,
-  seedProperty
+  seedProperty,
+  updatePropertyById
 } from "src/controller/property/propertyController";
-import { newPropertySchema } from "src/controller/property/propertySchema";
+import { newPropertySchema, updatePropertySchema } from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
 import { validateRequest } from "src/middleware/validateRequest";
 // import { Property } from "src/model/property";
@@ -273,5 +274,37 @@ router
       next(new NotFoundError("Property to delete does not exists!"));
     }
   });
+
+router
+  .route("/:propertyId")
+  .put(
+    onlyIfLoggedIn,
+    validateRequest(updatePropertySchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      const idOfPropertyToUpdate = req.params.propertyId;
+      const currentUserId = req.session.userId as string;
+
+      if (!currentUserId) {
+        next(new AuthError("Please login to perform this action!"));
+      }
+
+      const updatedProperty = await updatePropertyById(idOfPropertyToUpdate, currentUserId, req.body);
+
+      if (updatedProperty === 1) {
+        logger.info(
+          `Updated property of id ${idOfPropertyToUpdate} by user of id ${currentUserId}`,
+          { idOfPropertyToUpdate, currentUserId, email: req.session.email, body: req.body },
+          true
+        );
+        return res
+          .status(200)
+          .send({ message: `Property of id ${idOfPropertyToUpdate} updated successfully!` });
+      } else if (updatedProperty === -1) {
+        next(new ForbiddenError("User is not allowed to perform this action!"));
+      } else {
+        next(new NotFoundError("Property to update does not exists!"));
+      }
+    }
+  );
 
 export default router;
