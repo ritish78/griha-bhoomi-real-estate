@@ -92,24 +92,7 @@ router
           throw new AuthError("Could not verify the user! Please sign in to perfom this action!");
         }
 
-        // await db.insert(property).values({
-        //   sellerId: userId,
-        //   title,
-        //   slug: title,
-        //   description,
-        //   toRent,
-        //   address,
-        //   closeLandmark,
-        //   propertyType,
-        //   availableFrom,
-        //   availableTill,
-        //   price,
-        //   negotiable,
-        //   imageUrl,
-        //   status,
-        //   expiresOn: expiresOn ? expiresOn : new Date()
-        // });
-        await addProperty(
+        const idOfInsertedProperty = await addProperty(
           userId,
           title,
           description,

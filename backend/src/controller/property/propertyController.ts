@@ -7,6 +7,7 @@ import {
   getListOfProperties,
   preparedDeletePropertyById,
   preparedGetPropertyById,
+  preparedInsertHouse,
   // preparedGetPropertyByKeyword,
   preparedInsertProperty
 } from "src/db/preparedStatement";
@@ -68,7 +69,7 @@ export const seedProperty = async (dummyPropertyData) => {
  * @param imageUrl      String[] - Array of image url
  * @param status        String - Sale | Hold | Sold
  * @param expiresOn     String - Date in string where the listing expires on the website
- * @returns             void
+ * @returns             string - uuid of the added property
  */
 export const addProperty = async (
   sellerId: string,
@@ -86,7 +87,7 @@ export const addProperty = async (
   status: string,
   expiresOn: string
 ) => {
-  await preparedInsertProperty.execute({
+  const insertedProperty = await preparedInsertProperty.execute({
     sellerId,
     title,
     slug: slugify(title, { lower: true }),
@@ -103,6 +104,8 @@ export const addProperty = async (
     status,
     expiresOn
   });
+
+  console.log("Inserted property: ", insertedProperty[0].idOfNewProperty);
 
   //Saving in the log file. I know it is so similar to the above prepared statement query
   //and also the function above. Each has its own purpose even though we have made a tower.
@@ -126,6 +129,8 @@ export const addProperty = async (
     },
     true
   );
+
+  return insertedProperty[0].idOfNewProperty;
 };
 
 /**

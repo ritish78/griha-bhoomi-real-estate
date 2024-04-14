@@ -3,6 +3,7 @@ import { sql, eq, desc, count } from "drizzle-orm";
 
 import { user } from "src/model/user";
 import { property } from "src/model/property";
+import { house } from "src/model/house";
 
 /**
  * @params      email
@@ -97,7 +98,37 @@ export const preparedInsertProperty = db
     expiresOn: sql.placeholder("expiresOn"),
     views: 1
   })
+  .returning({ idOfNewProperty: property.id })
   .prepare("insert-property");
+
+/**
+ * @param
+ */
+export const preparedInsertHouse = db
+  .insert(house)
+  .values({
+    propertyId: sql.placeholder("propertyId"),
+    houseType: sql.placeholder("houseType"),
+    roomCount: sql.placeholder("roomCount"),
+    floorCount: sql.placeholder("floorCount"),
+    kitchenCount: sql.placeholder("kitchenCount"),
+    sharedBathroom: sql.placeholder("sharedBathroom"),
+    bathroomCount: sql.placeholder("bathroomCount"),
+    facilities: sql.placeholder("facilities"),
+    area: sql.placeholder("area"),
+    furnished: sql.placeholder("furnished"),
+    facing: sql.placeholder("facing"),
+    carParking: sql.placeholder("carParking"),
+    bikeParking: sql.placeholder("bikeParking"),
+    evCharging: sql.placeholder("evCharging"),
+    builtAt: sql.placeholder("builtAt"),
+    connectedToRoad: sql.placeholder("connectedToRoad"),
+    distanceToRoad: sql.placeholder("distanceToRoad"),
+    listedAt: sql.placeholder("listedAt"),
+    updatedAt: sql.placeholder("updatedAt")
+  })
+  .returning({ idofNewHouse: house.id })
+  .prepare("insert-house");
 
 /**
  * @param propertyId string - id of the property to fetch from postgres
