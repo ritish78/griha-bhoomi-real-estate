@@ -5,6 +5,7 @@ import {
   filterProperties,
   getListOfPropertiesByPagination,
   getPropertyById,
+  getPropertyBySlug,
   seedProperty,
   updatePropertyById
 } from "src/controller/property/propertyController";
@@ -179,13 +180,13 @@ router.route("/filter").get(async (req: Request, res: Response) => {
 });
 
 /**
- * @route               /api/v1/property/:propertyId
+ * @route               /api/v1/property/id/:propertyId
  * @method              GET
  * @desc                Get property using its id
  * @reqParams           string - propertyId
  * @access              Public
  */
-router.route("/:propertyId").get(async (req: Request, res: Response, next: NextFunction) => {
+router.route("/id/:propertyId").get(async (req: Request, res: Response, next: NextFunction) => {
   console.log("Property search by id", req.params.propertyId);
   const propertyById = await getPropertyById(req.params.propertyId);
 
@@ -206,14 +207,41 @@ router.route("/:propertyId").get(async (req: Request, res: Response, next: NextF
 });
 
 /**
- * @route               /api/v1/property/:propertyId
+ * @route               /api/v1/property/:slug
+ * @method              GET
+ * @desc                Get property using its slug
+ * @reqParams           string - slug
+ * @access              Public
+ */
+router.route("/:slug").get(async (req: Request, res: Response, next: NextFunction) => {
+  console.log("Property search by id", req.params.slug);
+  const propertyBySlug = await getPropertyBySlug(req.params.slug);
+
+  if (!propertyBySlug) {
+    logger.notFound(
+      `Property slug: ${req.params.slug} - (${new Date().toISOString()})`,
+      {
+        userId: req.session.userId,
+        email: req.session.email,
+        ip: req.socket.remoteAddress
+      },
+      true
+    );
+    next(new NotFoundError(`Property of slug ${req.params.slug} not found!`));
+  }
+
+  return res.status(200).send(propertyBySlug);
+});
+
+/**
+ * @route               /api/v1/property/id/:propertyId
  * @method              DELETE
  * @desc                Delete property using its id
  * @reqParams           string - propertyId
  * @access              Auth User | Admin
  */
 router
-  .route("/:propertyId")
+  .route("/id/:propertyId")
   .delete(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
     const currentUserId = req.session.userId;
     const propertyIdToBeDeleted = req.params.propertyId;
@@ -251,8 +279,15 @@ router
     }
   });
 
+/**
+ * @route               /api/v1/property/id/:propertyId
+ * @method              PUT
+ * @desc                Update using its id
+ * @reqParams           string - propertyId
+ * @access              Public
+ */
 router
-  .route("/:propertyId")
+  .route("/id/:propertyId")
   .put(
     onlyIfLoggedIn,
     validateRequest(updatePropertySchema),

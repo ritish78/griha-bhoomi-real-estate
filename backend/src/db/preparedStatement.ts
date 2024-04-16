@@ -155,6 +155,16 @@ export const preparedGetPropertyById = db
   .prepare("get-property-by-id");
 
 /**
+ * @param slug string - slug of the property to fetch from postgres
+ */
+export const preparedGetPropertyBySlug = db
+  .select()
+  .from(property)
+  .where(eq(property.slug, sql.placeholder("slug")))
+  .limit(1)
+  .prepare("get-property-by-slug");
+
+/**
  * @param keyword string - keyword to search the title and description
  */
 export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, ts_rank(search_vector, to_tsquery('english', ${sql.placeholder("keyword")})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${sql.placeholder("keyword")}) ORDER BY rank desc;`;

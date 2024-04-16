@@ -8,6 +8,7 @@ import {
   getListOfProperties,
   preparedDeletePropertyById,
   preparedGetPropertyById,
+  preparedGetPropertyBySlug,
   preparedInsertHouse,
   preparedInsertLand,
   // preparedGetPropertyByKeyword,
@@ -298,13 +299,24 @@ export const addLand = async (
 
 /**
  * @param propertyId  string - property id of the searched property
- * @returns property
+ * @returns           Property
  */
 export const getPropertyById = async (propertyId: string) => {
   console.log("Searching for property of id:", propertyId);
   const [propertyById] = await preparedGetPropertyById.execute({ propertyId });
 
   return propertyById;
+};
+
+/**
+ * @param slug  string - slug of the searched property
+ * @returns     Property
+ */
+export const getPropertyBySlug = async (slug: string) => {
+  console.log("Searching for property of slug:", slug);
+  const [propertyBySlug] = await preparedGetPropertyBySlug.execute({ slug });
+
+  return propertyBySlug;
 };
 
 /**
