@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import { newHouseSchema } from "src/controller/property/houseSchema";
+import { newLandSchema } from "src/controller/property/landSchema";
+import { BadRequestError } from "src/utils/error";
 import { AnyZodObject, ZodError } from "zod";
 
 /**
@@ -8,7 +11,6 @@ import { AnyZodObject, ZodError } from "zod";
  * @param next    Next middleware function from express
  * @returns       Response object from express || calls next middleware function
  */
-
 export const validateRequest =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -35,6 +37,7 @@ export const validateRequest =
         ];
        */
       if (error instanceof ZodError) {
+        console.log(error);
         //We return error of status code 422 - Unprocessable Content
         //We map throught the error object to get the path and set it as field
         //message is what we have set as error message in our ZodSchema
@@ -62,3 +65,20 @@ export const validateRequest =
       next(error);
     }
   };
+
+export const validatePropertySchema = (data, type: string) => {
+  let schema: AnyZodObject;
+
+  switch (type) {
+    case "HOUSE":
+      schema = newHouseSchema;
+      break;
+    case "LAND":
+      schema = newLandSchema;
+      break;
+    default:
+      throw new BadRequestError(`Invalid Property type: ${type}`);
+  }
+
+  schema.parse(data);
+};

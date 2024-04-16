@@ -10,9 +10,9 @@ import {
 } from "src/controller/property/propertyController";
 import { newPropertySchema, updatePropertySchema } from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
-import { validateRequest } from "src/middleware/validateRequest";
+import { validatePropertySchema, validateRequest } from "src/middleware/validateRequest";
 // import { Property } from "src/model/property";
-import { AuthError, ForbiddenError, NotFoundError } from "src/utils/error";
+import { AuthError, BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
 import { dummyPropertyData } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
@@ -46,7 +46,7 @@ router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Re
  * @param toRent        Boolean - Is property for rent?
  * @param address       String - Current implementation is to put address as a whole but need to create address table and add address to it and refer the address id instead on here
  * @param closeLandmark String - Closest Landmark
- * @param propertyType  String - House | Flat | Apartment | Land | Building
+ * @param propertyType  String - House | Land
  * @param availableFrom String - Date in string from when the property is for sale or rent
  * @param availableTill String - Date in string till the date where property is available
  * @param price         String - Price of the property
@@ -63,24 +63,8 @@ router
     validateRequest(newPropertySchema),
     async (req: Request, res: Response, next: NextFunction) => {
       const userId = req.session.userId;
-      try {
-        const {
-          title,
-          description,
-          toRent,
-          address,
-          closeLandmark,
-          propertyType,
-          availableFrom,
-          availableTill,
-          price,
-          negotiable,
-          imageUrl,
-          status,
-          expiresOn
-        } = req.body;
-        console.log(userId, title, description);
 
+      try {
         //In this below addProperty function, TypeScript throws error as userId
         //can be undefined. However that should not be the case as we already have
         //`onlyIfLoggedIn` middleware which will throw AuthError if userId is not present
@@ -92,24 +76,33 @@ router
           throw new AuthError("Could not verify the user! Please sign in to perfom this action!");
         }
 
+        if (req.body.propertyType.toUpperCase() === "HOUSE") {
+          //We validate if all the fields that we received in the body is of proper type for house
+          validatePropertySchema(req.body, "HOUSE");
+        } else if (req.body.propertyType.toUpperCase() === "LAND") {
+          validatePropertySchema(req.body, "LAND");
+        } else {
+          next(new BadRequestError("Could not parse property type from the request body!"));
+        }
+
+        /**
+         * There are three tables; Property, House and Land. Property is the main table which connects
+         * to the other two tables House and Land. House and Land are the types of property. First, we
+         * add House or Land info to the table. Then we get the id of the inserted row which we will
+         * store in the Property table in the column; property_type_id.
+         * Other way of doing it could be creating a row for the main table, Property, where we store
+         * the property info and leave the column `property_type_id` to be null. And then store the
+         * house or land info to their respective table and once we store it, we get their id and
+         * update the recently inserted property and set the id that we received from house or land
+         * table to the column property_type_id. It would make another database call which will lead
+         * to performance issue once we start to have real users in the app
+         */
         const idOfInsertedProperty = await addProperty(
           userId,
-          title,
-          description,
-          toRent,
-          address,
-          closeLandmark,
-          propertyType,
-          availableFrom,
-          availableTill,
-          price,
-          negotiable,
-          imageUrl,
-          status,
-          expiresOn ? expiresOn : new Date()
+          req.body
+          // expiresOn ? expiresOn : new Date()
         );
-
-        return res.status(201).send({ message: "New Property added!" });
+        return res.status(201).send({ message: `New Property added of id: ${idOfInsertedProperty}!` });
       } catch (error) {
         next(error);
       }

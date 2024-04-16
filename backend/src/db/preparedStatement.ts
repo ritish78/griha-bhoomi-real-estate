@@ -4,6 +4,7 @@ import { sql, eq, desc, count } from "drizzle-orm";
 import { user } from "src/model/user";
 import { property } from "src/model/property";
 import { house } from "src/model/house";
+import { land } from "src/model/land";
 
 /**
  * @params      email
@@ -56,27 +57,31 @@ export const preparedGetUserById = db
   .prepare("get-user-by-id");
 
 /**
- * @param sellerId      string - ID in uuid format of the current user
- * @param title         string - Title of the listing of the property
- * @param slug          string - Slug of the title
- * @param description   string - Description of the property
- * @param toRent        Boolean - Is property for rent?
- * @param address       string - Current implementation is to put address as a whole but need to create address table and add address to it and refer the address id instead on here
- * @param closeLandmark string - Closest Landmark
- * @param propertyType  string - House | Flat | Apartment | Land | Building
- * @param availableFrom string - Date in string from when the property is for sale or rent
- * @param availableTill string - Date in string till the date where property is available
- * @param price         string - Price of the property
- * @param negotiable    Boolean - Is property negotiable
- * @param imageUrl      string[] - Array of image url
- * @param status        string - Sale | Hold | Sold
- * @param expiresOn     string - Date in string where the listing expires on the website
- * @returns             Promise to insert new property in database.
+ * @param id              string - ID in uuid format of the to be inserted property
+ * @param sellerId        string - ID in uuid format of the current user
+ * @param propertyTypeId  string - ID in uuid format of the property type; HouseID or LandID
+ * @param title           string - Title of the listing of the property
+ * @param slug            string - Slug of the title
+ * @param description     string - Description of the property
+ * @param toRent          Boolean - Is property for rent?
+ * @param address         string - Current implementation is to put address as a whole but need to create address table and add address to it and refer the address id instead on here
+ * @param closeLandmark   string - Closest Landmark
+ * @param propertyType    string - House | Flat | Apartment | Land | Building
+ * @param availableFrom   string - Date in string from when the property is for sale or rent
+ * @param availableTill   string - Date in string till the date where property is available
+ * @param price           string - Price of the property
+ * @param negotiable      Boolean - Is property negotiable
+ * @param imageUrl        string[] - Array of image url
+ * @param status          string - Sale | Hold | Sold
+ * @param expiresOn       string - Date in string where the listing expires on the website
+ * @returns               Promise to insert new property in database.
  */
 export const preparedInsertProperty = db
   .insert(property)
   .values({
+    id: sql.placeholder("id"),
     sellerId: sql.placeholder("sellerId"),
+    propertyTypeId: sql.placeholder("propertyTypeId"),
     title: sql.placeholder("title"),
     slug: sql.placeholder("slug"),
     description: sql.placeholder("description"),
@@ -98,7 +103,6 @@ export const preparedInsertProperty = db
     expiresOn: sql.placeholder("expiresOn"),
     views: 1
   })
-  .returning({ idOfNewProperty: property.id })
   .prepare("insert-property");
 
 /**
@@ -107,7 +111,7 @@ export const preparedInsertProperty = db
 export const preparedInsertHouse = db
   .insert(house)
   .values({
-    propertyId: sql.placeholder("propertyId"),
+    id: sql.placeholder("id"),
     houseType: sql.placeholder("houseType"),
     roomCount: sql.placeholder("roomCount"),
     floorCount: sql.placeholder("floorCount"),
@@ -123,11 +127,21 @@ export const preparedInsertHouse = db
     evCharging: sql.placeholder("evCharging"),
     builtAt: sql.placeholder("builtAt"),
     connectedToRoad: sql.placeholder("connectedToRoad"),
-    distanceToRoad: sql.placeholder("distanceToRoad"),
-    listedAt: sql.placeholder("listedAt"),
-    updatedAt: sql.placeholder("updatedAt")
+    distanceToRoad: sql.placeholder("distanceToRoad")
   })
-  .returning({ idofNewHouse: house.id })
+  .prepare("insert-house");
+
+export const preparedInsertLand = db
+  .insert(land)
+  .values({
+    id: sql.placeholder("id"),
+    landType: sql.placeholder("landType"),
+    area: sql.placeholder("area"),
+    length: sql.placeholder("length"),
+    breadth: sql.placeholder("breadth"),
+    connectedToRoad: sql.placeholder("connectedToRoad"),
+    distanceToRoad: sql.placeholder("distanceToRoad")
+  })
   .prepare("insert-house");
 
 /**

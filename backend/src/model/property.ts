@@ -26,7 +26,7 @@ export const PropertyStatus = pgEnum("property_status", ["Sale", "Rent", "Hold",
 export const property = pgTable(
   "property",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuid("id").primaryKey(),
     sellerId: uuid("seller_id").references(() => user.id),
     propertyTypeId: uuid("property_type_id"),
     title: varchar("title", { length: 255 }).notNull(),

@@ -1,6 +1,7 @@
 import { and, eq, gte, ilike, lte, sql } from "drizzle-orm";
 import slugify from "slugify";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
+import { v4 as uuidv4 } from "uuid";
 import db from "src/db";
 
 import {
@@ -8,6 +9,7 @@ import {
   preparedDeletePropertyById,
   preparedGetPropertyById,
   preparedInsertHouse,
+  preparedInsertLand,
   // preparedGetPropertyByKeyword,
   preparedInsertProperty
 } from "src/db/preparedStatement";
@@ -25,6 +27,7 @@ export const seedProperty = async (dummyPropertyData) => {
       try {
         await tx.insert(property).values([
           {
+            id: uuidv4(),
             sellerId: row.sellerId,
             title: row.title,
             slug: row.title,
@@ -52,67 +55,43 @@ export const seedProperty = async (dummyPropertyData) => {
 };
 
 /**
- * @route               /api/v1/auth/property/new
- * @method              POST
- * @desc                Add new property listing
- * @param sellerId      String - ID in uuid format of the current user
- * @param title         String - Title of the listing of the property
- * @param description   String - Description of the property
- * @param toRent        Boolean - Is property for rent?
- * @param address       String - Current implementation is to put address as a whole but need to create address table and add address to it and refer the address id instead on here
- * @param closeLandmark String - Closest Landmark
- * @param propertyType  String - House | Flat | Apartment | Land | Building
- * @param availableFrom String - Date in string from when the property is for sale or rent
- * @param availableTill String - Date in string till the date where property is available
- * @param price         integer - Price of the property
- * @param negotiable    Boolean - Is property negotiable
- * @param imageUrl      String[] - Array of image url
- * @param status        String - Sale | Hold | Sold
- * @param expiresOn     String - Date in string where the listing expires on the website
- * @returns             string - uuid of the added property
+ * @route                   /api/v1/auth/property/new
+ * @method                  POST
+ * @desc                    Add new property listing
+ * @param sellerId          string - ID in uuid format of the current user
+ * @param title             string - Title of the listing of the property
+ * @param description       string - Description of the property
+ * @param toRent            boolean - Is property for rent?
+ * @param address           string - Current implementation is to put address as a whole but need to create address table and add address to it and refer the address id instead on here
+ * @param closeLandmark     string - Closest Landmark
+ * @param propertyType      string - House | Flat | Apartment | Land | Building
+ * @param availableFrom     string - Date in string from when the property is for sale or rent
+ * @param availableTill     string - Date in string till the date where property is available
+ * @param price             integer - Price of the property
+ * @param negotiable        boolean - Is property negotiable
+ * @param imageUrl          string[] - Array of image url
+ * @param status            string - Sale | Hold | Sold
+ * @param houseType         string - House | Flat | Shared | Room | Apartment | Bungalow | Villa
+ * @param roomCount         number - number of rooms available
+ * @param floorCount        number - number of floors available
+ * @param kitchenCount      number - number of kitchen available
+ * @param sharedBathroom    boolean - is the bathroom to be shared by others
+ * @param bathroomCount     number - number of bathroom available
+ * @param facilities        string[] - facilities or amentites provided
+ * @param area              string - area in meter square
+ * @param furnished         boolean - is the house furnished
+ * @param facing            string - house facing a specific direction like North East
+ * @param carParking        number - number of cark parking space available
+ * @param bikeParking       number - number of bike parking space available
+ * @param evCharging        boolean - can you charge ev where you park it
+ * @param builtAt           string - date in string when the house was built
+ * @param connectedToRoad   boolean - is the house connected to the road
+ * @param distanceToRoad    number - distance in meters where the house can be connected to road
+ * @returns                 string - uuid of the added property
  */
-export const addProperty = async (
-  sellerId: string,
-  title: string,
-  description: string,
-  toRent: boolean,
-  address: string,
-  closeLandmark: string,
-  propertyType: string,
-  availableFrom: string,
-  availableTill: string,
-  price: number,
-  negotiable: boolean,
-  imageUrl: string[],
-  status: string,
-  expiresOn: string
-) => {
-  const insertedProperty = await preparedInsertProperty.execute({
-    sellerId,
-    title,
-    slug: slugify(title, { lower: true }),
-    description,
-    toRent,
-    address,
-    closeLandmark,
-    propertyType,
-    availableFrom,
-    availableTill,
-    price,
-    negotiable,
-    imageUrl,
-    status,
-    expiresOn
-  });
-
-  console.log("Inserted property: ", insertedProperty[0].idOfNewProperty);
-
-  //Saving in the log file. I know it is so similar to the above prepared statement query
-  //and also the function above. Each has its own purpose even though we have made a tower.
-  logger.info(
-    "Added new property",
-    {
-      sellerId,
+export const addProperty = async (sellerId: string, body) => {
+  try {
+    const {
       title,
       description,
       toRent,
@@ -125,12 +104,196 @@ export const addProperty = async (
       negotiable,
       imageUrl,
       status,
-      expiresOn
-    },
-    true
-  );
+      houseType,
+      roomCount,
+      floorCount,
+      kitchenCount,
+      sharedBathroom,
+      bathroomCount,
+      facilities,
+      facing,
+      area,
+      furnished,
+      carParking,
+      bikeParking,
+      evCharging,
+      builtAt,
+      connectedToRoad,
+      distanceToRoad,
+      landType,
+      length,
+      breadth
+    } = body;
+    const idOfToBeInsertedProperty = uuidv4();
 
-  return insertedProperty[0].idOfNewProperty;
+    let propertyTypeId;
+    if (propertyType.toUpperCase() === "HOUSE") {
+      propertyTypeId = await addHouse(
+        houseType,
+        roomCount,
+        floorCount,
+        kitchenCount,
+        sharedBathroom,
+        bathroomCount,
+        facilities,
+        furnished,
+        area,
+        facing,
+        carParking,
+        bikeParking,
+        evCharging,
+        builtAt,
+        connectedToRoad,
+        distanceToRoad
+      );
+    } else if (propertyType.toUpperCase() === "LAND") {
+      propertyTypeId = await addLand(landType, area, length, breadth, connectedToRoad, distanceToRoad);
+    }
+
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+
+    await preparedInsertProperty.execute({
+      id: idOfToBeInsertedProperty,
+      sellerId,
+      propertyTypeId: propertyTypeId,
+      title,
+      slug: `${idOfToBeInsertedProperty.split("-")[0]}-${slugify(title, { lower: true })}`,
+      description,
+      toRent,
+      address,
+      closeLandmark,
+      propertyType,
+      availableFrom,
+      availableTill,
+      price,
+      negotiable,
+      imageUrl,
+      status,
+      expiresOn: nextMonth.toISOString()
+    });
+
+    //Saving in the log file. I know it is so similar to the above prepared statement query
+    //and also the function above. Each has its own purpose even though we have made a tower.
+    logger.info(
+      "Added new property",
+      {
+        id: idOfToBeInsertedProperty,
+        sellerId,
+        title,
+        description,
+        toRent,
+        address,
+        closeLandmark,
+        propertyType,
+        availableFrom,
+        availableTill,
+        price,
+        negotiable,
+        imageUrl,
+        status,
+        expiresOn: nextMonth.toISOString()
+      },
+      true
+    );
+
+    //Even though the variable is named `idOfTheToBeInsertedProperty`, once we reach here
+    //it is id of inserted property and still the same uuidv4 string
+    return idOfToBeInsertedProperty;
+  } catch (error) {
+    logger.error(`${error.message} - (${new Date().toISOString()})`, {
+      error: error.message,
+      stack: error.stack
+    });
+  }
+};
+
+/**
+ * @route                   /api/v1/auth/property/new
+ * @method                  POST
+ * @desc                    Not a separate route. When the user submits property of type `House` this function is used
+ * @param houseType         string - House | Flat | Shared | Room | Apartment | Bungalow | Villa
+ * @param roomCount         number - number of rooms available
+ * @param floorCount        number - number of floors available
+ * @param kitchenCount      number - number of kitchen available
+ * @param sharedBathroom    boolean - is the bathroom to be shared by others
+ * @param bathroomCount     number - number of bathroom available
+ * @param facilities        string[] - facilities or amentites provided
+ * @param area              string - area in meter square
+ * @param furnished         boolean - is the house furnished
+ * @param facing            string - house facing a specific direction like North East
+ * @param carParking        number - number of cark parking space available
+ * @param bikeParking       number - number of bike parking space available
+ * @param evCharging        boolean - can you charge ev where you park it
+ * @param builtAt           string - date in string when the house was built
+ * @param connectedToRoad   boolean - is the house connected to the road
+ * @param distanceToRoad    number - distance in meters where the house can be connected to road
+ * @returns                 string - id of the inserted house
+ */
+export const addHouse = async (
+  houseType: string,
+  roomCount: number,
+  floorCount: number,
+  kitchenCount: number,
+  sharedBathroom: boolean,
+  bathroomCount: number,
+  facilities: string[],
+  furnished: boolean,
+  area: string,
+  facing: string,
+  carParking: number,
+  bikeParking: number,
+  evCharging: boolean,
+  builtAt: string,
+  connectedToRoad: boolean,
+  distanceToRoad: number
+) => {
+  const idOfToBeInsertedHouse = uuidv4();
+
+  await preparedInsertHouse.execute({
+    id: idOfToBeInsertedHouse,
+    houseType,
+    roomCount,
+    floorCount,
+    kitchenCount,
+    sharedBathroom,
+    bathroomCount,
+    facilities,
+    area,
+    furnished,
+    facing,
+    carParking,
+    bikeParking,
+    evCharging,
+    builtAt,
+    connectedToRoad,
+    distanceToRoad
+  });
+
+  return idOfToBeInsertedHouse;
+};
+
+export const addLand = async (
+  landType: string,
+  area: string,
+  length: string,
+  breadth: string,
+  connectedToRoad: boolean,
+  distanceToRoad: number
+) => {
+  const idOfToBeInsertedLand = uuidv4();
+
+  await preparedInsertLand.execute({
+    id: idOfToBeInsertedLand,
+    landType,
+    area,
+    length,
+    breadth,
+    connectedToRoad,
+    distanceToRoad: connectedToRoad ? 0 : distanceToRoad
+  });
+
+  return idOfToBeInsertedLand;
 };
 
 /**

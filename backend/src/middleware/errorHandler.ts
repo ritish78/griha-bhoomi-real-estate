@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { GenericError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
+import { ZodError } from "zod";
 
 /**
  * @param error   Error of type unknown - Could be our Error that we extended from GenericError class
@@ -42,6 +43,15 @@ export const errorHandler = (error: unknown, req: Request, res: Response, next: 
     return res.status(error.statusCode).send({
       message: error.message,
       stack: process.env.NODE_ENV === "production" ? error.name : error.name
+    });
+  }
+
+  if (error instanceof ZodError) {
+    return res.status(422).send({
+      errors: error.issues.map((error) => ({
+        field: error.path[0],
+        message: error.message
+      }))
     });
   }
 

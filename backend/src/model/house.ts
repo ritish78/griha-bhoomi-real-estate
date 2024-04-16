@@ -10,7 +10,6 @@ import {
   smallint,
   timestamp
 } from "drizzle-orm/pg-core";
-import { property } from "./property";
 
 export const HouseType = pgEnum("house_type", [
   "House",
@@ -25,8 +24,7 @@ export const HouseType = pgEnum("house_type", [
 export const house = pgTable(
   "house",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    propertyId: uuid("property_id").references(() => property.id),
+    id: uuid("id").primaryKey(),
     houseType: HouseType("house_type").notNull(),
     roomCount: smallint("room_count").notNull(),
     floorCount: smallint("floor_count").default(1).notNull(),
@@ -40,11 +38,9 @@ export const house = pgTable(
     carParking: smallint("car_parking"),
     bikeParking: smallint("bike_parking"),
     evCharging: boolean("ev_charging").default(false),
-    builtAt: timestamp("built_at"),
+    builtAt: timestamp("built_at", { mode: "string" }),
     connectedToRoad: boolean("connected_to_road").notNull(),
-    distanceToRoad: boolean("distance_to_road").notNull(),
-    listedAt: timestamp("listed_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow()
+    distanceToRoad: smallint("distance_to_road").notNull()
   },
   (table) => {
     return {
