@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { newHouseSchema } from "src/controller/property/houseSchema";
-import { newLandSchema } from "src/controller/property/landSchema";
+import { newHouseSchema, updateHouseSchema } from "src/controller/property/houseSchema";
+import { newLandSchema, updateLandSchema } from "src/controller/property/landSchema";
 import { BadRequestError } from "src/utils/error";
 import { AnyZodObject, ZodError } from "zod";
 
@@ -67,7 +67,8 @@ export const validateRequest =
   };
 
 export const validatePropertySchema = (data, type: string) => {
-  let schema: AnyZodObject;
+  // let schema: AnyZodObject;
+  let schema;
 
   switch (type) {
     case "HOUSE":
@@ -81,4 +82,22 @@ export const validatePropertySchema = (data, type: string) => {
   }
 
   schema.parse(data);
+};
+
+export const hasHouseFields = (data) => {
+  try {
+    updateHouseSchema.parse(data);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const hasLandFields = (data) => {
+  try {
+    updateLandSchema.parse(data);
+    return true;
+  } catch (error) {
+    return false;
+  }
 };

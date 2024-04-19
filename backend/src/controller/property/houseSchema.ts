@@ -22,3 +22,29 @@ export const newHouseSchema = z.object({
   connectedToRoad: z.boolean(),
   distanceToRoad: z.number().nonnegative()
 });
+
+export const updateHouseSchema = z
+  .object({
+    houseType: ZodHouseTypeEnum.optional(),
+    roomCount: z.number().nonnegative().optional(),
+    floorCount: z.number().nonnegative().optional(),
+    kitchenCount: z.number().nonnegative().optional(),
+    sharedBathroom: z.boolean().optional(),
+    bathroomCount: z.number().nonnegative().optional(),
+    facilities: z.array(z.string()).optional(),
+    area: z.string().optional().optional(),
+    furnished: z.boolean().optional(),
+    facing: z.string().optional().optional(),
+    carParking: z.number().nonnegative().optional(),
+    bikeParking: z.number().nonnegative().optional(),
+    evCharging: z.boolean().optional(),
+    builtAt: z.string().datetime().optional(),
+    connectedToRoad: z.boolean().optional(),
+    distanceToRoad: z.number().nonnegative().optional()
+  })
+  .refine((data) => Object.values(data).some((field) => field !== undefined), {
+    message: "Please provide atleast one field to update!",
+    path: [
+      "houseType, roomCount, floorCount, kitchenCount, sharedbathroom, bathroomCount, facilites, area, furnished, facing, carParking, bikeParking, evCharging, builtAt, connectedToRoad, distanceToRoad"
+    ]
+  });

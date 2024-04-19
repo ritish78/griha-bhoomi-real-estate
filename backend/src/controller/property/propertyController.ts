@@ -18,42 +18,45 @@ import { property } from "src/model/property";
 
 import logger from "src/utils/logger";
 import { isAdmin } from "src/utils/isAdmin";
+import { hasHouseFields, hasLandFields } from "src/middleware/validateRequest";
+import { house } from "src/model/house";
+import { land } from "src/model/land";
 
 /**
  * @param dummyPropertyData array of property
  */
-export const seedProperty = async (dummyPropertyData) => {
-  await db.transaction(async (tx) => {
-    for (const row of dummyPropertyData) {
-      try {
-        await tx.insert(property).values([
-          {
-            id: uuidv4(),
-            sellerId: row.sellerId,
-            title: row.title,
-            slug: row.title,
-            description: row.description,
-            toRent: row.toRent,
-            address: row.address,
-            closeLandmark: row.closeLandmark,
-            propertyType: row.propertyType,
-            availableFrom: row.availableFrom,
-            availableTill: row.availableTill,
-            price: row.price,
-            negotiable: row.negotiable,
-            imageUrl: row.imageUrl,
-            status: row.status,
-            expiresOn: row.expiresOn,
-            views: 1
-          }
-        ]);
-      } catch (error) {
-        console.log(`Error inserting row: ${JSON.stringify(row)}`);
-        console.log(error);
-      }
-    }
-  });
-};
+// export const seedProperty = async (dummyPropertyData) => {
+//   await db.transaction(async (tx) => {
+//     for (const row of dummyPropertyData) {
+//       try {
+//         await tx.insert(property).values([
+//           {
+//             id: uuidv4(),
+//             sellerId: row.sellerId,
+//             title: row.title,
+//             slug: row.title,
+//             description: row.description,
+//             toRent: row.toRent,
+//             address: row.address,
+//             closeLandmark: row.closeLandmark,
+//             propertyType: row.propertyType,
+//             availableFrom: row.availableFrom,
+//             availableTill: row.availableTill,
+//             price: row.price,
+//             negotiable: row.negotiable,
+//             imageUrl: row.imageUrl,
+//             status: row.status,
+//             expiresOn: row.expiresOn,
+//             views: 1
+//           }
+//         ]);
+//       } catch (error) {
+//         console.log(`Error inserting row: ${JSON.stringify(row)}`);
+//         console.log(error);
+//       }
+//     }
+//   });
+// };
 
 /**
  * @route                   /api/v1/auth/property/new
@@ -88,6 +91,10 @@ export const seedProperty = async (dummyPropertyData) => {
  * @param builtAt           string - date in string when the house was built
  * @param connectedToRoad   boolean - is the house connected to the road
  * @param distanceToRoad    number - distance in meters where the house can be connected to road
+ * @param landType          string - plotting | residential | agricultural | industrial
+ * @param area              string - area of the land
+ * @param length            length - length of the land
+ * @param breadth           breadth - length of the land
  * @returns                 string - uuid of the added property
  */
 export const addProperty = async (sellerId: string, body) => {
@@ -268,12 +275,22 @@ export const addHouse = async (
     evCharging,
     builtAt,
     connectedToRoad,
-    distanceToRoad
+    distanceToRoad: connectedToRoad ? 0 : distanceToRoad
   });
 
   return idOfToBeInsertedHouse;
 };
 
+/**
+ *
+ * @param landType          string - plotting | residential | agricultural | industrial
+ * @param area              string - area of the land
+ * @param length            length - length of the land
+ * @param breadth           breadth - length of the land
+ * @param connectedToRoad   boolean - is land connected to road
+ * @param distanceToRoad    number - distance from land to the road
+ * @returns
+ */
 export const addLand = async (
   landType: string,
   area: string,
@@ -320,8 +337,8 @@ export const getPropertyBySlug = async (slug: string) => {
 };
 
 /**
- * @param filters filters object from req.params
- * @returns Properties[] or -1 if no filter is provided
+ * @param filters   filters object from req.params
+ * @returns         Properties[] or -1 if no filter is provided
  */
 export const filterProperties = async (filters) => {
   try {
@@ -535,8 +552,8 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
 
 /**
  *
- * @param offset number - start position to fetch the property
- * @returns Properties[]
+ * @param offset    number - start position to fetch the property
+ * @returns         Properties[]
  */
 export const getListOfPropertiesByPagination = async (offset: number) => {
   try {
@@ -604,7 +621,18 @@ export const deletePropertyById = async (userId: string, propertyId: string) => 
   }
 };
 
-export const updatePropertyById = async (propertyId, currentUserId: string, propertyFieldsToUpdate) => {
+/**
+ *
+ * @param propertyId                string - id of the property to update
+ * @param currentUserId             string - id of the current user
+ * @param propertyFieldsToUpdate    object - property fields to update
+ * @returns                         0 if no property of provided id is found | 1 if updated succesfully | -1 if the user is not authorized to update property
+ */
+export const updatePropertyById = async (
+  propertyId: string,
+  currentUserId: string,
+  propertyFieldsToUpdate
+) => {
   const propertyById = await getPropertyById(propertyId);
 
   //If property by its id does not exists we return 0 which we will use in the api handler
@@ -613,9 +641,15 @@ export const updatePropertyById = async (propertyId, currentUserId: string, prop
     return 0;
   }
 
+  if (propertyById.propertyType.toUpperCase() === "HOUSE" && hasHouseFields(propertyFieldsToUpdate)) {
+    await updateHouseListingById(propertyById.propertyTypeId, propertyFieldsToUpdate);
+  } else if (propertyById.propertyType.toUpperCase() === "LAND" && hasLandFields(propertyFieldsToUpdate)) {
+    await updateLandListingById(propertyById.propertyTypeId, propertyFieldsToUpdate);
+  }
+
   //If the property listing is created by the current user then we allow the update to happen
   if (propertyById.sellerId === currentUserId) {
-    await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
+    await updatePropertyListingById(propertyId, propertyFieldsToUpdate);
     return 1;
   }
 
@@ -627,7 +661,7 @@ export const updatePropertyById = async (propertyId, currentUserId: string, prop
    */
   const currentUserIsAdmin = await isAdmin(currentUserId);
   if (currentUserIsAdmin) {
-    await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
+    await updatePropertyListingById(propertyId, propertyFieldsToUpdate);
     return 1;
   }
 
@@ -635,4 +669,20 @@ export const updatePropertyById = async (propertyId, currentUserId: string, prop
   //the listing and isn't admin then we return -1 back to api handler where we throw
   //ForbiddenError with the status code of 403.
   return -1;
+};
+
+/**
+ * @param propertyId                string - id of the property to update
+ * @param propertyFieldsToUpdate    object - property fields to update
+ */
+const updatePropertyListingById = async (propertyId: string, propertyFieldsToUpdate) => {
+  await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
+};
+
+const updateHouseListingById = async (houseId: string, houseFieldsToUpdate) => {
+  await db.update(house).set(houseFieldsToUpdate).where(eq(house.id, houseId));
+};
+
+const updateLandListingById = async (landId: string, landFieldsToUpdate) => {
+  await db.update(land).set(landFieldsToUpdate).where(eq(land.id, landId));
 };

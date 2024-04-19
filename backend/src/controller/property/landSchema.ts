@@ -12,3 +12,17 @@ export const newLandSchema = z.object({
   connectedToRoad: z.boolean(),
   distanceToRoad: z.number().nonnegative()
 });
+
+export const updateLandSchema = z
+  .object({
+    landType: ZodLandTypeEnum.optional(),
+    area: z.string().optional(),
+    length: z.string().optional(),
+    breadth: z.string().optional(),
+    connectedToRoad: z.boolean().optional(),
+    distanceToRoad: z.number().nonnegative().optional()
+  })
+  .refine((data) => Object.values(data).some((field) => field !== undefined), {
+    message: "Please provide atleast one field to update!",
+    path: ["landType, area, length, breadth, connectedToRoad, distanceToRoad"]
+  });

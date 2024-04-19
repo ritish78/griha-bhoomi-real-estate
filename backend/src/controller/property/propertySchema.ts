@@ -24,26 +24,6 @@ export const newPropertySchema = z.object({
   })
 });
 
-// export const newPropertySchema = z.object({
-//   body: z
-//     .object({
-//       title: z.string().min(1, { message: "Please enter title to set for the property!" }),
-//       description: z.string().min(1, { message: "Please describe your property in atleast few words!" }),
-//       toRent: z.boolean(),
-//       address: z.string().min(1, { message: "Please enter address of the property!" }),
-//       closeLandmark: z.string().min(1, { message: "Please add nearest landmark name!" }),
-//       propertyType: z.string().min(1, { message: "Please provide the property type!" }),
-//       availableFrom: z.string().datetime(),
-//       availableTill: z.string().datetime(),
-//       price: z.number().gte(1),
-//       negotiable: z.boolean(),
-//       imageUrl: z.array(z.string()).nonempty(),
-//       status: z.string().min(1, { message: "Please enter valid status of property!" }),
-//       expiresOn: z.string().datetime()
-//     })
-//     .strict()
-// });
-
 export const updatePropertySchema = z.object({
   body: z
     .object({
@@ -64,5 +44,10 @@ export const updatePropertySchema = z.object({
       status: z.string().min(1, { message: "Please enter valid status of property!" }).optional(),
       expiresOn: z.string().datetime().optional()
     })
-    .strict()
+    .refine((data) => Object.values(data).some((field) => field !== undefined), {
+      message: "Please provide atleast one field to update!",
+      path: [
+        "title, description, toRent, address, closeLandmark, propertyType, availableFrom, availableTill, price, negotiable, imageUrl, status, expiresOn"
+      ]
+    })
 });
