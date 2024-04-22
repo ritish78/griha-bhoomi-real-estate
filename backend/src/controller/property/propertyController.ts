@@ -424,7 +424,7 @@ export const filterProperties = async (filters) => {
     //if the filter is only one `keyword` then we return them with the function
     //that we have created below named `searchPropertyByKeyword`
     if (mapFilterOptions.size === 1 && filters.keyword) {
-      const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), filters?.page || 0);
+      const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), filters?.page || 1);
       return listOfProperties;
     }
 
@@ -484,7 +484,7 @@ export const filterProperties = async (filters) => {
       .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
       .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
 
-    console.log("Filtered properties", filteredProperties);
+    // console.log("Filtered properties", filteredProperties);
 
     //We are returning in the shape of:
     /**
@@ -515,12 +515,15 @@ export const filterProperties = async (filters) => {
      *   ]
      * }
      */
+
     return {
       currentPage: filters.page ? Number(filters.page) : 1,
-      numberOfPages: Math.ceil(
-        filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE
-      ),
-      listOfFilteredProperties: filteredProperties.map((result) => result.listOfProperties)
+      numberOfPages:
+        filteredProperties.length > 0
+          ? Math.ceil(filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE)
+          : 0,
+      listOfFilteredProperties:
+        filteredProperties.length > 0 ? filteredProperties.map((result) => result.listOfProperties) : {}
     };
   } catch (error) {
     console.log("Error occurred while filtering results!");
