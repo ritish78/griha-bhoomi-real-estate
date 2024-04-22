@@ -21,6 +21,7 @@ import { isAdmin } from "src/utils/isAdmin";
 import { hasHouseFields, hasLandFields } from "src/middleware/validateRequest";
 import { house } from "src/model/house";
 import { land } from "src/model/land";
+import { addAddress } from "../address/addressController";
 
 /**
  * @param dummyPropertyData array of property
@@ -130,7 +131,16 @@ export const addProperty = async (sellerId: string, body) => {
       distanceToRoad,
       landType,
       length,
-      breadth
+      breadth,
+      houseNumber,
+      street,
+      wardNumber,
+      municipality,
+      city,
+      district,
+      province,
+      latitude,
+      longitude
     } = body;
     const idOfToBeInsertedProperty = uuidv4();
 
@@ -158,6 +168,18 @@ export const addProperty = async (sellerId: string, body) => {
       propertyTypeId = await addLand(landType, area, length, breadth, connectedToRoad, distanceToRoad);
     }
 
+    const addressId = await addAddress(
+      houseNumber,
+      street,
+      wardNumber,
+      municipality,
+      city,
+      district,
+      province,
+      latitude,
+      longitude
+    );
+
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
 
@@ -169,7 +191,7 @@ export const addProperty = async (sellerId: string, body) => {
       slug: `${idOfToBeInsertedProperty.split("-")[0]}-${slugify(title, { lower: true })}`,
       description,
       toRent,
-      address,
+      address: addressId,
       closeLandmark,
       propertyType,
       availableFrom,
@@ -674,15 +696,26 @@ export const updatePropertyById = async (
 /**
  * @param propertyId                string - id of the property to update
  * @param propertyFieldsToUpdate    object - property fields to update
+ * @returns                         Promise<void>
  */
 const updatePropertyListingById = async (propertyId: string, propertyFieldsToUpdate) => {
   await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
 };
 
+/**
+ * @param houseId                   string - id of the house to update
+ * @param houseFieldsToUpdate       object - house fields to update
+ * @returns                         Promise<void>
+ */
 const updateHouseListingById = async (houseId: string, houseFieldsToUpdate) => {
   await db.update(house).set(houseFieldsToUpdate).where(eq(house.id, houseId));
 };
 
+/**
+ * @param landId                    string - id of the land to update
+ * @param landFieldsToUpdate        object - land fields to update
+ * @returns                         Promise<void>
+ */
 const updateLandListingById = async (landId: string, landFieldsToUpdate) => {
   await db.update(land).set(landFieldsToUpdate).where(eq(land.id, landId));
 };

@@ -12,7 +12,6 @@ export const newPropertySchema = z.object({
     title: z.string().min(1, { message: "Please enter title to set for the property!" }),
     description: z.string().min(1, { message: "Please describe your property in atleast few words!" }),
     toRent: z.boolean(),
-    address: z.string().min(1, { message: "Please enter address of the property!" }),
     closeLandmark: z.string().min(1, { message: "Please add nearest landmark name!" }),
     propertyType: ZodPropertyTypeEnum,
     availableFrom: z.string().datetime(),

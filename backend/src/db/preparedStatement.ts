@@ -5,6 +5,7 @@ import { user } from "src/model/user";
 import { property } from "src/model/property";
 import { house } from "src/model/house";
 import { land } from "src/model/land";
+import { address } from "src/model/address";
 
 /**
  * @params      email
@@ -190,7 +191,23 @@ export const getTotalNumberOfProperties = db
   .from(property)
   .prepare("get-count-of-properties");
 
+/**
+ * @param propertyId    string - property id to delete
+ */
 export const preparedDeletePropertyById = db
   .delete(property)
   .where(eq(property.id, sql.placeholder("propertyId")))
   .prepare("delete-property-by-id");
+
+export const preparedInsertAddress = db.insert(address).values({
+  id: sql.placeholder("id"),
+  houseNumber: sql.placeholder("houseNumber"),
+  street: sql.placeholder("street"),
+  wardNumber: sql.placeholder("wardNumber"),
+  municipality: sql.placeholder("municipality"),
+  city: sql.placeholder("city"),
+  district: sql.placeholder("district"),
+  province: sql.placeholder("province"),
+  latitude: sql.placeholder("latitude"),
+  longitude: sql.placeholder("longitude")
+});

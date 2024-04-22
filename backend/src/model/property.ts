@@ -11,6 +11,7 @@ import {
   integer
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
+import { address } from "./address";
 // import { tsvector } from "src/utils/tsvector";
 
 export const PropertyType = pgEnum("property_type", ["House", "Land"]);
@@ -33,7 +34,7 @@ export const property = pgTable(
     slug: varchar("slug", { length: 255 }).notNull(),
     description: text("description").notNull(),
     toRent: boolean("to_rent").notNull(),
-    address: varchar("address", { length: 255 }),
+    address: uuid("address").references(() => address.id),
     closeLandmark: varchar("close_landmark", { length: 255 }),
     propertyType: PropertyType("property_type").default("House").notNull(),
     availableFrom: timestamp("available_from", { mode: "string" }).notNull(),

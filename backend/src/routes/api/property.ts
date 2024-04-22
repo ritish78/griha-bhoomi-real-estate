@@ -15,7 +15,7 @@ import { validatePropertySchema, validateRequest } from "src/middleware/validate
 // import { Property } from "src/model/property";
 import { AuthError, BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
-import { dummyPropertyData } from "seed";
+// import { dummyPropertyData } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import { getTotalNumberOfProperties } from "src/db/preparedStatement";
 
