@@ -22,6 +22,7 @@ import { hasHouseFields, hasLandFields } from "src/middleware/validateRequest";
 import { house } from "src/model/house";
 import { land } from "src/model/land";
 import { addAddress } from "../address/addressController";
+import { address } from "src/model/address";
 
 /**
  * @param dummyPropertyData array of property
@@ -367,7 +368,7 @@ export const filterProperties = async (filters) => {
     //These are the fields that the users can search. It can be queried from url
     //so we are not following camel case to name the fields. Users can just type
     //and search using the api without having to remember which letter to capitalize
-    const validFilterOptions: string[] = [
+    const validPropertiesFilterOptions: string[] = [
       "keyword",
       "torent",
       "address",
@@ -386,13 +387,70 @@ export const filterProperties = async (filters) => {
       "sortby",
       "order"
     ];
-    const mapFilterOptions = new Map();
+
+    const validHouseFilterOptions: string[] = [
+      "housetype",
+      "roomcount",
+      "minroomcount",
+      "maxroomcount",
+      "roomcountrange",
+      "floorcount",
+      "minfloorcount",
+      "maxfloorcount",
+      "kitchencount",
+      "minkitchencount",
+      "maxkitchencount",
+      "sharedbathroom",
+      "bathroomcount",
+      "minbathroomcount",
+      "maxbathroomcount",
+      "facilites",
+      "area",
+      "furnished",
+      "facing",
+      "carparking",
+      "bikeparking",
+      "evcharging",
+      "builtat",
+      "connectedtoroad",
+      "distancetoroad"
+    ];
+
+    const validLandFilterOptions: string[] = [
+      "landtype",
+      "area",
+      "length",
+      "breadth",
+      "connectedtoroad",
+      "distancetoroad"
+    ];
+
+    const validAddressFilterOptions: string[] = [
+      "street",
+      "wardnumber",
+      "municipality",
+      "city",
+      "district",
+      "province",
+      "latitude",
+      "longitude"
+    ];
+
+    const mapPropertyFilterOptions = new Map();
+    const mapHouseFilterOptions = new Map();
+    const mapLandFilterOptions = new Map();
+    const mapAddressFilterOptions = new Map();
+
     for (const key in filters) {
       //The search query needs to be within the above `filterOptions`. User might search using `&test=ok`
       //and we might use it to query against the database. So, we only allow what can be queried
       //We also don't allow users to searches with same filter options twice in same request
       //Also if the user has provided the value for the query then only we take it for
-      if (validFilterOptions.includes(key) && !mapFilterOptions.has(key) && filters[key].trim()) {
+      if (
+        validPropertiesFilterOptions.includes(key) &&
+        !mapPropertyFilterOptions.has(key) &&
+        filters[key].trim()
+      ) {
         //We are skipping if `torent` or `negotiable` key is provided and something other than true or false is provided
         if (
           (key === "torent" || key === "negotiable") &&
@@ -402,28 +460,55 @@ export const filterProperties = async (filters) => {
         }
         //If user provides `ascending` or `descending` in full
         if (key === "order" && filters[key].toLowerCase().startsWith("asc")) {
-          mapFilterOptions.set(key, "ASC");
+          mapPropertyFilterOptions.set(key, "ASC");
         }
         if (key === "order" && filters[key].toLowerCase().startsWith("desc")) {
-          mapFilterOptions.set(key, "DESC");
+          mapPropertyFilterOptions.set(key, "DESC");
         }
-        mapFilterOptions.set(key, filters[key]);
+        mapPropertyFilterOptions.set(key, filters[key]);
+      } else if (validHouseFilterOptions.includes(key) && !mapHouseFilterOptions.has(key)) {
+        //Now to add filter options for house
+        mapHouseFilterOptions.set(key, filters[key]);
+
+        //If `connectedtoroad` and `distancetoroad` fields are provided in the context
+        //of land, we add to it. We could simplify it by storing those two fields in
+        //property table itself instead of having both fields on both House and Land table
+        if (key === "connectedtoroad" || key === "distancetoroad") {
+          mapLandFilterOptions.set(key, filters[key]);
+        }
+      } else if (validLandFilterOptions.includes(key) && !mapLandFilterOptions.has(key)) {
+        mapLandFilterOptions.set(key, filters[key]);
+      } else if (validAddressFilterOptions.includes(key) && !mapAddressFilterOptions.has(key)) {
+        mapAddressFilterOptions.set(key, filters[key]);
       }
     }
 
-    console.log("Filter Map: ", mapFilterOptions);
-    console.log("Filter Map Length: ", mapFilterOptions.size);
+    console.log("Property Filter Map: ", mapPropertyFilterOptions);
+    console.log("Property Filter Map Length: ", mapPropertyFilterOptions.size);
+
+    console.log("House Filter Map: ", mapHouseFilterOptions);
+    console.log("House Filter Map Length: ", mapHouseFilterOptions.size);
+
+    console.log("Land Filter Map: ", mapLandFilterOptions);
+    console.log("Land Filter Map Length: ", mapLandFilterOptions.size);
+
+    console.log("Address Filter Map: ", mapAddressFilterOptions);
+    console.log("Address Filter Map Length: ", mapAddressFilterOptions.size);
 
     //if the length of query is 0, that is user has only visited the page
     //we return -1 to the api route handler which will then redirect the user
     //to `/api/v1/property?page=1`
-    if (mapFilterOptions.size === 0) {
+    if (
+      mapPropertyFilterOptions.size === 0 &&
+      mapHouseFilterOptions.size === 0 &&
+      mapLandFilterOptions.size === 0
+    ) {
       return -1;
     }
 
     //if the filter is only one `keyword` then we return them with the function
     //that we have created below named `searchPropertyByKeyword`
-    if (mapFilterOptions.size === 1 && filters.keyword) {
+    if (mapPropertyFilterOptions.size === 1 && filters.keyword) {
       const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), filters?.page || 1);
       return listOfProperties;
     }
@@ -434,57 +519,174 @@ export const filterProperties = async (filters) => {
       .select({
         listOfProperties: property,
         numberOfFilteredProperties: sql<number>`count(*) over()`
-        // tsrank: sql`ts_rank(search_vector, to_tsquery('english', '${mapFilterOptions.get("keyword").replace(" ", " | ")}')) as rank`
+        // tsrank: sql`ts_rank(search_vector, to_tsquery('english', '${mapPropertyFilterOptions.get("keyword").replace(" ", " | ")}')) as rank`
       })
       .from(property)
+      .leftJoin(address, eq(property.address, address.id))
+      .leftJoin(house, eq(property.propertyTypeId, house.id))
+      .leftJoin(land, eq(property.propertyTypeId, land.id))
       .where(
         and(
-          // mapFilterOptions.get("keyword")
-          //   ? sql`search_vector @@ to_tsquery('english', '${mapFilterOptions.get("keyword").replace(" ", " | ")}')`
+          // mapPropertyFilterOptions.get("keyword")
+          //   ? sql`search_vector @@ to_tsquery('english', '${mapPropertyFilterOptions.get("keyword").replace(" ", " | ")}')`
           //   : undefined,
+          // TODO:
           // Currently, tsvector search is not implemented in Drizzle and the above method did not work
           // It is in progress and will be implemented soon. So, need to look back in the future when searching
           // using keyword like how it is implemented in `searchPropertyByKeyword`
-          mapFilterOptions.get("keyword")
-            ? ilike(property.title, `%${mapFilterOptions.get("keyword")}%`)
+          mapPropertyFilterOptions.get("keyword")
+            ? ilike(property.title, `%${mapPropertyFilterOptions.get("keyword")}%`)
             : undefined,
-          mapFilterOptions.get("torent") ? eq(property.toRent, mapFilterOptions.get("torent")) : undefined,
-          mapFilterOptions.get("propertytype")
-            ? eq(property.propertyType, mapFilterOptions.get("propertytype"))
+          mapPropertyFilterOptions.get("torent")
+            ? eq(property.toRent, mapPropertyFilterOptions.get("torent"))
             : undefined,
-          mapFilterOptions.get("availablefrom")
-            ? gte(property.availableFrom, mapFilterOptions.get("availablefrom"))
+          mapPropertyFilterOptions.get("propertytype")
+            ? eq(property.propertyType, mapPropertyFilterOptions.get("propertytype"))
             : undefined,
-          mapFilterOptions.get("availabletill")
-            ? lte(property.availableTill, mapFilterOptions.get("availabletill"))
+          mapPropertyFilterOptions.get("availablefrom")
+            ? gte(property.availableFrom, mapPropertyFilterOptions.get("availablefrom"))
             : undefined,
-          mapFilterOptions.get("price") ? eq(property.price, mapFilterOptions.get("price")) : undefined,
-          mapFilterOptions.get("minprice")
-            ? gte(property.price, mapFilterOptions.get("minprice"))
+          mapPropertyFilterOptions.get("availabletill")
+            ? lte(property.availableTill, mapPropertyFilterOptions.get("availabletill"))
             : undefined,
-          mapFilterOptions.get("maxprice") ? lte(property.price, mapFilterOptions.get("price")) : undefined,
-          mapFilterOptions.get("pricerange")
+          mapPropertyFilterOptions.get("price")
+            ? eq(property.price, mapPropertyFilterOptions.get("price"))
+            : undefined,
+          mapPropertyFilterOptions.get("minprice")
+            ? gte(property.price, mapPropertyFilterOptions.get("minprice"))
+            : undefined,
+          mapPropertyFilterOptions.get("maxprice")
+            ? lte(property.price, mapPropertyFilterOptions.get("maxprice"))
+            : undefined,
+          mapPropertyFilterOptions.get("pricerange")
             ? and(
-                gte(property.price, mapFilterOptions.get("pricerange").split("-")[0]),
-                lte(property.price, mapFilterOptions.get("pricerange").split("-")[1])
+                gte(property.price, mapPropertyFilterOptions.get("pricerange").split("-")[0]),
+                lte(property.price, mapPropertyFilterOptions.get("pricerange").split("-")[1])
               )
             : undefined,
-          mapFilterOptions.get("negotiable")
-            ? eq(property.negotiable, mapFilterOptions.get("negotiable"))
+          mapPropertyFilterOptions.get("negotiable")
+            ? eq(property.negotiable, mapPropertyFilterOptions.get("negotiable"))
             : undefined,
-          mapFilterOptions.get("status") ? eq(property.status, mapFilterOptions.get("status")) : undefined,
-          mapFilterOptions.get("listedat")
-            ? gte(property.listedAt, mapFilterOptions.get("listedat"))
+          mapPropertyFilterOptions.get("status")
+            ? eq(property.status, mapPropertyFilterOptions.get("status"))
             : undefined,
-          mapFilterOptions.get("updatedat")
-            ? gte(property.updatedAt, mapFilterOptions.get("updatedat"))
+          mapPropertyFilterOptions.get("listedat")
+            ? gte(property.listedAt, mapPropertyFilterOptions.get("listedat"))
+            : undefined,
+          mapPropertyFilterOptions.get("updatedat")
+            ? gte(property.updatedAt, mapPropertyFilterOptions.get("updatedat"))
+            : undefined,
+          //Filtering options for House
+          mapHouseFilterOptions.get("housetype")
+            ? eq(house.houseType, mapHouseFilterOptions.get("housetype"))
+            : undefined,
+          mapHouseFilterOptions.get("roomcount")
+            ? eq(house.roomCount, mapHouseFilterOptions.get("roomcount"))
+            : undefined,
+          mapHouseFilterOptions.get("minroomcount")
+            ? gte(house.roomCount, mapHouseFilterOptions.get("minroomcount"))
+            : undefined,
+          mapHouseFilterOptions.get("maxroomcount")
+            ? lte(house.roomCount, mapHouseFilterOptions.get("maxroomcount"))
+            : undefined,
+          mapHouseFilterOptions.get("roomcountrange")
+            ? and(
+                gte(house.roomCount, mapHouseFilterOptions.get("roomcountrange").split("-")[0]),
+                lte(house.roomCount, mapHouseFilterOptions.get("roomcountrange").split("-")[1])
+              )
+            : undefined,
+          mapHouseFilterOptions.get("floorcount")
+            ? eq(house.floorCount, mapHouseFilterOptions.get("floorcount"))
+            : undefined,
+          mapHouseFilterOptions.get("minfloorcount")
+            ? gte(house.floorCount, mapHouseFilterOptions.get("minfloorcount"))
+            : undefined,
+          mapHouseFilterOptions.get("maxfloorcount")
+            ? lte(house.floorCount, mapHouseFilterOptions.get("maxfloorcount"))
+            : undefined,
+          mapHouseFilterOptions.get("kitchencount")
+            ? eq(house.kitchenCount, mapHouseFilterOptions.get("kitchencount"))
+            : undefined,
+          mapHouseFilterOptions.get("minkitchencount")
+            ? gte(house.kitchenCount, mapHouseFilterOptions.get("minkitchencount"))
+            : undefined,
+          mapHouseFilterOptions.get("maxkitchencount")
+            ? lte(house.kitchenCount, mapHouseFilterOptions.get("maxkitchencount"))
+            : undefined,
+          mapHouseFilterOptions.get("sharedbathroom")
+            ? eq(house.sharedBathroom, mapHouseFilterOptions.get("sharedbathroom"))
+            : undefined,
+          mapHouseFilterOptions.get("bathroomcount")
+            ? eq(house.bathroomCount, mapHouseFilterOptions.get("bathroomcount"))
+            : undefined,
+          mapHouseFilterOptions.get("minbathroomcount")
+            ? gte(house.bathroomCount, mapHouseFilterOptions.get("minbathroomcount"))
+            : undefined,
+          mapHouseFilterOptions.get("maxbathroomcount")
+            ? lte(house.bathroomCount, mapHouseFilterOptions.get("maxbathroomcount"))
+            : undefined,
+          // mapHouseFilterOptions.get("facilities")    //TODO: Filters are arrays
+          // mapHouseFilterOptions.get("area")          //TODO: We have set area to be of type string
+          //The area may or may not be of same unit. eg. meter square, square feet
+          mapHouseFilterOptions.get("furnished")
+            ? eq(house.furnished, mapHouseFilterOptions.get("furnished"))
+            : undefined,
+          mapHouseFilterOptions.get("facing")
+            ? eq(house.facing, mapHouseFilterOptions.get("facing"))
+            : undefined,
+          mapHouseFilterOptions.get("carparking")
+            ? gte(house.carParking, mapHouseFilterOptions.get("carparking"))
+            : undefined,
+          mapHouseFilterOptions.get("bikeparking")
+            ? gte(house.bikeParking, mapHouseFilterOptions.get("bikeparking"))
+            : undefined,
+          mapHouseFilterOptions.get("evcharging")
+            ? eq(house.evCharging, mapHouseFilterOptions.get("evcharging"))
+            : undefined,
+          mapHouseFilterOptions.get("builtat")
+            ? gte(house.builtAt, mapHouseFilterOptions.get("builtat"))
+            : undefined,
+          mapHouseFilterOptions.get("connectedtoroad")
+            ? eq(house.connectedToRoad, mapHouseFilterOptions.get("connectedtoroad"))
+            : undefined,
+          mapHouseFilterOptions.get("distancetoroad")
+            ? lte(house.distanceToRoad, mapHouseFilterOptions.get("distancetoroad"))
+            : undefined,
+          //Now, filtering options for Land
+          mapLandFilterOptions.get("landtype")
+            ? eq(land.landType, mapLandFilterOptions.get("landtype"))
+            : undefined,
+          // mapLandFilterOptions.get("length")
+          //TODO: Area, length and breadth are of type string
+          mapLandFilterOptions.get("connectedtoroad")
+            ? eq(land.connectedToRoad, mapLandFilterOptions.get("connectedToRoad"))
+            : undefined,
+          mapLandFilterOptions.get("distancetoroad")
+            ? lte(land.distanceToRoad, mapLandFilterOptions.get("distancetoroad"))
+            : undefined,
+
+          //Now filtering options for Address
+          mapAddressFilterOptions.get("street")
+            ? eq(address.street, mapAddressFilterOptions.get("street"))
+            : undefined,
+          mapAddressFilterOptions.get("wardnumber")
+            ? eq(address.wardNumber, mapAddressFilterOptions.get("wardnumber"))
+            : undefined,
+          mapAddressFilterOptions.get("municipality")
+            ? eq(address.municipality, mapAddressFilterOptions.get("municipality"))
+            : undefined,
+          mapAddressFilterOptions.get("city")
+            ? eq(address.city, mapAddressFilterOptions.get("city"))
+            : undefined,
+          mapAddressFilterOptions.get("district")
+            ? eq(address.district, mapAddressFilterOptions.get("district"))
             : undefined
         )
       )
       .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
       .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
 
-    // console.log("Filtered properties", filteredProperties);
+    console.log("Filtered properties", filteredProperties);
 
     //We are returning in the shape of:
     /**
