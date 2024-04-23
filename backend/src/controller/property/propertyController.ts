@@ -382,8 +382,8 @@ export const filterProperties = async (filters) => {
       "pricerange",
       "negotiable",
       "status",
-      "listedAt",
-      "updatedAt",
+      "listedat",
+      "updatedat",
       "sortby",
       "order"
     ];
@@ -501,14 +501,23 @@ export const filterProperties = async (filters) => {
     if (
       mapPropertyFilterOptions.size === 0 &&
       mapHouseFilterOptions.size === 0 &&
-      mapLandFilterOptions.size === 0
+      mapLandFilterOptions.size === 0 &&
+      mapAddressFilterOptions.size === 0
     ) {
       return -1;
     }
 
+    //TODO: If the user provides `keyword` along with other fields of other tables
+    //it is neglected. We need to make it search with other fields as well
     //if the filter is only one `keyword` then we return them with the function
     //that we have created below named `searchPropertyByKeyword`
-    if (mapPropertyFilterOptions.size === 1 && filters.keyword) {
+    if (
+      mapPropertyFilterOptions.size === 1 &&
+      filters.keyword &&
+      mapHouseFilterOptions.size === 0 &&
+      mapLandFilterOptions.size === 0 &&
+      mapAddressFilterOptions.size === 0
+    ) {
       const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), filters?.page || 1);
       return listOfProperties;
     }
@@ -643,8 +652,17 @@ export const filterProperties = async (filters) => {
           mapHouseFilterOptions.get("evcharging")
             ? eq(house.evCharging, mapHouseFilterOptions.get("evcharging"))
             : undefined,
+          //To get the built at, if user only provides the year; we create
+          //date object where it specifies the first day othe year and if
+          //the user supplies date like; 2004-05-01, then we use it instead
+          //of having to create a date object
           mapHouseFilterOptions.get("builtat")
-            ? gte(house.builtAt, mapHouseFilterOptions.get("builtat"))
+            ? gte(
+                house.builtAt,
+                mapHouseFilterOptions.get("builtat").length > 4
+                  ? mapHouseFilterOptions.get("builtat")
+                  : new Date(mapHouseFilterOptions.get("builtat"), 0, 1)
+              )
             : undefined,
           mapHouseFilterOptions.get("connectedtoroad")
             ? eq(house.connectedToRoad, mapHouseFilterOptions.get("connectedtoroad"))
@@ -667,19 +685,22 @@ export const filterProperties = async (filters) => {
 
           //Now filtering options for Address
           mapAddressFilterOptions.get("street")
-            ? eq(address.street, mapAddressFilterOptions.get("street"))
+            ? ilike(address.street, `%${mapAddressFilterOptions.get("street")}%`)
             : undefined,
           mapAddressFilterOptions.get("wardnumber")
             ? eq(address.wardNumber, mapAddressFilterOptions.get("wardnumber"))
             : undefined,
           mapAddressFilterOptions.get("municipality")
-            ? eq(address.municipality, mapAddressFilterOptions.get("municipality"))
+            ? ilike(address.municipality, `%${mapAddressFilterOptions.get("municipality")}%`)
             : undefined,
           mapAddressFilterOptions.get("city")
-            ? eq(address.city, mapAddressFilterOptions.get("city"))
+            ? ilike(address.city, `%${mapAddressFilterOptions.get("city")}%`)
             : undefined,
           mapAddressFilterOptions.get("district")
-            ? eq(address.district, mapAddressFilterOptions.get("district"))
+            ? ilike(address.district, `%${mapAddressFilterOptions.get("district")}%`)
+            : undefined,
+          mapAddressFilterOptions.get("province")
+            ? ilike(address.province, `%${mapAddressFilterOptions.get("province")}%`)
             : undefined
         )
       )
