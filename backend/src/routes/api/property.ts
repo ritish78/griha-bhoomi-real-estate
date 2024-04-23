@@ -188,7 +188,7 @@ router.route("/filter").get(async (req: Request, res: Response) => {
  */
 router.route("/id/:propertyId").get(async (req: Request, res: Response, next: NextFunction) => {
   console.log("Property search by id", req.params.propertyId);
-  const propertyById = await getPropertyById(req.params.propertyId);
+  const propertyById = await getPropertyById(req.params.propertyId, req.session.userId);
 
   if (!propertyById) {
     logger.notFound(
@@ -201,9 +201,9 @@ router.route("/id/:propertyId").get(async (req: Request, res: Response, next: Ne
       true
     );
     next(new NotFoundError(`Property of id ${req.params.propertyId} not found!`));
+  } else {
+    return res.status(200).send(propertyById);
   }
-
-  return res.status(200).send(propertyById);
 });
 
 /**
@@ -215,7 +215,7 @@ router.route("/id/:propertyId").get(async (req: Request, res: Response, next: Ne
  */
 router.route("/:slug").get(async (req: Request, res: Response, next: NextFunction) => {
   console.log("Property search by id", req.params.slug);
-  const propertyBySlug = await getPropertyBySlug(req.params.slug);
+  const propertyBySlug = await getPropertyBySlug(req.params.slug, req.session.userId);
 
   if (!propertyBySlug) {
     logger.notFound(

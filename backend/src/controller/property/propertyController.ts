@@ -1,4 +1,4 @@
-import { and, eq, gte, ilike, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, lte, sql } from "drizzle-orm";
 import slugify from "slugify";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import { v4 as uuidv4 } from "uuid";
@@ -14,7 +14,7 @@ import {
   // preparedGetPropertyByKeyword,
   preparedInsertProperty
 } from "src/db/preparedStatement";
-import { property } from "src/model/property";
+import { Property, property } from "src/model/property";
 
 import logger from "src/utils/logger";
 import { isAdmin } from "src/utils/isAdmin";
@@ -305,7 +305,6 @@ export const addHouse = async (
 };
 
 /**
- *
  * @param landType          string - plotting | residential | agricultural | industrial
  * @param area              string - area of the land
  * @param length            length - length of the land
@@ -341,22 +340,94 @@ export const addLand = async (
  * @param propertyId  string - property id of the searched property
  * @returns           Property
  */
-export const getPropertyById = async (propertyId: string) => {
+export const getPropertyById = async (propertyId: string, userId) => {
   console.log("Searching for property of id:", propertyId);
   const [propertyById] = await preparedGetPropertyById.execute({ propertyId });
 
-  return propertyById;
+  ///if property does not exists, we immediately return null back from the function
+  if (!propertyById) {
+    return null;
+  }
+
+  if (!propertyById.private && new Date(propertyById.expiresOn) > new Date()) {
+    //If the property listing hasn't expired and the property is not set to private
+    //finally, we increase the view count of the property by one before returning property
+    await increaseViewOfProperty(propertyById);
+
+    return propertyById;
+  }
+
+  //After quering the database to get the property using its id, we then
+  //check if that property is set as private or is it expired.
+  //If it satisfies either of the condition, then we then move to another check
+  if (propertyById.private || new Date(propertyById.expiresOn) < new Date()) {
+    //If the user id is not supplied and the property is set to private or is expired,
+    //we return null
+    if (!userId) {
+      return null;
+    }
+    const currentUserIsAdmin = await isAdmin(userId);
+    //if current user is the seller or an admin. If it satisfies one of the
+    //condition, we then return property without increasing the views
+    if (propertyById.sellerId === userId || currentUserIsAdmin) {
+      return propertyById;
+    } else {
+      //If the current user is not the seller or an admin and the property is
+      //listed as private, then we return null
+      return null;
+    }
+  }
+
+  //If the property listing is expired, then we return null.
+  if (new Date(propertyById.expiresOn) > new Date()) {
+    return null;
+  }
 };
 
 /**
  * @param slug  string - slug of the searched property
  * @returns     Property
  */
-export const getPropertyBySlug = async (slug: string) => {
+export const getPropertyBySlug = async (slug: string, userId) => {
   console.log("Searching for property of slug:", slug);
   const [propertyBySlug] = await preparedGetPropertyBySlug.execute({ slug });
 
-  return propertyBySlug;
+  ///if property does not exists, we immediately return null back from the function
+  if (!propertyBySlug) {
+    return null;
+  }
+
+  if (!propertyBySlug.private && new Date(propertyBySlug.expiresOn) > new Date()) {
+    //If the property listing hasn't expired and the property is not set to private
+    //finally, we increase the view count of the property by one before returning property
+    await increaseViewOfProperty(propertyBySlug);
+
+    return propertyBySlug;
+  }
+
+  //Similar to what we have implemented in the `getPropertyById` function
+  if (propertyBySlug.private || new Date(propertyBySlug.expiresOn) < new Date()) {
+    //If the user id is not supplied and the property is set to private or is expired,
+    //we return null
+    if (!userId) {
+      return null;
+    }
+    const currentUserIsAdmin = await isAdmin(userId);
+    //if current user is the seller or an admin. If it satisfies one of the
+    //condition, we then return property without increasing the views
+    if (propertyBySlug.sellerId === userId || currentUserIsAdmin) {
+      return propertyBySlug;
+    } else {
+      //If the current user is not the seller or an admin and the property is
+      //listed as private, then we return null
+      return null;
+    }
+  }
+
+  //If the property listing is expired, then we return null.
+  if (new Date(propertyBySlug.expiresOn) > new Date()) {
+    return null;
+  }
 };
 
 /**
@@ -522,6 +593,19 @@ export const filterProperties = async (filters) => {
       return listOfProperties;
     }
 
+    const sortField = mapPropertyFilterOptions.get("sortby") || "views";
+    const sortOrder =
+      mapPropertyFilterOptions.get("sortby") && mapPropertyFilterOptions.get("order") == "asc" ? asc : desc;
+
+    console.log("Sort Field: ", sortField);
+    console.log("Sort Field: ", sortField);
+    console.log("Sort Field: ", sortField);
+    console.log("Sort Field: ", sortField);
+    console.log("Sort By: ", sortOrder);
+    console.log("Sort By: ", sortOrder);
+    console.log("Sort By: ", sortOrder);
+    console.log("Sort By: ", sortOrder);
+
     //To get the number of filtered properties, we use one select() from dizzle where we
     //get the count and also the list of properties from where() clause.
     const filteredProperties = await db
@@ -548,6 +632,9 @@ export const filterProperties = async (filters) => {
             : undefined,
           mapPropertyFilterOptions.get("torent")
             ? eq(property.toRent, mapPropertyFilterOptions.get("torent"))
+            : undefined,
+          mapPropertyFilterOptions.get("closelandmark")
+            ? ilike(property.closeLandmark, `%${mapPropertyFilterOptions.get("closelandmark")}%`)
             : undefined,
           mapPropertyFilterOptions.get("propertytype")
             ? eq(property.propertyType, mapPropertyFilterOptions.get("propertytype"))
@@ -704,6 +791,7 @@ export const filterProperties = async (filters) => {
             : undefined
         )
       )
+      .orderBy(desc(property.featured), sortOrder(property[sortField]))
       .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
       .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
 
@@ -828,7 +916,7 @@ export const getListOfPropertiesByPagination = async (offset: number) => {
  */
 export const deletePropertyById = async (userId: string, propertyId: string) => {
   try {
-    const propertyById = await getPropertyById(propertyId);
+    const propertyById = await getPropertyById(propertyId, userId);
 
     /**
      * Is it better to throw NotFoundError and say that the property does not exists!
@@ -881,7 +969,7 @@ export const updatePropertyById = async (
   currentUserId: string,
   propertyFieldsToUpdate
 ) => {
-  const propertyById = await getPropertyById(propertyId);
+  const propertyById = await getPropertyById(propertyId, currentUserId);
 
   //If property by its id does not exists we return 0 which we will use in the api handler
   //to throw NotFoundError with the status code of 404.
@@ -944,4 +1032,14 @@ const updateHouseListingById = async (houseId: string, houseFieldsToUpdate) => {
  */
 const updateLandListingById = async (landId: string, landFieldsToUpdate) => {
   await db.update(land).set(landFieldsToUpdate).where(eq(land.id, landId));
+};
+
+/**
+ * @param propertyToUpdate      Property - property to update
+ */
+const increaseViewOfProperty = async (propertyToUpdate: Property) => {
+  await db
+    .update(property)
+    .set({ views: propertyToUpdate.views + 1 })
+    .where(eq(property.id, propertyToUpdate.id));
 };
