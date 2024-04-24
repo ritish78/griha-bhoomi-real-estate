@@ -554,18 +554,6 @@ export const filterProperties = async (filters) => {
       }
     }
 
-    console.log("Property Filter Map: ", mapPropertyFilterOptions);
-    console.log("Property Filter Map Length: ", mapPropertyFilterOptions.size);
-
-    console.log("House Filter Map: ", mapHouseFilterOptions);
-    console.log("House Filter Map Length: ", mapHouseFilterOptions.size);
-
-    console.log("Land Filter Map: ", mapLandFilterOptions);
-    console.log("Land Filter Map Length: ", mapLandFilterOptions.size);
-
-    console.log("Address Filter Map: ", mapAddressFilterOptions);
-    console.log("Address Filter Map Length: ", mapAddressFilterOptions.size);
-
     //if the length of query is 0, that is user has only visited the page
     //we return -1 to the api route handler which will then redirect the user
     //to `/api/v1/property?page=1`
@@ -597,14 +585,8 @@ export const filterProperties = async (filters) => {
     const sortOrder =
       mapPropertyFilterOptions.get("sortby") && mapPropertyFilterOptions.get("order") == "asc" ? asc : desc;
 
-    console.log("Sort Field: ", sortField);
-    console.log("Sort Field: ", sortField);
-    console.log("Sort Field: ", sortField);
-    console.log("Sort Field: ", sortField);
-    console.log("Sort By: ", sortOrder);
-    console.log("Sort By: ", sortOrder);
-    console.log("Sort By: ", sortOrder);
-    console.log("Sort By: ", sortOrder);
+    const nowToday = new Date();
+    const nowTodayInISOString = nowToday.toISOString();
 
     //To get the number of filtered properties, we use one select() from dizzle where we
     //get the count and also the list of properties from where() clause.
@@ -627,6 +609,8 @@ export const filterProperties = async (filters) => {
           // Currently, tsvector search is not implemented in Drizzle and the above method did not work
           // It is in progress and will be implemented soon. So, need to look back in the future when searching
           // using keyword like how it is implemented in `searchPropertyByKeyword`
+          eq(property.private, false),
+          gte(property.expiresOn, nowTodayInISOString),
           mapPropertyFilterOptions.get("keyword")
             ? ilike(property.title, `%${mapPropertyFilterOptions.get("keyword")}%`)
             : undefined,
@@ -859,6 +843,9 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
   //we would have to supply this to postgres `beach & traditional`.
   const normalisedKeyword = keyword.trim().replace(" ", " | ");
 
+  const nowToday = new Date();
+  const nowTodayInISOString = nowToday.toISOString();
+
   //I had prepeared a statement `preparedGetPropertyByKeyword` which was supposed to be executed
   //to get the property by keyword, however it did not work as intended as I was not able to pass
   //value of `keyword` into the `sql.placeholder("keyword")`
@@ -866,11 +853,15 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
     //Here there are two database query which is inefficient. Will merge the `filterProperties` and this function
     //once searching by ts_vector gets implemented.
     const propertyByKeyword = await db.execute(
-      sql`SELECT *, ts_rank(search_vector, to_tsquery('english', ${normalisedKeyword})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) ORDER BY rank desc OFFSET ${(offset - 1) * 2} LIMIT ${2};`
+      sql`SELECT *, ts_rank(search_vector, to_tsquery('english', ${normalisedKeyword})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) AND private=${false} AND expires_on >=${nowTodayInISOString} ORDER BY rank desc OFFSET ${(offset - 1) * 2} LIMIT ${2};`
     );
     const numberOfResults = await db.execute(
-      sql`SELECT COUNT(*) FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword});`
+      sql`SELECT COUNT(*) FROM property WHERE search_vector @@ to_tsquery('english', ${normalisedKeyword}) AND private=${false} AND expires_on >=${nowTodayInISOString};`
     );
+
+    console.log("Number of results: ", numberOfResults.rows[0].count);
+    console.log("Number of results: ", numberOfResults.rows[0].count);
+    console.log("Number of results: ", numberOfResults.rows[0].count);
 
     return {
       currentPage: Number(offset),
@@ -958,7 +949,6 @@ export const deletePropertyById = async (userId: string, propertyId: string) => 
 };
 
 /**
- *
  * @param propertyId                string - id of the property to update
  * @param currentUserId             string - id of the current user
  * @param propertyFieldsToUpdate    object - property fields to update
@@ -977,15 +967,39 @@ export const updatePropertyById = async (
     return 0;
   }
 
+  const validUpdatePropertyOptions: string[] = [
+    "title",
+    "description",
+    "torent",
+    "closelandmark",
+    "availablefrom",
+    "availabletill",
+    "price",
+    "negotiable",
+    "imageurl",
+    "status",
+    "private"
+  ];
+
+  const validPropertyFieldsToUpdate = Object.keys(propertyFieldsToUpdate)
+    .filter((key) => validUpdatePropertyOptions.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = propertyFieldsToUpdate[key];
+      return obj;
+    }, {});
+
+  let houseOrLandUpdated = false;
   if (propertyById.propertyType.toUpperCase() === "HOUSE" && hasHouseFields(propertyFieldsToUpdate)) {
     await updateHouseListingById(propertyById.propertyTypeId, propertyFieldsToUpdate);
+    houseOrLandUpdated = true;
   } else if (propertyById.propertyType.toUpperCase() === "LAND" && hasLandFields(propertyFieldsToUpdate)) {
     await updateLandListingById(propertyById.propertyTypeId, propertyFieldsToUpdate);
+    houseOrLandUpdated = true;
   }
 
   //If the property listing is created by the current user then we allow the update to happen
-  if (propertyById.sellerId === currentUserId) {
-    await updatePropertyListingById(propertyId, propertyFieldsToUpdate);
+  if (propertyById.sellerId === currentUserId && Object.keys(validPropertyFieldsToUpdate).length > 0) {
+    await updatePropertyListingById(propertyId, validPropertyFieldsToUpdate);
     return 1;
   }
 
@@ -996,7 +1010,7 @@ export const updatePropertyById = async (
    * if statement if the current user is the user that is providing the update fields.
    */
   const currentUserIsAdmin = await isAdmin(currentUserId);
-  if (currentUserIsAdmin) {
+  if (currentUserIsAdmin && Object.keys(validPropertyFieldsToUpdate).length > 0) {
     await updatePropertyListingById(propertyId, propertyFieldsToUpdate);
     return 1;
   }
@@ -1004,7 +1018,7 @@ export const updatePropertyById = async (
   //If the user who sent the request to update the property is neither the user who posted
   //the listing and isn't admin then we return -1 back to api handler where we throw
   //ForbiddenError with the status code of 403.
-  return -1;
+  return houseOrLandUpdated ? 1 : -1;
 };
 
 /**

@@ -19,7 +19,8 @@ export const newPropertySchema = z.object({
     price: z.number().gte(1),
     negotiable: z.boolean(),
     imageUrl: z.array(z.string()).nonempty(),
-    status: ZodPropertyStatusEnum
+    status: ZodPropertyStatusEnum,
+    private: z.boolean()
   })
 });
 
@@ -41,12 +42,12 @@ export const updatePropertySchema = z.object({
       negotiable: z.boolean().optional(),
       imageUrl: z.array(z.string()).nonempty().optional(),
       status: z.string().min(1, { message: "Please enter valid status of property!" }).optional(),
-      expiresOn: z.string().datetime().optional()
+      private: z.boolean().optional()
     })
     .refine((data) => Object.values(data).some((field) => field !== undefined), {
       message: "Please provide atleast one field to update!",
       path: [
-        "title, description, toRent, address, closeLandmark, propertyType, availableFrom, availableTill, price, negotiable, imageUrl, status, expiresOn"
+        "title, description, toRent, address, closeLandmark, propertyType, availableFrom, availableTill, price, negotiable, imageUrl, status, private"
       ]
     })
 });

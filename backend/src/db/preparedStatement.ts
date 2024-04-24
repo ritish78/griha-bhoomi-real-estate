@@ -1,5 +1,5 @@
 import db from ".";
-import { sql, eq, desc, count } from "drizzle-orm";
+import { sql, eq, desc, count, and, gte } from "drizzle-orm";
 
 import { user } from "src/model/user";
 import { property } from "src/model/property";
@@ -170,6 +170,8 @@ export const preparedGetPropertyBySlug = db
  */
 export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, ts_rank(search_vector, to_tsquery('english', ${sql.placeholder("keyword")})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${sql.placeholder("keyword")}) ORDER BY rank desc;`;
 
+const nowToday = new Date();
+const nowTodayInISOString = nowToday.toISOString();
 /**
  * @param limit   number - number of properties to fetch from database
  * @param offset  number - skip this many number of properties
@@ -178,6 +180,7 @@ export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, t
 export const getListOfProperties = db
   .select()
   .from(property)
+  .where(and(eq(property.private, false), gte(property.expiresOn, nowTodayInISOString)))
   .orderBy(desc(property.listedAt))
   .limit(sql.placeholder("limit"))
   .offset(sql.placeholder("offset"))
@@ -189,6 +192,7 @@ export const getListOfProperties = db
 export const getTotalNumberOfProperties = db
   .select({ count: count() })
   .from(property)
+  .where(and(eq(property.private, false), gte(property.expiresOn, nowTodayInISOString)))
   .prepare("get-count-of-properties");
 
 /**
