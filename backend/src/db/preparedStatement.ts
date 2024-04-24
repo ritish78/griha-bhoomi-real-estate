@@ -181,7 +181,7 @@ export const getListOfProperties = db
   .select()
   .from(property)
   .where(and(eq(property.private, false), gte(property.expiresOn, nowTodayInISOString)))
-  .orderBy(desc(property.listedAt))
+  .orderBy(desc(property.featured), desc(property.views), desc(property.listedAt))
   .limit(sql.placeholder("limit"))
   .offset(sql.placeholder("offset"))
   .prepare("get-number-of-properties");

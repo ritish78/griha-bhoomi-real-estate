@@ -6,6 +6,7 @@ import {
   getListOfPropertiesByPagination,
   getPropertyById,
   getPropertyBySlug,
+  togglePropertyPrivate,
   // seedProperty,
   updatePropertyById
 } from "src/controller/property/propertyController";
@@ -284,7 +285,7 @@ router
  * @method              PUT
  * @desc                Update using its id
  * @reqParams           string - propertyId
- * @access              Public
+ * @access              Private
  */
 router
   .route("/id/:propertyId")
@@ -317,5 +318,33 @@ router
       }
     }
   );
+
+/**
+ * @route               /api/v1/property/id/:propertyId/private
+ * @method              POST
+ * @desc                Toggle the private status of the property
+ * @reqParams           string - propertyId
+ * @access              Private
+ */
+router
+  .route("/id/:propertyId/private")
+  .post(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
+    const idOfPropertyToTogglePrivate = req.params.propertyId;
+    const currentUserId = req.session.userId as string;
+
+    if (!currentUserId) {
+      next(new AuthError("Please login to perform this action!"));
+    }
+
+    const privatePropertyToggled = await togglePropertyPrivate(idOfPropertyToTogglePrivate, currentUserId);
+
+    if (privatePropertyToggled) {
+      return res
+        .status(200)
+        .send({ message: `Updated private status of property of id ${idOfPropertyToTogglePrivate}` });
+    } else {
+      return res.status(404).send({ message: `Property of id ${idOfPropertyToTogglePrivate} not found!` });
+    }
+  });
 
 export default router;

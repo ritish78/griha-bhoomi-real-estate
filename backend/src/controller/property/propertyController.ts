@@ -352,7 +352,15 @@ export const getPropertyById = async (propertyId: string, userId) => {
   if (!propertyById.private && new Date(propertyById.expiresOn) > new Date()) {
     //If the property listing hasn't expired and the property is not set to private
     //finally, we increase the view count of the property by one before returning property
-    await increaseViewOfProperty(propertyById);
+
+    //We increase the view count only if the property listed by the user isn't the
+    //current user. We rank the property by `featured` and `views` and we don't want
+    //view botting by the user. However, this isn't fullproof as we increase the view
+    //count if the current user isn't signed in.
+    //Might reference it later to make it better.
+    if (!userId || propertyById.sellerId !== userId) {
+      await increaseViewOfProperty(propertyById);
+    }
 
     return propertyById;
   }
@@ -967,20 +975,23 @@ export const updatePropertyById = async (
     return 0;
   }
 
+  //The list contains what the user can update of the property listing.
   const validUpdatePropertyOptions: string[] = [
     "title",
     "description",
-    "torent",
-    "closelandmark",
-    "availablefrom",
-    "availabletill",
+    "toRent",
+    "closeLandmark",
+    "availableFrom",
+    "availableTill",
     "price",
     "negotiable",
-    "imageurl",
+    "imageUrl",
     "status",
     "private"
   ];
 
+  //We get all the fields for property, house, land and address to update in the body
+  //We then create a object which contains only the keys that the user can update of property table
   const validPropertyFieldsToUpdate = Object.keys(propertyFieldsToUpdate)
     .filter((key) => validUpdatePropertyOptions.includes(key))
     .reduce((obj, key) => {
@@ -988,12 +999,60 @@ export const updatePropertyById = async (
       return obj;
     }, {});
 
+  //We do the same for house table. We have fields that the user can update
+  const validUpdateHouseOptions: string[] = [
+    "houseType",
+    "roomCount",
+    "floorCount",
+    "kitchenCount",
+    "sharedBathroom",
+    "bathroomCount",
+    "facilities",
+    "area",
+    "furnished",
+    "facing",
+    "carParking",
+    "bikeParking",
+    "evCharging",
+    "builtAt",
+    "connectedToRoad",
+    "distanceToRoad"
+  ];
+
+  //Like what we did in the above property fields to update, we create an object which
+  //contains all the valid fields that the user can update in the house table
+  const validHouseFieldsToUpdate = Object.keys(propertyFieldsToUpdate)
+    .filter((key) => validUpdateHouseOptions.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = propertyFieldsToUpdate[key];
+      return obj;
+    }, {});
+
+  //Again, same as the above two tables, we specify what the user can update
+  const validUpdateLandOptions: string[] = [
+    "landType",
+    "area",
+    "length",
+    "breadth",
+    "connectedToRoad",
+    "distanceToRoad"
+  ];
+
+  //Creating another object which contains the key and value of what the user
+  //intends to update. We use it to query against the database
+  const validLandFieldsToUpdate = Object.keys(propertyFieldsToUpdate)
+    .filter((key) => validUpdateLandOptions.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = propertyFieldsToUpdate[key];
+      return obj;
+    }, {});
+
   let houseOrLandUpdated = false;
   if (propertyById.propertyType.toUpperCase() === "HOUSE" && hasHouseFields(propertyFieldsToUpdate)) {
-    await updateHouseListingById(propertyById.propertyTypeId, propertyFieldsToUpdate);
+    await updateHouseListingById(propertyById.propertyTypeId, validHouseFieldsToUpdate);
     houseOrLandUpdated = true;
   } else if (propertyById.propertyType.toUpperCase() === "LAND" && hasLandFields(propertyFieldsToUpdate)) {
-    await updateLandListingById(propertyById.propertyTypeId, propertyFieldsToUpdate);
+    await updateLandListingById(propertyById.propertyTypeId, validLandFieldsToUpdate);
     houseOrLandUpdated = true;
   }
 
@@ -1027,6 +1086,7 @@ export const updatePropertyById = async (
  * @returns                         Promise<void>
  */
 const updatePropertyListingById = async (propertyId: string, propertyFieldsToUpdate) => {
+  propertyFieldsToUpdate.updatedAt = new Date();
   await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
 };
 
@@ -1056,4 +1116,44 @@ const increaseViewOfProperty = async (propertyToUpdate: Property) => {
     .update(property)
     .set({ views: propertyToUpdate.views + 1 })
     .where(eq(property.id, propertyToUpdate.id));
+};
+
+/**
+ * @param propertyId      string - id of the property to set as private or remove as private
+ * @param currentUserId   string - id of the current user
+ */
+export const togglePropertyPrivate = async (propertyId: string, currentUserId: string) => {
+  const propertyById = await getPropertyById(propertyId, currentUserId);
+
+  if (!propertyById) {
+    return null;
+  }
+
+  //If the current user is the one who posted the property listing
+  //we then allow to toggle the property private status
+  if (propertyById.sellerId === currentUserId) {
+    await propertyPrivateToggleHandler(propertyById, propertyId);
+    return true;
+  }
+
+  const currentUserIsAdmin = await isAdmin(currentUserId);
+  if (currentUserIsAdmin) {
+    await propertyPrivateToggleHandler(propertyById, propertyId);
+    return true;
+  } else {
+    return null;
+  }
+};
+
+/**
+ * @param propertyById    Property - property to update the private status
+ * @param propertyId      string - id of the property to update
+ */
+const propertyPrivateToggleHandler = async (propertyById: Property, propertyId: string) => {
+  const nowToday = new Date();
+
+  await db
+    .update(property)
+    .set({ private: !propertyById.private, updatedAt: nowToday })
+    .where(eq(property.id, propertyId));
 };

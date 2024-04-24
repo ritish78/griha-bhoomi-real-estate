@@ -7,10 +7,10 @@ export const land = pgTable(
   "land",
   {
     id: uuid("id").primaryKey(),
-    landType: LandType("land_type").default("residential"),
-    area: varchar("area", { length: 125 }),
-    length: varchar("length", { length: 125 }),
-    breadth: varchar("breadth", { length: 125 }),
+    landType: LandType("land_type").default("residential").notNull(),
+    area: varchar("area", { length: 125 }).notNull(),
+    length: varchar("length", { length: 125 }).notNull(),
+    breadth: varchar("breadth", { length: 125 }).notNull(),
     connectedToRoad: boolean("connected_to_road").notNull(),
     distanceToRoad: smallint("distance_to_road").notNull()
   },
