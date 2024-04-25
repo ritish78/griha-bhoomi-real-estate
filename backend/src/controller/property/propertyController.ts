@@ -338,6 +338,7 @@ export const addLand = async (
 
 /**
  * @param propertyId  string - property id of the searched property
+ * @param userId      string | undefined - user id if signed in or undefined if not signed in
  * @returns           Property
  */
 export const getPropertyById = async (propertyId: string, userId) => {
@@ -386,10 +387,7 @@ export const getPropertyById = async (propertyId: string, userId) => {
     }
   }
 
-  //If the property listing is expired, then we return null.
-  if (new Date(propertyById.expiresOn) > new Date()) {
-    return null;
-  }
+  return null;
 };
 
 /**

@@ -19,6 +19,7 @@ import logger from "src/utils/logger";
 // import { dummyPropertyData } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import { getTotalNumberOfProperties } from "src/db/preparedStatement";
+import { toggleBookmark } from "src/controller/bookmark/bookmarkController";
 
 const router = Router();
 
@@ -344,6 +345,36 @@ router
         .send({ message: `Updated private status of property of id ${idOfPropertyToTogglePrivate}` });
     } else {
       return res.status(404).send({ message: `Property of id ${idOfPropertyToTogglePrivate} not found!` });
+    }
+  });
+
+/**
+ * @route               /api/v1/property/id/:propertyId/bookmark
+ * @method              POST
+ * @desc                Toggle bookmark the property listing
+ * @reqParams           string - propertyId
+ * @access              Private
+ */
+router
+  .route("/id/:propertyId/bookmark")
+  .post(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
+    const idOfPropertyToBookmark = req.params.propertyId;
+    const currentUserId = req.session.userId as string;
+
+    if (!currentUserId) {
+      next(new AuthError("Please login to perform this action!"));
+    }
+
+    const isBookmarked = await toggleBookmark(currentUserId, idOfPropertyToBookmark);
+
+    if (isBookmarked == 1) {
+      return res.status(201).send({ message: `Bookmarked property of id ${idOfPropertyToBookmark}` });
+    } else if (isBookmarked === 0) {
+      return res
+        .status(200)
+        .send({ message: `Bookmark deleted of property of id ${idOfPropertyToBookmark}` });
+    } else {
+      next(new NotFoundError("Property to bookmark does not exists!"));
     }
   });
 

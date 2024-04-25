@@ -6,6 +6,7 @@ import { property } from "src/model/property";
 import { house } from "src/model/house";
 import { land } from "src/model/land";
 import { address } from "src/model/address";
+import { bookmark } from "src/model/bookmark";
 
 /**
  * @params      email
@@ -203,15 +204,91 @@ export const preparedDeletePropertyById = db
   .where(eq(property.id, sql.placeholder("propertyId")))
   .prepare("delete-property-by-id");
 
-export const preparedInsertAddress = db.insert(address).values({
-  id: sql.placeholder("id"),
-  houseNumber: sql.placeholder("houseNumber"),
-  street: sql.placeholder("street"),
-  wardNumber: sql.placeholder("wardNumber"),
-  municipality: sql.placeholder("municipality"),
-  city: sql.placeholder("city"),
-  district: sql.placeholder("district"),
-  province: sql.placeholder("province"),
-  latitude: sql.placeholder("latitude"),
-  longitude: sql.placeholder("longitude")
-});
+/**
+ * @param id                string - uuid of the address to insert
+ * @param houseNumber       string - house number
+ * @param street            string - name of the street
+ * @param wardNumber        number - ward number
+ * @param municipality      string - name of the municipality
+ * @param city              string - name of the city
+ * @param district          string - name of the district
+ * @param province          string - name of the province
+ * @param latitude          number - latitude
+ * @param longitude         number - longitude
+ */
+export const preparedInsertAddress = db
+  .insert(address)
+  .values({
+    id: sql.placeholder("id"),
+    houseNumber: sql.placeholder("houseNumber"),
+    street: sql.placeholder("street"),
+    wardNumber: sql.placeholder("wardNumber"),
+    municipality: sql.placeholder("municipality"),
+    city: sql.placeholder("city"),
+    district: sql.placeholder("district"),
+    province: sql.placeholder("province"),
+    latitude: sql.placeholder("latitude"),
+    longitude: sql.placeholder("longitude")
+  })
+  .prepare("insert-address");
+
+/**
+ * @param userId        string - uuid of the user who bookmarked the property listing
+ * @param propertyId    string - uuid of the property
+ */
+export const preparedInsertBookmark = db
+  .insert(bookmark)
+  .values({
+    userId: sql.placeholder("userId"),
+    propertyId: sql.placeholder("propertyId")
+  })
+  .prepare("insert-bookmark");
+
+/**
+ * @param userId        string - uuid of the user who bookmarked the property listing
+ * @param propertyId    string - uuid of the property
+ */
+export const preparedGetBookmark = db
+  .select()
+  .from(bookmark)
+  .where(
+    and(
+      eq(bookmark.userId, sql.placeholder("userId")),
+      eq(bookmark.propertyId, sql.placeholder("propertyId"))
+    )
+  )
+  .prepare("get-bookmark");
+
+/**
+ * @param userId        string - uuid of the user who bookmarked the property listing
+ * @param propertyId    string - uuid of the property
+ */
+export const preparedDeleteBookmark = db
+  .delete(bookmark)
+  .where(
+    and(
+      eq(bookmark.userId, sql.placeholder("userId")),
+      eq(bookmark.propertyId, sql.placeholder("propertyId"))
+    )
+  )
+  .prepare("delete-bookmark");
+
+/**
+ * @param userId        string - uuid of the user who bookmarked the property listing
+ * @param propertyId    string - uuid of the property
+ */
+export const preparedAppendToBookmarkInUser = db
+  .update(user)
+  .set({ bookmarks: sql`array_append(bookmarks, ${sql.placeholder("propertyId")})` })
+  .where(eq(user.id, sql.placeholder("userId")))
+  .prepare("append-bookmark-in-user");
+
+/**
+ * @param userId        string - uuid of the user who bookmarked the property listing
+ * @param propertyId    string - uuid of the property
+ */
+export const preparedDeleteBookmarkFromUser = db
+  .update(user)
+  .set({ bookmarks: sql`array_remove(bookmarks, ${sql.placeholder("propertyId")})` })
+  .where(eq(user.id, sql.placeholder("userId")))
+  .prepare("delete-bookmark-in-user");

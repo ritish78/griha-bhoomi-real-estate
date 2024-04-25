@@ -1,5 +1,6 @@
 import { InferSelectModel } from "drizzle-orm";
 import { pgTable, pgEnum, index, text, varchar, uuid, timestamp, boolean } from "drizzle-orm/pg-core";
+import { property } from "./property";
 
 //Role of the new user
 export const UsersRole = pgEnum("user_role", ["ADMIN", "MODERATOR", "VIEWER"]);
@@ -25,6 +26,9 @@ export const user = pgTable(
     password: text("password").notNull(),
     phone: varchar("phone", { length: 10 }).unique(),
     dob: varchar("dob", { length: 10 }).notNull(), //e.g. 2001-05-06
+    bookmarks: uuid("bookmarks")
+      .references(() => property.id)
+      .array(),
     bio: text("bio"),
     profilePicUrl: text("profile_pic_url"),
     secondEmail: varchar("second_email", { length: 255 }),

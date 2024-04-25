@@ -19,8 +19,7 @@ export const newPropertySchema = z.object({
     price: z.number().gte(1),
     negotiable: z.boolean(),
     imageUrl: z.array(z.string()).nonempty(),
-    status: ZodPropertyStatusEnum,
-    private: z.boolean()
+    status: ZodPropertyStatusEnum
   })
 });
 
