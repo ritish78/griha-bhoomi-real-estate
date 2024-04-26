@@ -8,10 +8,10 @@ export const bookmark = pgTable(
   "bookmark",
   {
     userId: uuid("userId")
-      .references(() => user.id)
+      .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
     propertyId: uuid("propertyId")
-      .references(() => property.id)
+      .references(() => property.id, { onDelete: "cascade" })
       .notNull(),
     createdAt: timestamp("created_at", { mode: "string" }).defaultNow()
   },

@@ -108,7 +108,22 @@ export const preparedInsertProperty = db
   .prepare("insert-property");
 
 /**
- * @param
+ * @param houseType         string - House | Flat | Shared | Room | Apartment | Bungalow | Villa
+ * @param roomCount         number - number of rooms available
+ * @param floorCount        number - number of floors available
+ * @param kitchenCount      number - number of kitchen available
+ * @param sharedBathroom    boolean - is the bathroom to be shared by others
+ * @param bathroomCount     number - number of bathroom available
+ * @param facilities        string[] - facilities or amentites provided
+ * @param area              string - area in meter square
+ * @param furnished         boolean - is the house furnished
+ * @param facing            string - house facing a specific direction like North East
+ * @param carParking        number - number of cark parking space available
+ * @param bikeParking       number - number of bike parking space available
+ * @param evCharging        boolean - can you charge ev where you park it
+ * @param builtAt           string - date in string when the house was built
+ * @param connectedToRoad   boolean - is the house connected to the road
+ * @param distanceToRoad    number - distance in meters where the house can be connected to road
  */
 export const preparedInsertHouse = db
   .insert(house)
@@ -133,6 +148,14 @@ export const preparedInsertHouse = db
   })
   .prepare("insert-house");
 
+/**
+ * @param landType          string - plotting | residential | agricultural | industrial
+ * @param area              string - area of the land
+ * @param length            length - length of the land
+ * @param breadth           breadth - length of the land
+ * @param connectedToRoad   boolean - is land connected to road
+ * @param distanceToRoad    number - distance from land to the road
+ */
 export const preparedInsertLand = db
   .insert(land)
   .values({
@@ -292,3 +315,11 @@ export const preparedDeleteBookmarkFromUser = db
   .set({ bookmarks: sql`array_remove(bookmarks, ${sql.placeholder("propertyId")})` })
   .where(eq(user.id, sql.placeholder("userId")))
   .prepare("delete-bookmark-in-user");
+
+/**
+ * @param addressId     string - uuid of the address to delete
+ */
+export const preparedDeleteAddress = db
+  .delete(address)
+  .where(eq(address.id, sql.placeholder("addressId")))
+  .prepare("delete-address");
