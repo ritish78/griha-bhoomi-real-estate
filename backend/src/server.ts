@@ -12,6 +12,7 @@ import { REDIS_SECRET } from "./config";
 //import for routes
 import authRoute from "./routes/api/auth";
 import propertyRoute from "./routes/api/property";
+import userRoute from "./routes/api/user";
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.get("/api/v1/ping", (req, res) => {
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/property", propertyRoute);
+app.use("/api/v1/user", userRoute);
 
 app.use(errorHandler);
 

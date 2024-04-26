@@ -29,7 +29,11 @@ const rateLimiter = async (req: Request, res: Response, next: NextFunction) => {
     } else {
       ttl = await redisClient.ttl(req.session.userId);
     }
-    res.setHeader("X-Rate-Limit", ttl);
+    res.setHeader("X-RateLimit-TTL", ttl);
+    res.setHeader(
+      "X-RateLimit-Remaining",
+      MAX_NUMBER_OF_REQUESTS_AUTH_USER_PER_WINDOW_SIZE - numberOfRequestByAuthorizedUser
+    );
 
     //If the number of requests made by the user is higher than we have set
     //we rate limit them and throw RateLimitError.
@@ -38,7 +42,12 @@ const rateLimiter = async (req: Request, res: Response, next: NextFunction) => {
     //limit error 10 times in the past 14 days, then we can ban the account
     //We might need to store that analytics in a different database
     if (numberOfRequestByAuthorizedUser >= MAX_NUMBER_OF_REQUESTS_AUTH_USER_PER_WINDOW_SIZE) {
-      throw new RateLimitError("Too many requests! Rate Limit Exceeded!");
+      logger.debug(
+        `Rate limited for user of id ${req.session.id}`,
+        { id: req.session.id, ttl, ip: req.socket.remoteAddress },
+        true
+      );
+      next(new RateLimitError("Too many requests! Rate Limit Exceeded!"));
     } else {
       next();
     }
@@ -71,8 +80,17 @@ const rateLimiter = async (req: Request, res: Response, next: NextFunction) => {
       }
 
       res.setHeader("X-RateLimit-TTL", ttl);
+      res.setHeader(
+        "X-RateLimit-Remaining",
+        MAX_NUMBER_OF_REQUESTS_NOT_LOGGEDIN_USER_PER_WINDOW_SIZE - numberOfRequestByNotLoggedInUser
+      );
       if (numberOfRequestByNotLoggedInUser >= MAX_NUMBER_OF_REQUESTS_NOT_LOGGEDIN_USER_PER_WINDOW_SIZE) {
-        throw new RateLimitError("Rate Limit Exceeded! Login to use more!");
+        logger.debug(
+          `Rate limited for user of not logged in user!`,
+          { ip: req.socket.remoteAddress, ttl },
+          true
+        );
+        next(new RateLimitError("Rate Limit Exceeded! Login to use more!"));
       } else {
         next();
       }

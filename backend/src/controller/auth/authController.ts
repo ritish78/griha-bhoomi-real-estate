@@ -94,13 +94,13 @@ export const registerUser = async (
 };
 
 /**
- * @route           /api/v1/auth/login
- * @method          POST
- * @desc            Authenticate user
- * @access          Public
- * @param email     string - email of the user
- * @param password  string - password of the user in plain text
- * @returns         User Object
+ * @route             /api/v1/auth/login
+ * @method            POST
+ * @desc              Authenticate user
+ * @access            Public
+ * @param email       string - email of the user
+ * @param password    string - password of the user in plain text
+ * @returns           User Object
  */
 export const authUser = async (email: string, password: string) => {
   const userFromDatabase = await getUserByEmail(email);
