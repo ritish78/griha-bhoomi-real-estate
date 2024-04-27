@@ -126,6 +126,14 @@ router.route("/").get(async (req: Request, res: Response) => {
   const currentPageNumber: number = Number(req.query.page) || 1;
 
   const numberOfProperties = await getTotalNumberOfProperties.execute();
+  //In the scenario where there is no property, we were redirecting the user to page 1
+  //and since, there is no property, we were causing a loop of redirect in our previous implementation
+  if (numberOfProperties[0].count === 0) {
+    return res.status(200).send({
+      properties:
+        "Oh no! No properties are in the database! Please reload again to see if we can retrieve properties listing from the database!"
+    });
+  }
   const numberOfPages: number = Math.ceil(numberOfProperties[0].count / PROPERTY_COUNT_LIMIT_PER_PAGE);
 
   //If the user tries to visit page number below 1 than the number

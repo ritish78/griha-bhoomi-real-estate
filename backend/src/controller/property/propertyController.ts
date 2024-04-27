@@ -6,6 +6,9 @@ import db from "src/db";
 
 import {
   getListOfProperties,
+  preparedDeleteAddress,
+  preparedDeleteHouseById,
+  preparedDeleteLandById,
   preparedDeletePropertyById,
   preparedGetPropertyById,
   preparedGetPropertyBySlug,
@@ -931,7 +934,7 @@ export const deletePropertyById = async (userId: string, propertyId: string) => 
     //If the property listing and the user who provided the command to delete
     //is the same user then we delete the property.
     if (propertyById.sellerId === userId) {
-      await preparedDeletePropertyById.execute({ propertyId });
+      await deleteProperty(propertyById);
       return 1;
     }
 
@@ -940,7 +943,7 @@ export const deletePropertyById = async (userId: string, propertyId: string) => 
     //them to delete the property listing
     const currentUserIsAdmin = await isAdmin(userId);
     if (currentUserIsAdmin) {
-      await preparedDeletePropertyById.execute({ propertyId });
+      await deleteProperty(propertyById);
       return 1;
     }
 
@@ -1076,6 +1079,19 @@ export const updatePropertyById = async (
   //the listing and isn't admin then we return -1 back to api handler where we throw
   //ForbiddenError with the status code of 403.
   return houseOrLandUpdated ? 1 : -1;
+};
+
+/**
+ * @param propertyToDelete        Property - Property object that the user is intending to delete
+ */
+const deleteProperty = async (propertyToDelete: Property) => {
+  await preparedDeletePropertyById.execute({ propertyId: propertyToDelete.id });
+  await preparedDeleteAddress.execute({ addressId: propertyToDelete.address });
+  if (propertyToDelete.propertyType.toUpperCase() === "HOUSE") {
+    await preparedDeleteHouseById.execute({ houseId: propertyToDelete.propertyTypeId });
+  } else if (propertyToDelete.propertyType.toUpperCase() === "LAND") {
+    await preparedDeleteLandById.execute({ landId: propertyToDelete.propertyTypeId });
+  }
 };
 
 /**

@@ -149,6 +149,14 @@ export const preparedInsertHouse = db
   .prepare("insert-house");
 
 /**
+ * @param houseId           string - uuid of the house to delete
+ */
+export const preparedDeleteHouseById = db
+  .delete(house)
+  .where(eq(house.id, sql.placeholder("houseId")))
+  .prepare("delete-house");
+
+/**
  * @param landType          string - plotting | residential | agricultural | industrial
  * @param area              string - area of the land
  * @param length            length - length of the land
@@ -168,6 +176,14 @@ export const preparedInsertLand = db
     distanceToRoad: sql.placeholder("distanceToRoad")
   })
   .prepare("insert-house");
+
+/**
+ * @param landId          string - uuid of the land to delete
+ */
+export const preparedDeleteLandById = db
+  .delete(land)
+  .where(eq(land.id, sql.placeholder("landId")))
+  .prepare("delete-land");
 
 /**
  * @param propertyId string - id of the property to fetch from postgres
