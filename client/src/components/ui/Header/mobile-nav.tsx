@@ -13,6 +13,7 @@ import { ScrollArea } from "../scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "../sheet";
 import { Icons } from "@/components/icons";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { NavigationMenuTrigger } from "../navigation-menu";
 
 interface MobileNavProps {
   items?: MainNavItem[];
@@ -31,12 +32,13 @@ export function MobileNav({ items }: MobileNavProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-5 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 lg:hidden"
+          className="ms-4 z-20 size-5 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 lg:hidden"
         >
           <Icons.menu aria-hidden="true" />
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
+
       <SheetContent side="left" className="pl-1 pr-0 pt-9">
         <div className="w-full px-7">
           <Link href="/" className="flex items-center" onClick={() => setOpen(false)}>

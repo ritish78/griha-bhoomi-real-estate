@@ -10,10 +10,8 @@ export default async function HomeLayout({ children, modal }: HomeLayoutProps) {
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      <main className="flex-1">
-        <SiteHeader />
-        {children}
-      </main>
+      <SiteHeader />
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

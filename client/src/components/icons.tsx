@@ -1,6 +1,13 @@
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
-import { HomeIcon, AvatarIcon, DashboardIcon, GearIcon, ImageIcon } from "@radix-ui/react-icons";
+import {
+  HomeIcon,
+  AvatarIcon,
+  DashboardIcon,
+  GearIcon,
+  ImageIcon,
+  AspectRatioIcon
+} from "@radix-ui/react-icons";
 
 export const Icons = {
   logo: HomeIcon,
@@ -197,5 +204,7 @@ export const Icons = {
   dashboard: DashboardIcon,
   avatar: AvatarIcon,
   placeholder: ImageIcon,
-  settings: GearIcon
+  settings: GearIcon,
+  land: AspectRatioIcon,
+  house: HomeIcon
 };
