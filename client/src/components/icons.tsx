@@ -6,7 +6,8 @@ import {
   DashboardIcon,
   GearIcon,
   ImageIcon,
-  AspectRatioIcon
+  AspectRatioIcon,
+  SunIcon
 } from "@radix-ui/react-icons";
 
 export const Icons = {
@@ -206,5 +207,6 @@ export const Icons = {
   placeholder: ImageIcon,
   settings: GearIcon,
   land: AspectRatioIcon,
-  house: HomeIcon
+  house: HomeIcon,
+  sun: SunIcon
 };

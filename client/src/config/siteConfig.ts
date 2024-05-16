@@ -1,5 +1,6 @@
 const links = {
-  github: "https://github.com/ritish78"
+  github: "https://github.com/ritish78",
+  portfolio: "https://ritishtimalsina.com"
 };
 
 export type SiteConfig = typeof siteConfig;
@@ -57,6 +58,83 @@ export const siteConfig = {
           href: "/sale/house",
           description: "View House that are available for sale!",
           items: []
+        }
+      ]
+    }
+  ],
+  footerNav: [
+    {
+      title: "Credits",
+      items: [
+        {
+          title: "Skateshop",
+          href: "https://github.com/sadmann7/skateshop",
+          external: true
+        },
+        {
+          title: "Taxonomy",
+          href: "https://github.com/shadcn-ui/taxonomy",
+          external: true
+        },
+        {
+          title: "Shadcn/ui",
+          href: "https://github.com/shadcn-ui/ui",
+          external: true
+        },
+        {
+          title: "OneStopShop",
+          href: "https://github.com/jackblatch/OneStopShop",
+          external: true
+        },
+        {
+          title: "Omae",
+          href: "https://dribbble.com/shots/21710052-Omae-Real-Estate-Dashboard",
+          external: true
+        },
+        {
+          title: "D'house",
+          href: "https://dribbble.com/shots/21665043-D-house-Real-Estate-Dashboard",
+          external: true
+        }
+      ]
+    },
+    {
+      title: "Help",
+      items: [
+        {
+          title: "About",
+          href: "/about",
+          external: false
+        },
+        {
+          title: "Contact",
+          href: "/contact-us",
+          external: false
+        },
+        {
+          title: "Terms",
+          href: "/terms-and-conditions",
+          external: false
+        },
+        {
+          title: "Privacy",
+          href: "/privacy",
+          external: false
+        }
+      ]
+    },
+    {
+      title: "Social",
+      items: [
+        {
+          title: "Github",
+          href: links.github,
+          external: true
+        },
+        {
+          title: "Portfolio",
+          href: links.portfolio,
+          external: true
         }
       ]
     }
