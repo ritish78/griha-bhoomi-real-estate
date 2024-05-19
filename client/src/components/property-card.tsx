@@ -38,9 +38,9 @@ export default function PropertyCard({ link }: PropertyCardProps) {
           <strong>$340,900</strong>
         </CardTitle>
         <CardDescription className="mb-4 text-lg font-bold">New Apartment Nice View</CardDescription>
-        <CardDescription className="flex h-5 mr-auto text-muted-foreground">
-          <Icons.pin className="size-1 max-h-1 -mb-3" />
-          <span>Belmont Gardens, Chicago</span>
+        <CardDescription className="flex h-5 mr-auto">
+          <Icons.pin className="size-1 max-h-1" />
+          <span className="text-muted-foreground mt-1">Belmont Gardens, Chicago</span>
         </CardDescription>
       </CardContent>
       <CardFooter className="flex flex-wrap items-center gap-y-4 p-2">

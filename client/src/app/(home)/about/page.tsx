@@ -16,8 +16,8 @@ export default function AboutPage() {
         </div>
         <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-2">
           <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[220px] flex-col justify-between rounded-md p-6">
-              <Icons.house className="h-12 w-12 fill-current" />
+            <div className="flex flex-col justify-between rounded-md p-6">
+              <Icons.house className="h-12 w-12" />
               <div className="space-y-2">
                 <h3 className="font-bold">Sell or rent house</h3>
                 <p className="text-sm text-muted-foreground">
