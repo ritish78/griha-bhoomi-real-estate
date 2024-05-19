@@ -7,7 +7,10 @@ import {
   GearIcon,
   ImageIcon,
   AspectRatioIcon,
-  SunIcon
+  SunIcon,
+  CheckIcon,
+  EyeOpenIcon,
+  PlusIcon
 } from "@radix-ui/react-icons";
 
 export const Icons = {
@@ -202,11 +205,63 @@ export const Icons = {
       <path d="M12 18h4" />
     </svg>
   ),
+  pin: (props: IconProps) => (
+    <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+      <g>
+        <path
+          className="st0"
+          d="M256,0C160.798,0,83.644,77.155,83.644,172.356c0,97.162,48.158,117.862,101.386,182.495
+		C248.696,432.161,256,512,256,512s7.304-79.839,70.97-157.148c53.228-64.634,101.386-85.334,101.386-182.495
+		C428.356,77.155,351.202,0,256,0z M256,231.921c-32.897,0-59.564-26.668-59.564-59.564s26.668-59.564,59.564-59.564
+		c32.896,0,59.564,26.668,59.564,59.564S288.896,231.921,256,231.921z"
+        />
+      </g>
+    </svg>
+  ),
+  bathroom: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+      <line x1="10" x2="8" y1="5" y2="7" />
+      <line x1="2" x2="22" y1="12" y2="12" />
+      <line x1="7" x2="7" y1="19" y2="21" />
+      <line x1="17" x2="17" y1="19" y2="21" />
+    </svg>
+  ),
+  bedroom: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M3 20v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8" />
+      <path d="M5 10V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4" />
+      <path d="M3 18h18" />
+    </svg>
+  ),
   dashboard: DashboardIcon,
   avatar: AvatarIcon,
   placeholder: ImageIcon,
   settings: GearIcon,
   land: AspectRatioIcon,
   house: HomeIcon,
-  sun: SunIcon
+  sun: SunIcon,
+  check: CheckIcon,
+  eye: EyeOpenIcon,
+  plus: PlusIcon
 };

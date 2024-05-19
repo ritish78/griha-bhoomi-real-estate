@@ -11,7 +11,6 @@ export default function TermsAndConditionPage() {
           These terms and conditions outline the rules and regulations for the use of GrihaBhoomi's Website.
           By using this website, you accept these terms and conditions in full. If you disagree with these
           terms and conditions or any part of these terms and conditions, you must not use this website.
-          located at GrihaBhoomi website.
         </p>
         <h2 className="text-xl font-bold border-b mb-4">1. License</h2>
         <p className="mb-12">
@@ -26,7 +25,7 @@ export default function TermsAndConditionPage() {
         <h2 className="text-xl font-bold border-b mb-4">3. Content Liability</h2>
         <p className="mb-12">
           We shall not be hold responsible for any content that appears on GrihaBhoomi. You agree to protect
-          and defend us against all claims that is rising on GrihaBhoomi.
+          and defend us against all claims that may rise on GrihaBhoomi.
         </p>
         <h2 className="text-xl font-bold border-b mb-4">4. Your Privacy</h2>
         <p className="mb-12">
@@ -37,7 +36,7 @@ export default function TermsAndConditionPage() {
         </p>
         <h2 className="text-xl font-bold border-b mb-4">5. Reservation of Rights</h2>
         <p className="mb-12">
-          We reserve the right to request that you remove all links or any particular link to our Website. You
+          We reserve the right to request that you remove all links or any particular link to our website. You
           approve to immediately remove all links to our GrihaBhoomi website upon request.
         </p>
       </div>
