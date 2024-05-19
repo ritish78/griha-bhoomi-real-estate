@@ -29,8 +29,8 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[220px] flex-col justify-between rounded-md p-6">
-              <Icons.land className="h-12 w-12 fill-current" />
+            <div className="flex flex-col justify-between rounded-md p-6">
+              <Icons.land className="h-12 w-12" />
               <div className="space-y-2">
                 <h3 className="font-bold">Sell or rent land</h3>
                 <p className="text-sm text-muted-foreground">
@@ -190,7 +190,8 @@ export default function AboutPage() {
         </div>
         <div className="mx-auto text-center md:max-w-[58rem]">
           <p className="leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            There are many more features in this web app. Please view the github to see it in detail.
+            There are many more features in this web app. Please view the github repository to see it in
+            detail.
           </p>
         </div>
       </section>
