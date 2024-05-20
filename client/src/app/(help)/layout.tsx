@@ -6,7 +6,7 @@ interface HomeLayoutProps
     modal: React.ReactNode;
   }> {}
 
-export default async function HomeLayout({ children, modal }: HomeLayoutProps) {
+export default async function HelpLayout({ children, modal }: HomeLayoutProps) {
   //TODO: Add functionality to get signed in user
 
   return (
