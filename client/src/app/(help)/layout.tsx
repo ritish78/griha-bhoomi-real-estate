@@ -1,12 +1,12 @@
 import SiteHeader from "@/components/ui/Header/site-header";
 import { SiteFooter } from "@/components/ui/footer/site-footer";
 
-interface HomeLayoutProps
+interface HelpLayoutProps
   extends React.PropsWithChildren<{
     modal: React.ReactNode;
   }> {}
 
-export default async function HelpLayout({ children, modal }: HomeLayoutProps) {
+export default async function HelpLayout({ children, modal }: HelpLayoutProps) {
   //TODO: Add functionality to get signed in user
 
   return (
