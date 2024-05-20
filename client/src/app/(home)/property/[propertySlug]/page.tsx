@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import PropertyCard from "@/components/property-card";
 import { Shell } from "@/components/shell";
 import { PropertyImageCarousel } from "@/components/property-image-carousel";
+import { getPropertyBySlug } from "@/actions/property";
 
 interface PropertyPageProps {
   params: {
@@ -28,17 +29,20 @@ const imageUrls = [
 
 //TODO: Generate Metada for individual property page
 
-export default function PropertyPage({ params }: PropertyPageProps) {
+export default async function PropertyPage({ params }: PropertyPageProps) {
   const propertySlug = params.propertySlug;
 
   //TODO: Implement fetching of property by its slug
+  const data = await getPropertyBySlug(propertySlug);
+
+  console.log(data);
 
   return (
     <Shell className="pb-12 md:pb-14">
       <div className="flex flex-col gap-8 md:flex-row md:gap-16">
         <PropertyImageCarousel
           className="w-full md:w-1/2"
-          imageUrls={imageUrls ?? []}
+          imageUrls={data.imageUrl ?? []}
           options={{ loop: true }}
         />
       </div>

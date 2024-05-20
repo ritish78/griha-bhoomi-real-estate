@@ -129,7 +129,7 @@ export function PropertyImageCarousel({
               onClick={() => scrollTo(index)}
               onKeyDown={handleKeyDown}
             >
-              <div className="absolute inset-0 z-10 bg-zinc-950/20 group-hover:bg-zinc-950/60 transition ease-in-out duration-400" />
+              <div className="absolute inset-0 z-10 bg-zinc-950/20 group-hover:bg-zinc-950/60 transition ease-in-out duration-500" />
               <Image
                 src={imageUrl}
                 alt="A thumbnail image of the property"

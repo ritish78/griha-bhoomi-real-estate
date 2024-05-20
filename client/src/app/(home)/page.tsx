@@ -1,7 +1,10 @@
+import { getListOfProperties } from "@/actions/property";
 import PropertyCard from "@/components/property-card";
 
-export default function Home() {
-  // const listOfProperties =
+export default async function Home() {
+  const listOfProperties = await getListOfProperties();
+
+  console.log("List of properties:", listOfProperties);
 
   return (
     <main className="container bg-slate-50 dark:bg-transparent pb-8 pt-6">
@@ -12,7 +15,11 @@ export default function Home() {
         <PropertyCard link="https://images.unsplash.com/photo-1576941089067-2de3c901e126?q=80&w=1956&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
       </div>
       <p className="font-bold text-2xl mt-12 mb-3">Trending Property:</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{/* <PropertyList /> */}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {listOfProperties.properties.map((property: any) => (
+          <PropertyCard link={property.imageUrl[0]} />
+        ))}
+      </div>
     </main>
   );
 }
