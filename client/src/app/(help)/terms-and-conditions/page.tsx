@@ -30,7 +30,7 @@ export default function TermsAndConditionPage() {
         <h2 className="text-xl font-bold border-b mb-4">4. Your Privacy</h2>
         <p className="mb-12">
           Please read{" "}
-          <Link href="/privacy" className="underline text-zinc-300 transition-colors hover:text-zinc-100">
+          <Link href="/privacy" className="underline transition-colors hover:text-muted-foreground">
             Privacy Policy.
           </Link>
         </p>

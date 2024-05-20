@@ -16,13 +16,13 @@ export default function ContactUsPage() {
         <div className="flex space-x-4">
           <Link
             href="https://github.com/ritish78"
-            className="text-lg text-zinc-300 transition-colors hover:text-zinc-100"
+            className="text-lg transition-colors hover:text-muted-foreground"
           >
             GitHub
           </Link>
           <a
             href="https://ritishtimalsina.com"
-            className="text-lg text-zinc-300 transition-colors hover:text-zinc-100"
+            className="text-lg transition-colors hover:text-muted-foreground"
           >
             Portfolio
           </a>

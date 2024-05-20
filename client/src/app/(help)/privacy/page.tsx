@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
         <h2 className="text-xl font-bold border-b mb-4">5. Contact Us</h2>
         <p className="mb-12">
           If you have any questions about this Privacy Policy, please{" "}
-          <Link href="/contact-us" className="underline text-zinc-300 transition-colors hover:text-zinc-100">
+          <Link href="/contact-us" className="underline transition-colors hover:text-muted-foreground">
             contact us
           </Link>
           .
