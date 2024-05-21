@@ -4,9 +4,9 @@ import PropertyCard from "@/components/property-card";
 import { dummyPropertyData } from "@/dummy-data";
 
 export default async function Home() {
-  const listOfProperties = await getListOfProperties();
+  // const listOfProperties = await getListOfProperties();
 
-  console.log("List of properties:", listOfProperties);
+  // console.log("List of properties:", listOfProperties);
 
   return (
     <main className="container bg-slate-50 dark:bg-transparent pb-8 pt-6">
@@ -27,9 +27,10 @@ export default async function Home() {
         linkText="View other trending properties"
         className="mt-20"
       >
-        {listOfProperties.properties.map((property: any, index: number) => (
-          <PropertyCard link={property.imageUrl[0] || ""} key={index} />
-        ))}
+        {/* {listOfProperties &&
+          listOfProperties.properties.map((property: any, index: number) => (
+            <PropertyCard link={property.imageUrl[0] || ""} key={index} />
+          ))} */}
       </ContentSection>
     </main>
   );
