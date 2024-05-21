@@ -10,13 +10,20 @@ import {
   SunIcon,
   CheckIcon,
   EyeOpenIcon,
-  PlusIcon
+  PlusIcon,
+  ArrowRightIcon
 } from "@radix-ui/react-icons";
 
 export const Icons = {
   logo: HomeIcon,
   menu: ({ ...props }: IconProps) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeWidth="1.5"
+      {...props}
+    >
       <path
         d="M3 5H11"
         stroke="currentColor"
@@ -266,5 +273,6 @@ export const Icons = {
   sun: SunIcon,
   check: CheckIcon,
   eye: EyeOpenIcon,
-  plus: PlusIcon
+  plus: PlusIcon,
+  rightArrow: ArrowRightIcon
 };
