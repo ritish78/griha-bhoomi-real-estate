@@ -1,4 +1,4 @@
-import { getListOfProperties } from "@/actions/property";
+// import { getListOfProperties } from "@/actions/property";
 import { ContentSection } from "@/components/content-section";
 import PropertyCard from "@/components/property-card";
 import { dummyPropertyData } from "@/dummy-data";
