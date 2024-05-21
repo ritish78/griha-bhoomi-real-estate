@@ -20,18 +20,19 @@ export default async function Home() {
           <PropertyCard link={property.imageUrl[0] || ""} key={index} />
         ))}
       </ContentSection>
-      <ContentSection
+      {/* <ContentSection
         title="Trending Property"
         description="View properties that are in high demand"
         href="/property/trending"
         linkText="View other trending properties"
         className="mt-20"
       >
-        {/* {listOfProperties &&
+        
+         {listOfProperties &&
           listOfProperties.properties.map((property: any, index: number) => (
             <PropertyCard link={property.imageUrl[0] || ""} key={index} />
-          ))} */}
-      </ContentSection>
+          ))}
+      </ContentSection> */}
     </main>
   );
 }
