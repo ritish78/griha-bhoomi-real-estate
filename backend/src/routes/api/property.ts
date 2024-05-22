@@ -3,6 +3,7 @@ import {
   addProperty,
   deletePropertyById,
   filterProperties,
+  getListOfFeaturedPropertiesByPagination,
   getListOfPropertiesByPagination,
   getPropertyById,
   getPropertyBySlug,
@@ -125,6 +126,9 @@ router.route("/").get(async (req: Request, res: Response) => {
   //and limit the first 10 results. To get to the next page `?page=2` needs to be supplied
   const currentPageNumber: number = Number(req.query.page) || 1;
 
+  //We are doing a count of total number of properties in the table `Property` and
+  //yes, I know it will lead to slow db performance if we have like 100 million rows
+  //and since we don't have those kinds of rows count, we should be fine
   const numberOfProperties = await getTotalNumberOfProperties.execute();
   //In the scenario where there is no property, we were redirecting the user to page 1
   //and since, there is no property, we were causing a loop of redirect in our previous implementation
@@ -154,6 +158,38 @@ router.route("/").get(async (req: Request, res: Response) => {
   );
 
   return res.status(200).send({ currentPageNumber, numberOfPages, properties });
+});
+
+/**
+ * @route             /api/v1/property/featured
+ * @eg                /api/v1/property/featured?page=1&limit=3
+ * @method            GET
+ * @desc              Retrieve list of properties if featured is set as true
+ * @access            Public
+ */
+router.route("/featured").get(async (req: Request, res: Response) => {
+  //First we get the current page that the user is currently in.
+  //If the user does not supply the page number then we provide the default
+  //value of the page number to be 1
+  const currentPageNumber: number = Number(req.query.page) || 1;
+
+  //We also set the default value of limit to 3. In the homepage, we might need only
+  //3 properties that are set as featured and we want just 3. And we might need
+  //12 featured property when the user is on a dedicated featured page
+  const limit: number = Number(req.query.limit) > 12 ? 12 : 3 || 3;
+
+  //If the user tries to visit page number below 1 than the number
+  //of pages in the website, we redirect them back to page 1
+  if (currentPageNumber <= 0) {
+    return res.redirect("/api/v1/property/featured?page=1");
+  }
+
+  const featuredProperties = await getListOfFeaturedPropertiesByPagination(
+    (currentPageNumber - 1) * limit,
+    limit
+  );
+
+  return res.status(200).send({ currentPageNumber, limit, properties: featuredProperties });
 });
 
 /**

@@ -10,6 +10,7 @@ import {
   preparedDeleteHouseById,
   preparedDeleteLandById,
   preparedDeletePropertyById,
+  preparedGetPropertyByFeaturedStatus,
   preparedGetPropertyById,
   preparedGetPropertyBySlug,
   preparedInsertHouse,
@@ -887,7 +888,6 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
 };
 
 /**
- *
  * @param offset    number - start position to fetch the property
  * @returns         Properties[]
  */
@@ -901,6 +901,27 @@ export const getListOfPropertiesByPagination = async (offset: number) => {
     console.log("List of properties: ", listOfProperties);
 
     return listOfProperties;
+  } catch (error) {
+    logger.error(`${error.message} - (${new Date().toISOString()})`, {
+      error: error.message,
+      stack: error.stack
+    });
+  }
+};
+
+/**
+ * @param offset    number - start position to fetch the property
+ * @param limit     number - limit the number of featured properties to fetch from db
+ * @returns         Properties[] where featured === true
+ */
+export const getListOfFeaturedPropertiesByPagination = async (offset: number, limit: number) => {
+  try {
+    const listOfFeaturedProperties = await preparedGetPropertyByFeaturedStatus.execute({
+      limit,
+      offset
+    });
+
+    return listOfFeaturedProperties;
   } catch (error) {
     logger.error(`${error.message} - (${new Date().toISOString()})`, {
       error: error.message,

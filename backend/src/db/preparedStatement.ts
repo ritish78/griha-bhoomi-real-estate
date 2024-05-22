@@ -205,13 +205,34 @@ export const preparedGetPropertyBySlug = db
   .limit(1)
   .prepare("get-property-by-slug");
 
+const nowToday = new Date();
+const nowTodayInISOString = nowToday.toISOString();
+
+/**
+ * @param limit   number - number of featured properties to fetch from database
+ * @param offset  number - skip this many number of featured properties
+ * @returns       Property[] where featured === true
+ */
+export const preparedGetPropertyByFeaturedStatus = db
+  .select()
+  .from(property)
+  .where(
+    and(
+      eq(property.featured, true),
+      eq(property.private, false),
+      gte(property.expiresOn, nowTodayInISOString)
+    )
+  )
+  .orderBy(desc(property.views))
+  .limit(sql.placeholder("limit"))
+  .offset(sql.placeholder("offset"))
+  .prepare("get-featured-properties");
+
 /**
  * @param keyword string - keyword to search the title and description
  */
 export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, ts_rank(search_vector, to_tsquery('english', ${sql.placeholder("keyword")})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${sql.placeholder("keyword")}) ORDER BY rank desc;`;
 
-const nowToday = new Date();
-const nowTodayInISOString = nowToday.toISOString();
 /**
  * @param limit   number - number of properties to fetch from database
  * @param offset  number - skip this many number of properties
