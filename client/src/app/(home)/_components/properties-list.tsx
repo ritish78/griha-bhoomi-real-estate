@@ -14,7 +14,7 @@ export default async function PropertyList({ propertyListPromise }: PropertyList
 
   await simulateNetworkDelay(5000);
 
-  return listOfProperties.properties.map((property, index) => (
-    <PropertyCard link={property.imageUrl[0] || ""} key={index} />
+  return listOfProperties.properties.map((property) => (
+    <PropertyCard property={property} key={property.id} />
   ));
 }

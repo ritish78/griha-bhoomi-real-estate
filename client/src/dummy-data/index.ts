@@ -1,4 +1,6 @@
-export const dummyPropertyData = [
+import { Property } from "@/types/property";
+
+export const dummyPropertyData: Property[] = [
   {
     id: "c13f40e1-768f-425a-9116-ff6c328cb011",
     sellerId: "c3af2a0a-5b00-4140-9433-3576f8ed0279",
@@ -39,7 +41,7 @@ export const dummyPropertyData = [
     toRent: true,
     address: "f3e4d5c6-7a8b-4c5d-6e7f-8a9b0c1d2e3f",
     closeLandmark: "St. Michael's Mount",
-    propertyType: "Cottage",
+    propertyType: "House",
     availableFrom: "2024-09-01 12:00:00",
     availableTill: "2025-09-01 12:00:00",
     price: 1500,
@@ -68,7 +70,7 @@ export const dummyPropertyData = [
     toRent: false,
     address: "2c3f85d1-7b4a-4b8a-9a8c-7e2e5d6f5c4b",
     closeLandmark: "Leaning Tower of Pisa",
-    propertyType: "Villa",
+    propertyType: "House",
     availableFrom: "2024-07-01 12:00:00",
     availableTill: "2025-07-01 12:00:00",
     price: 750000,

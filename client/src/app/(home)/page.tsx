@@ -4,7 +4,8 @@ import PropertyCard from "@/components/property-card";
 import { dummyPropertyData } from "@/dummy-data";
 import { Suspense } from "react";
 import PropertyList from "./_components/properties-list";
-import { PropertyCardSkeleton } from "./_components/property-skeleton";
+import PropertyCardSkeletonList from "./_components/property-skeleton-list";
+import ErrorBoundary from "./error";
 
 export default async function HomePage() {
   const listOfProperties = getListOfProperties();
@@ -18,8 +19,8 @@ export default async function HomePage() {
         href="/property/featured"
         linkText="View other featured properties"
       >
-        {dummyPropertyData.map((property, index) => (
-          <PropertyCard link={property.imageUrl[0] || ""} key={index} />
+        {dummyPropertyData.map((property) => (
+          <PropertyCard property={property} key={property.id} />
         ))}
       </ContentSection>
       <ContentSection
@@ -29,7 +30,7 @@ export default async function HomePage() {
         linkText="View other trending properties"
         className="mt-20"
       >
-        <Suspense fallback={<PropertyCardSkeleton />}>
+        <Suspense fallback={<PropertyCardSkeletonList numberOfSkeletons={6} />}>
           <PropertyList propertyListPromise={listOfProperties} />
         </Suspense>
       </ContentSection>
