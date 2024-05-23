@@ -6,7 +6,10 @@ export type Property = {
   slug: string;
   description: string;
   toRent: boolean;
-  address: string;
+  street?: string;
+  municipality?: string;
+  city?: string;
+  district?: string;
   closeLandmark: string;
   propertyType: "House" | "Land";
   availableFrom: string;
@@ -21,6 +24,12 @@ export type Property = {
   private: boolean;
   expiresOn: string;
   views: number;
+  roomCount?: number | null;
+  bathroomCount?: number | null;
+  houseArea?: string | null;
+  length?: string | null;
+  breadth?: string | null;
+  landArea?: string | null;
 };
 
 export type PartialProperty = Partial<Property>;

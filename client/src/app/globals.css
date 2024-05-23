@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+.featured-property {
+  background: rgb(191, 149, 63);
+  background: linear-gradient(
+    180deg,
+    rgba(191, 149, 63, 1) 0%,
+    rgba(191, 149, 63, 1) 39%,
+    rgba(252, 246, 250, 1) 84%
+  );
+}
+
+.dark-featured-property {
+  background: rgb(127, 99, 42);
+  background: linear-gradient(
+    180deg,
+    rgba(127, 99, 42, 1) 0%,
+    rgba(127, 99, 42, 1) 39%,
+    rgba(168, 132, 56, 1) 84%
+  );
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -214,8 +214,25 @@ const nowTodayInISOString = nowToday.toISOString();
  * @returns       Property[] where featured === true
  */
 export const preparedGetPropertyByFeaturedStatus = db
-  .select()
+  .select({
+    id: property.id,
+    title: property.title,
+    slug: property.slug,
+    description: property.description,
+    toRent: property.toRent,
+    propertyType: property.propertyType,
+    price: property.price,
+    imageUrl: property.imageUrl,
+    status: property.status,
+    featured: property.featured,
+    views: property.views,
+    street: address.street,
+    municipality: address.municipality,
+    city: address.municipality,
+    district: address.district
+  })
   .from(property)
+  .leftJoin(address, eq(property.address, address.id))
   .where(
     and(
       eq(property.featured, true),
@@ -239,8 +256,33 @@ export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, t
  * @returns       Property[]
  */
 export const getListOfProperties = db
-  .select()
+  .select({
+    id: property.id,
+    title: property.title,
+    slug: property.slug,
+    description: property.description,
+    toRent: property.toRent,
+    propertyType: property.propertyType,
+    price: property.price,
+    imageUrl: property.imageUrl,
+    status: property.status,
+    featured: property.featured,
+    views: property.views,
+    street: address.street,
+    municipality: address.municipality,
+    city: address.municipality,
+    district: address.district,
+    roomCount: house.roomCount,
+    bathroomCount: house.bathroomCount,
+    houseArea: house.area,
+    length: land.length,
+    breadth: land.breadth,
+    landArea: land.area
+  })
   .from(property)
+  .leftJoin(address, eq(property.address, address.id))
+  .leftJoin(house, eq(property.propertyTypeId, house.id))
+  .leftJoin(land, eq(property.propertyTypeId, land.id))
   .where(and(eq(property.private, false), gte(property.expiresOn, nowTodayInISOString)))
   .orderBy(desc(property.featured), desc(property.views), desc(property.listedAt))
   .limit(sql.placeholder("limit"))

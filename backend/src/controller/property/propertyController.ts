@@ -898,8 +898,6 @@ export const getListOfPropertiesByPagination = async (offset: number) => {
       offset
     });
 
-    console.log("List of properties: ", listOfProperties);
-
     return listOfProperties;
   } catch (error) {
     logger.error(`${error.message} - (${new Date().toISOString()})`, {

@@ -10,7 +10,10 @@ export const dummyPropertyData: Property[] = [
     description:
       "Experience the tranquility of Japanese living in this beautiful traditional house located in the heart of Kyoto.",
     toRent: false,
-    address: "4252b11b-a192-40f3-b875-57bc760969cd",
+    street: "123 Sakura Lane",
+    municipality: "Gion",
+    city: "Kyoto",
+    district: "Higashiyama",
     closeLandmark: "Kiyomizu-dera Temple",
     propertyType: "Land",
     availableFrom: "2024-04-01 12:00:00",
@@ -29,7 +32,11 @@ export const dummyPropertyData: Property[] = [
     featured: true,
     private: false,
     expiresOn: "2024-06-19 18:15:00",
-    views: 1
+    views: 1,
+    bathroomCount: null,
+    length: "28.3 feet",
+    breadth: "10 feet",
+    landArea: "283 square feet"
   },
   {
     id: "e7b2d6a4-9c5f-4e3d-a1b8-6c5a7f8d3e2b",
@@ -39,7 +46,10 @@ export const dummyPropertyData: Property[] = [
     slug: "e7b2d6a4-seaside-cottage-cornwall",
     description: "Escape to this cozy seaside cottage nestled on the rugged coastline of Cornwall.",
     toRent: true,
-    address: "f3e4d5c6-7a8b-4c5d-6e7f-8a9b0c1d2e3f",
+    street: "456 Coastal Road",
+    municipality: "Penzance",
+    city: "Cornwall",
+    district: "West Cornwall",
     closeLandmark: "St. Michael's Mount",
     propertyType: "House",
     availableFrom: "2024-09-01 12:00:00",
@@ -48,9 +58,9 @@ export const dummyPropertyData: Property[] = [
     negotiable: true,
     imageUrl: [
       "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzR8fGludGVyaW9yfGVufDB8fDB8fHww",
-      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D",
-      "https://images.unsplash.com/photo-1511190404154-700f574540f2?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGluZG9vciUyMHN0YWlyc3xlbnwwfHwwfHx8MA%3D%3D"
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1511190404154-700f574540f2?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     ],
     status: "Rent",
     listedAt: "2024-05-20T16:27:35.807Z",
@@ -58,7 +68,12 @@ export const dummyPropertyData: Property[] = [
     featured: true,
     private: false,
     expiresOn: "2024-10-20 18:15:00",
-    views: 0
+    views: 0,
+    roomCount: 4,
+    bathroomCount: 1,
+    length: null,
+    breadth: null,
+    houseArea: "180 square feet"
   },
   {
     id: "a65b3f20-7912-4e1a-9349-5d2e3b762c34",
@@ -68,7 +83,10 @@ export const dummyPropertyData: Property[] = [
     slug: "a65b3f20-charming-villa-tuscany",
     description: "Relax in this charming villa surrounded by the beautiful Tuscan countryside.",
     toRent: false,
-    address: "2c3f85d1-7b4a-4b8a-9a8c-7e2e5d6f5c4b",
+    street: "789 Olive Grove",
+    municipality: "Siena",
+    city: "Tuscany",
+    district: "Central Tuscany",
     closeLandmark: "Leaning Tower of Pisa",
     propertyType: "House",
     availableFrom: "2024-07-01 12:00:00",
@@ -87,6 +105,11 @@ export const dummyPropertyData: Property[] = [
     featured: true,
     private: false,
     expiresOn: "2024-08-20 18:15:00",
-    views: 1
+    views: 1,
+    roomCount: 8,
+    bathroomCount: 4,
+    length: null,
+    breadth: null,
+    houseArea: "755 square feet"
   }
 ];
