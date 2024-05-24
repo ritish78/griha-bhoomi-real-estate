@@ -1,4 +1,43 @@
-export type Property = {
+export interface Address {
+  street?: string;
+  wardNumber?: number | null;
+  municipality?: string | null;
+  city?: string | null;
+  district?: string | null;
+  province?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
+}
+
+export interface Land {
+  landType?: string | null;
+  landArea?: string | null;
+  length?: string | null;
+  breadth?: string | null;
+  connectedToRoad?: boolean | null;
+  distanceToRoad?: number | null;
+}
+
+export interface House {
+  houseType?: string | null;
+  roomCount?: number | null;
+  floorCount?: number | null;
+  kitchenCount?: number | null;
+  sharedBathroom?: boolean | null;
+  bathroomCount?: number | null;
+  facilities?: string[] | null;
+  houseFacing?: string | null;
+  carParking?: number | null;
+  bikeParking?: number | null;
+  evCharging?: boolean | null;
+  builtAt?: string | null;
+  houseArea?: string | null;
+  furnished?: boolean | null;
+  houseConnectedToRoad?: boolean | null;
+  houseDistanceToRoad?: number | null;
+}
+
+export interface Property extends Address, Land, House {
   id: string;
   sellerId: string;
   propertyTypeId: string;
@@ -6,10 +45,6 @@ export type Property = {
   slug: string;
   description: string;
   toRent: boolean;
-  street?: string;
-  municipality?: string;
-  city?: string;
-  district?: string;
   closeLandmark: string;
   propertyType: "House" | "Land";
   availableFrom: string;
@@ -24,13 +59,7 @@ export type Property = {
   private: boolean;
   expiresOn: string;
   views: number;
-  roomCount?: number | null;
-  bathroomCount?: number | null;
-  houseArea?: string | null;
-  length?: string | null;
-  breadth?: string | null;
-  landArea?: string | null;
-};
+}
 
 export type PartialProperty = Partial<Property>;
 

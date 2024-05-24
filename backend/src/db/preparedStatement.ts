@@ -199,8 +199,62 @@ export const preparedGetPropertyById = db
  * @param slug string - slug of the property to fetch from postgres
  */
 export const preparedGetPropertyBySlug = db
-  .select()
+  .select({
+    id: property.id,
+    sellerId: property.sellerId,
+    title: property.title,
+    slug: property.slug,
+    description: property.description,
+    toRent: property.toRent,
+    closeLandmark: property.closeLandmark,
+    propertyType: property.propertyType,
+    availableFrom: property.availableFrom,
+    availableTill: property.availableTill,
+    price: property.price,
+    negotiable: property.negotiable,
+    imageUrl: property.imageUrl,
+    status: property.status,
+    listedAt: property.listedAt,
+    updatedAt: property.updatedAt,
+    featured: property.featured,
+    private: property.private,
+    expiresOn: property.expiresOn,
+    views: property.views,
+    houseType: house.houseType,
+    roomCount: house.roomCount,
+    floorCount: house.floorCount,
+    kitchenCount: house.kitchenCount,
+    sharedBathroom: house.sharedBathroom,
+    bathroomCount: house.bathroomCount,
+    facilities: house.facilities,
+    houseFacing: house.facing,
+    carParking: house.carParking,
+    bikeParking: house.bikeParking,
+    evCharging: house.evCharging,
+    builtAt: house.builtAt,
+    houseArea: house.area,
+    houseConnectedToRoad: house.connectedToRoad,
+    houesDistanceToRoad: house.distanceToRoad,
+    landType: land.landType,
+    landArea: land.area,
+    length: land.length,
+    breadth: land.breadth,
+    landConnectedToRoad: land.connectedToRoad,
+    landDistanceToRoad: land.distanceToRoad,
+    houseNumber: address.houseNumber,
+    street: address.street,
+    wardNumber: address.wardNumber,
+    municipality: address.municipality,
+    city: address.city,
+    district: address.district,
+    province: address.province,
+    latitude: address.latitude,
+    longitude: address.longitude
+  })
   .from(property)
+  .leftJoin(address, eq(property.address, address.id))
+  .leftJoin(house, eq(property.propertyTypeId, house.id))
+  .leftJoin(land, eq(property.propertyTypeId, land.id))
   .where(eq(property.slug, sql.placeholder("slug")))
   .limit(1)
   .prepare("get-property-by-slug");
@@ -233,6 +287,8 @@ export const preparedGetPropertyByFeaturedStatus = db
   })
   .from(property)
   .leftJoin(address, eq(property.address, address.id))
+  .leftJoin(house, eq(property.propertyTypeId, house.id))
+  .leftJoin(land, eq(property.propertyTypeId, land.id))
   .where(
     and(
       eq(property.featured, true),

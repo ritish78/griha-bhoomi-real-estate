@@ -65,9 +65,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             </strong>
           </CardTitle>
           <Link href={`/property/${property.slug}`}>
-            <CardDescription className="mb-4 text-lg font-bold">
-              {property.description}
-            </CardDescription>
+            <CardDescription className="mb-4 text-lg font-bold">{property.title}</CardDescription>
           </Link>
         </div>
         <CardDescription className="flex h-5 mr-auto mb-1">
@@ -94,7 +92,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               <span className="ml-1">Bathrooms</span>
             </Badge>
             <Badge variant="secondary" className="">
-              <Icons.land className="mb-1 size-4"></Icons.land>
+              <Icons.land className="size-4"></Icons.land>
               <strong className="ml-1">{property.houseArea?.split(" ")[0]}</strong>
               <span className="ml-1">Sq ft</span>
             </Badge>
@@ -112,7 +110,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               <span className="ml-1">Breadth</span>
             </Badge>
             <Badge variant="secondary" className="">
-              <Icons.area className="mb-1 size-4"></Icons.area>
+              <Icons.land className="pt-1 size-4"></Icons.land>
               <strong className="ml-1">{property.landArea?.split(" ")[0]}</strong>
               <span className="ml-1">Sq ft</span>
             </Badge>

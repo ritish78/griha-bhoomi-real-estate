@@ -5,10 +5,10 @@ export const dummyPropertyData: Property[] = [
     id: "c13f40e1-768f-425a-9116-ff6c328cb011",
     sellerId: "c3af2a0a-5b00-4140-9433-3576f8ed0279",
     propertyTypeId: "61e41e98-5b62-4788-a534-b6621c6a13eb",
-    title: "Traditional Japanese House for Rent",
-    slug: "c13f40e1-traditional-japanese-house-for-rent",
+    title: "Land with a small house for Sale",
+    slug: "c13f40e1-land-with-a-small-house-for-sale",
     description:
-      "Experience the tranquility of Japanese living in this beautiful traditional house located in the heart of Kyoto.",
+      "Experience the tranquility of Japanese living in this beautiful neighbourhood with ample land for irrigation with traditional house located in the heart of Kyoto.",
     toRent: false,
     street: "123 Sakura Lane",
     municipality: "Gion",

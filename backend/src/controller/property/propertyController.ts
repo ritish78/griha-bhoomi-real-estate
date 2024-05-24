@@ -400,10 +400,20 @@ export const getPropertyById = async (propertyId: string, userId) => {
  */
 export const getPropertyBySlug = async (slug: string, userId) => {
   console.log("Searching for property of slug:", slug);
+  console.log("Searching for property of slug:", slug);
+  console.log("Searching for property of slug:", slug);
+  console.log("Searching for property of slug:", slug);
+  console.log("Searching for property of slug:", slug);
+  console.log("Searching for property of slug:", slug);
   const [propertyBySlug] = await preparedGetPropertyBySlug.execute({ slug });
 
   ///if property does not exists, we immediately return null back from the function
   if (!propertyBySlug) {
+    console.log("Property by slug not found!");
+    console.log("Property by slug not found!");
+    console.log("Property by slug not found!");
+    console.log("Property by slug not found!");
+    console.log("Property by slug not found!");
     return null;
   }
 
