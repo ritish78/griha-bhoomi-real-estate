@@ -1,4 +1,5 @@
 import { Icons } from "@/components/icons";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatBuiltDate, formatListedAtDate } from "@/lib/formatDate";
 import { formatPrice } from "@/lib/formatPrice";
@@ -16,13 +17,16 @@ export default function House({ property }: HouseProps) {
         <p className="text-muted-foreground text-base font-medium">
           ${formatPrice(property.price)} {property.toRent && "per month"}
         </p>
-        <p className="text-sm text-muted-foreground flex items-center">
-          <Icons.eye className="mr-2 size-4" />
+        <div className="text-sm text-muted-foreground flex items-center">
+          <Badge variant="default" className="mr-4 font-medium px-4">
+            {property.status}
+          </Badge>
+          <Icons.eye className="mr-2 size-5" />
           {property.views} views
           <span className="mx-4"></span>
-          <Icons.calendar className="mr-2 size-4" />
+          <Icons.calendar className="mr-2 size-5" />
           <span>Posted: {formatListedAtDate(property.listedAt)} ago</span>
-        </p>
+        </div>
       </div>
       <Separator className="my-1.5" />
       <div className="grid grid-cols-2 justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-2 lg:grid-cols-3">
@@ -68,6 +72,18 @@ export default function House({ property }: HouseProps) {
             </div>
           </div>
         </div>
+
+        {property.floorCount && property.floorCount > 0 && (
+          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
+            <div className="flex h-[75px] w-full max-w-[400px] flex-col justify-between rounded-md p-2">
+              <h3 className="font-bold">Floor</h3>
+              <div className="flex items-center">
+                <Icons.stairs />
+                <p className="text-muted-foreground ml-2">{property.floorCount}</p>
+              </div>
+            </div>
+          </div>
+        )}
         {property.furnished && (
           <div className="relative overflow-hidden rounded-lg border bg-background p-2">
             <div className="flex h-[75px] w-full max-w-[400px] flex-col justify-between rounded-md p-2">
@@ -175,7 +191,7 @@ export default function House({ property }: HouseProps) {
           <h2 className="font-bold text-xl mb-4">Description</h2>
           <p>{property.description}</p>
         </div>
-        <div className="mb-4">
+        <div>
           <h2 className="font-bold text-xl mb-4">Close Landmark</h2>
           <div className="flex items-center">
             <Icons.mapPin className="size-5" />
@@ -184,6 +200,13 @@ export default function House({ property }: HouseProps) {
         </div>
       </div>
       <Separator className="my-1.5" />
+      <div className="mb-4">
+        <div className="mb-2">
+          <h2 className="font-bold text-xl mb-4">Facilities</h2>
+          <p>{property.facilities}</p>
+          {/* <ul>{property.facilities?.map((facility, index) => <li key={index}>{facility}</li>)}</ul> */}
+        </div>
+      </div>
     </div>
   );
 }

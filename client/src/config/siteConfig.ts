@@ -100,6 +100,11 @@ export const siteConfig = {
           title: "D'house",
           href: "https://dribbble.com/shots/21665043-D-house-Real-Estate-Dashboard",
           external: true
+        },
+        {
+          title: "PropertyPro",
+          href: "https://dribbble.com/shots/18786348-PropertyPro-Redesign",
+          external: true
         }
       ]
     },

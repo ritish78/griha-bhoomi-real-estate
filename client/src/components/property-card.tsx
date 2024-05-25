@@ -49,7 +49,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             </Badge>
             {property.featured ? (
               <Badge variant="default" className="absolute top-2 left-2 p-2 flex mr-auto">
-                <Icons.award className="mb-1 size-5"></Icons.award>
+                <Icons.award className="mb-1 size-4"></Icons.award>
                 {/* <span className="ml-2 text-gold dark:text-yellow-600">Featured</span> */}
                 <span className="ml-2">Featured</span>
               </Badge>
@@ -82,12 +82,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         {property.propertyType === "House" ? (
           <>
             <Badge variant="secondary" className="mr-2">
-              <Icons.bedroom className="mb-1 size-5"></Icons.bedroom>
+              <Icons.bedroom className="mb-1"></Icons.bedroom>
               <strong className="ml-1">{property.roomCount}</strong>
               <span className="ml-1">Bedrooms</span>
             </Badge>
             <Badge variant="secondary" className="mr-2">
-              <Icons.bathroom className="mb-1 size-4"></Icons.bathroom>
+              <Icons.bathroom className="mb-1"></Icons.bathroom>
               <strong className="ml-1">{property.bathroomCount}</strong>
               <span className="ml-1">Bathrooms</span>
             </Badge>
@@ -100,17 +100,17 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         ) : (
           <>
             <Badge variant="secondary" className="mr-2">
-              <Icons.pencilRuler className="mb-1 size-5"></Icons.pencilRuler>
+              <Icons.pencilRuler className="mb-1"></Icons.pencilRuler>
               <strong className="ml-1">{property.length}</strong>
               <span className="ml-1">Length</span>
             </Badge>
             <Badge variant="secondary" className="mr-2">
-              <Icons.ruler className="mb-1 size-4"></Icons.ruler>
+              <Icons.ruler className="mb-1"></Icons.ruler>
               <strong className="ml-1">{property.breadth}</strong>
               <span className="ml-1">Breadth</span>
             </Badge>
             <Badge variant="secondary" className="">
-              <Icons.land className="pt-1 size-4"></Icons.land>
+              <Icons.land className="size-5"></Icons.land>
               <strong className="ml-1">{property.landArea?.split(" ")[0]}</strong>
               <span className="ml-1">Sq ft</span>
             </Badge>

@@ -147,6 +147,12 @@ export const addProperty = async (sellerId: string, body) => {
       latitude,
       longitude
     } = body;
+    console.log("Image URL", imageUrl);
+    console.log("Image URL", imageUrl);
+    console.log("Image URL", imageUrl);
+    console.log("Image URL", imageUrl);
+    console.log("Image URL", imageUrl);
+    console.log("Image URL", imageUrl);
     const idOfToBeInsertedProperty = uuidv4();
 
     let propertyTypeId;

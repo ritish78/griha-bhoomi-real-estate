@@ -249,8 +249,8 @@ export const Icons = {
   bathroom: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -268,8 +268,8 @@ export const Icons = {
   bedroom: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -317,8 +317,8 @@ export const Icons = {
   ruler: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -336,8 +336,8 @@ export const Icons = {
   pencilRuler: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -356,8 +356,8 @@ export const Icons = {
   area: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -520,6 +520,39 @@ export const Icons = {
         fill="currentColor"
         d="M168.4 29.55L24.38 477.6l15.24 4.8L183.6 34.45l-15.2-4.9zm175.2 0l-15.2 4.9 144 447.95 15.2-4.8-144-448.05zM248 32l-.8 20h17.6l-.8-20h-16zm-1.4 36l-.8 20h20.4l-.8-20h-18.8zm-1.5 36l-1.3 32h24.4l-1.3-32h-21.8zm-1.9 48l-2 48h29.6l-2-48h-25.6zm-2.8 68l-2.4 60h36l-2.4-60h-31.2zm-3.3 84l-2.9 72h43.6l-2.9-72h-37.8zm-4 100l-3.1 76h52l-3.1-76h-45.8z"
       />
+    </svg>
+  ),
+  stairs: (props: IconProps) => (
+    <svg
+      fill="currentColor"
+      height="28px"
+      width="24px"
+      version="1.1"
+      id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      xmlSpace="preserve"
+    >
+      <g>
+        <g>
+          <path
+            d="M425.567,28.444c-5.236,0-8.382,4.161-8.382,9.397v85.418h-67.002c-5.236,0-8.85,4.633-8.85,9.869v75.464h-76.951
+			c-5.236,0-8.382,4.105-8.382,9.341v75.992h-76.428c-5.236,0-8.905,4.165-8.905,9.402v75.932H93.715
+			c-5.236,0-8.382,4.633-8.382,9.869v75.464H0v18.963h93.715c5.236,0,10.581-3.858,10.581-9.094v-76.24h75.275
+			c5.236,0,10.058-3.858,10.058-9.094v-76.24h74.752c5.236,0,10.581-4.325,10.581-9.561v-75.772h75.22
+			c5.236,0,10.113-4.385,10.113-9.622v-75.712h65.271c5.236,0,10.581-3.858,10.581-9.094V47.407H512V28.444H425.567z"
+          />
+        </g>
+      </g>
+      <g>
+        <g>
+          <path
+            d="M425.567,293.926h-56.889c-5.236,0-9.481,4.245-9.481,9.482s4.245,9.482,9.481,9.482h29.417l-55.083,55.042
+			c-3.704,3.704-3.704,9.682,0,13.385c1.852,1.852,4.278,2.767,6.704,2.767c2.426,0,5.402-0.931,7.254-2.783l60.216-59.672v38.583
+			c0,5.236,4.245,9.482,9.482,9.482s9.481-4.246,9.481-9.482v-56.889C436.148,298.087,430.803,293.926,425.567,293.926z"
+          />
+        </g>
+      </g>
     </svg>
   ),
   dashboard: DashboardIcon,

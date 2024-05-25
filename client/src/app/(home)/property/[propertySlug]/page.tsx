@@ -17,6 +17,7 @@ import { getPropertyBySlug } from "@/actions/property";
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import House from "./_components/house";
+import Land from "./_components/land";
 
 interface PropertyPageProps {
   params: {
@@ -73,6 +74,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
         <Separator className="mt-4 md:hidden" />
         {property.propertyType === "House" && <House property={property} />}
+        {property.propertyType === "Land" && <Land property={property} />}
       </div>
     </Shell>
   );

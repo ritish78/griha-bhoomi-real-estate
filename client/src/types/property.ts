@@ -21,8 +21,8 @@ export interface Land {
   landArea?: string | null;
   length?: string | null;
   breadth?: string | null;
-  connectedToRoad?: boolean | null;
-  distanceToRoad?: number | null;
+  landConnectedToRoad?: boolean | null;
+  landDistanceToRoad?: number | null;
 }
 
 export interface House {
