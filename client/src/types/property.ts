@@ -1,3 +1,10 @@
+export interface User {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  profilePicUrl?: string;
+}
+
 export interface Address {
   street?: string;
   wardNumber?: number | null;
@@ -37,7 +44,7 @@ export interface House {
   houseDistanceToRoad?: number | null;
 }
 
-export interface Property extends Address, Land, House {
+export interface Property extends Address, Land, House, User {
   id: string;
   sellerId: string;
   propertyTypeId: string;

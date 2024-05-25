@@ -4,6 +4,8 @@ export const dummyPropertyData: Property[] = [
   {
     id: "c13f40e1-768f-425a-9116-ff6c328cb011",
     sellerId: "c3af2a0a-5b00-4140-9433-3576f8ed0279",
+    firstName: "John",
+    lastName: "Doe",
     propertyTypeId: "61e41e98-5b62-4788-a534-b6621c6a13eb",
     title: "Land with a small house for Sale",
     slug: "c13f40e1-land-with-a-small-house-for-sale",
@@ -41,6 +43,8 @@ export const dummyPropertyData: Property[] = [
   {
     id: "e7b2d6a4-9c5f-4e3d-a1b8-6c5a7f8d3e2b",
     sellerId: "f9e8d7c6-b5a4-4c3d-8f2e-1d3c4b5a6f7e",
+    firstName: "John",
+    lastName: "Doe",
     propertyTypeId: "d4e5f6a7-8b9c-4d5e-6f7a-1b2c3d4e5f6a",
     title: "Seaside Cottage in Cornwall",
     slug: "e7b2d6a4-seaside-cottage-cornwall",
@@ -78,6 +82,8 @@ export const dummyPropertyData: Property[] = [
   {
     id: "a65b3f20-7912-4e1a-9349-5d2e3b762c34",
     sellerId: "c4a5f2d3-9148-46a8-bfb0-2c1a4c6c5f3a",
+    firstName: "John",
+    lastName: "Doe",
     propertyTypeId: "b16c6d8b-39c8-41b7-b798-1f3e3e5c7c56",
     title: "Charming Villa in Tuscany",
     slug: "a65b3f20-charming-villa-tuscany",

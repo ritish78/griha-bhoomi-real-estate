@@ -96,9 +96,9 @@ export const preparedInsertProperty = db
     price: sql.placeholder("price"),
     negotiable: sql.placeholder("negotiable"),
     imageUrl: [
-      "https://placehold.co/600x400",
-      "https://placehold.co/800x800",
-      "https://placehold.co/1200x1000"
+      "https://placehold.co/600x400.png",
+      "https://placehold.co/800x800.png",
+      "https://placehold.co/1200x1000.png"
     ],
     // imageUrl: sql.placeholder("imageUrl"),
     status: sql.placeholder("status"),
@@ -202,6 +202,10 @@ export const preparedGetPropertyBySlug = db
   .select({
     id: property.id,
     sellerId: property.sellerId,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    phone: user.phone,
+    profilePicUrl: user.profilePicUrl,
     title: property.title,
     slug: property.slug,
     description: property.description,
@@ -233,6 +237,7 @@ export const preparedGetPropertyBySlug = db
     evCharging: house.evCharging,
     builtAt: house.builtAt,
     houseArea: house.area,
+    furnished: house.furnished,
     houseConnectedToRoad: house.connectedToRoad,
     houesDistanceToRoad: house.distanceToRoad,
     landType: land.landType,
@@ -252,6 +257,7 @@ export const preparedGetPropertyBySlug = db
     longitude: address.longitude
   })
   .from(property)
+  .leftJoin(user, eq(property.sellerId, user.id))
   .leftJoin(address, eq(property.address, address.id))
   .leftJoin(house, eq(property.propertyTypeId, house.id))
   .leftJoin(land, eq(property.propertyTypeId, land.id))

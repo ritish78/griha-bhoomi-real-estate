@@ -12,7 +12,7 @@ function simulateNetworkDelay(milliseconds: number): Promise<any> {
 export default async function PropertyList({ propertyListPromise }: PropertyListProps) {
   const listOfProperties = await propertyListPromise;
 
-  await simulateNetworkDelay(5000);
+  await simulateNetworkDelay(1000);
 
   return listOfProperties.properties.map((property) => (
     <PropertyCard property={property} key={property.id} />
