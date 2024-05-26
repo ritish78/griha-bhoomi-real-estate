@@ -5,7 +5,7 @@ export interface FeaturedPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default function FeaturedPage(props: FeaturedPageProps) {
+export default async function FeaturedPage(props: FeaturedPageProps) {
   return (
     <div className="container bg-slate-50 dark:bg-transparent pb-8">
       <FeaturedPageSection {...props} />

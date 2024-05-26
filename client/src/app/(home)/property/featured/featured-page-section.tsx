@@ -15,7 +15,7 @@ export default async function FeaturedPageSection(props: FeaturedPageProps) {
     redirect("/property/featured?page=1");
   }
 
-  const listOfFeaturedProperties = getListOfFeaturedProperties(pageNumber);
+  const listOfFeaturedProperties = getListOfFeaturedProperties(pageNumber, 12);
 
   return (
     <PropertyPageContent

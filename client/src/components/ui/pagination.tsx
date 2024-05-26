@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DotsHorizontalIcon,
-  LinkBreak2Icon
-} from "@radix-ui/react-icons";
+import { ChevronLeftIcon, ChevronRightIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utlis";
 import { ButtonProps, buttonVariants } from "@/components/ui/button";
@@ -14,7 +9,7 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     role="navigation"
     aria-label="pagination"
-    className={cn("mx-auto flex w-full justify-center", className)}
+    className={cn("flex flex-wrap items-center justify-center gap-2", className)}
     {...props}
   />
 );

@@ -19,7 +19,10 @@ import { AuthError, BadRequestError, ForbiddenError, NotFoundError } from "src/u
 import logger from "src/utils/logger";
 // import { dummyPropertyData } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
-import { getTotalNumberOfProperties } from "src/db/preparedStatement";
+import {
+  preparedGetTotalNumberOfFeaturedProperties,
+  getTotalNumberOfProperties
+} from "src/db/preparedStatement";
 import { toggleBookmark } from "src/controller/bookmark/bookmarkController";
 
 const router = Router();
@@ -140,8 +143,9 @@ router.route("/").get(async (req: Request, res: Response) => {
   //and since, there is no property, we were causing a loop of redirect in our previous implementation
   if (numberOfProperties[0].count === 0) {
     return res.status(200).send({
-      properties:
-        "Oh no! No properties are in the database! Please reload again to see if we can retrieve properties listing from the database!"
+      currentPageNumber: 1,
+      numberOfPages: 1,
+      properties: []
     });
   }
   const numberOfPages: number = Math.ceil(numberOfProperties[0].count / limit);
@@ -180,7 +184,7 @@ router.route("/featured").get(async (req: Request, res: Response) => {
   //We also set the default value of limit to 3. In the homepage, we might need only
   //3 properties that are set as featured and we want just 3. And we might need
   //12 featured property when the user is on a dedicated featured page
-  const limit: number = Number(req.query.limit) > 12 ? 12 : 3 || 3;
+  let limit: number = Number(req.query.limit) || 3;
 
   //If the user tries to visit page number below 1 than the number
   //of pages in the website, we redirect them back to page 1
@@ -188,12 +192,42 @@ router.route("/featured").get(async (req: Request, res: Response) => {
     return res.redirect("/api/v1/property/featured?page=1");
   }
 
+  //We get the numberOfProperties from preparedStatement
+  //We receive in this format: [ { count: 'n' } ]
+  const numberOfProperties = await preparedGetTotalNumberOfFeaturedProperties.execute();
+
+  //If we don't have any featured property in the database, then we return an empty array
+  if (numberOfProperties[0].count === 0) {
+    return res
+      .status(200)
+      .send({ currentPageNumber: 1, numberOfPages: 1, numberOfProperties: 0, limit, properties: [] });
+  }
+
+  //If the user submits the limit of less than 0 or greater than 12, then we set
+  //the defauly value to 12 as someone might send very high number of limit count
+  if (limit <= 0 || limit >= 12) {
+    limit = 12;
+  }
+
+  const numberOfPages = Math.ceil(numberOfProperties[0].count / limit);
+
+  //If the current page requested by the user is more than the pages in the provided
+  //limit then we return the last page to the user.
+  if (currentPageNumber > numberOfPages) {
+    return res.redirect(`/api/v1/property/featured?page=${numberOfPages}`);
+  }
+
+  //Finally we fetch the list of featured propertties, with offset and limit applied
   const featuredProperties = await getListOfFeaturedPropertiesByPagination(
     (currentPageNumber - 1) * limit,
     limit
   );
 
-  return res.status(200).send({ currentPageNumber, limit, properties: featuredProperties });
+  return res.status(200).send({
+    currentPageNumber,
+    numberOfPages,
+    properties: featuredProperties
+  });
 });
 
 /**

@@ -367,6 +367,21 @@ export const getTotalNumberOfProperties = db
   .prepare("get-count-of-properties");
 
 /**
+ * @returns   number - count of the total number of featured properties in the database
+ */
+export const preparedGetTotalNumberOfFeaturedProperties = db
+  .select({ count: count() })
+  .from(property)
+  .where(
+    and(
+      eq(property.private, false),
+      gte(property.expiresOn, nowTodayInISOString),
+      eq(property.featured, true)
+    )
+  )
+  .prepare("get-count-of-featured-properties");
+
+/**
  * @param propertyId    string - property id to delete
  */
 export const preparedDeletePropertyById = db

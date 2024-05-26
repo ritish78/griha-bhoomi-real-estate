@@ -1,3 +1,4 @@
+import PaginationButton from "@/components/pagination-button";
 import PropertyCard from "@/components/property-card";
 import { ListOfProperties } from "@/types/property";
 import { redirect } from "next/navigation";
@@ -27,7 +28,14 @@ export default async function PropertyList({
 
   await simulateNetworkDelay(1000);
 
-  return listOfProperties.properties.map((property) => (
-    <PropertyCard property={property} key={property.id} />
-  ));
+  return (
+    <>
+      {listOfProperties.properties.map((property) => (
+        <PropertyCard property={property} key={property.id} />
+      ))}
+      <div className="flex justify-center mt-5">
+        <PaginationButton totalPages={listOfProperties.numberOfPages} page={currentPage} />
+      </div>
+    </>
+  );
 }
