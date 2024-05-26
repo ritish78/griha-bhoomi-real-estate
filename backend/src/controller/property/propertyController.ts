@@ -405,21 +405,10 @@ export const getPropertyById = async (propertyId: string, userId) => {
  * @returns     Property
  */
 export const getPropertyBySlug = async (slug: string, userId) => {
-  console.log("Searching for property of slug:", slug);
-  console.log("Searching for property of slug:", slug);
-  console.log("Searching for property of slug:", slug);
-  console.log("Searching for property of slug:", slug);
-  console.log("Searching for property of slug:", slug);
-  console.log("Searching for property of slug:", slug);
   const [propertyBySlug] = await preparedGetPropertyBySlug.execute({ slug });
 
   ///if property does not exists, we immediately return null back from the function
   if (!propertyBySlug) {
-    console.log("Property by slug not found!");
-    console.log("Property by slug not found!");
-    console.log("Property by slug not found!");
-    console.log("Property by slug not found!");
-    console.log("Property by slug not found!");
     return null;
   }
 
@@ -905,12 +894,16 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
 
 /**
  * @param offset    number - start position to fetch the property
+ * @param limit     number - number of properties to fetch per call
  * @returns         Properties[]
  */
-export const getListOfPropertiesByPagination = async (offset: number) => {
+export const getListOfPropertiesByPagination = async (
+  offset: number,
+  limit: number = PROPERTY_COUNT_LIMIT_PER_PAGE
+) => {
   try {
     const listOfProperties = await getListOfProperties.execute({
-      limit: PROPERTY_COUNT_LIMIT_PER_PAGE,
+      limit,
       offset
     });
 

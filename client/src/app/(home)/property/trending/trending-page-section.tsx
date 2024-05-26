@@ -6,16 +6,17 @@ import { Suspense } from "react";
 import PropertyCardSkeletonList from "../../_components/property-skeleton-list";
 import PropertyList from "../../_components/properties-list";
 import { PropertyPageContent } from "@/components/property-page-content";
+import { redirect } from "next/navigation";
 
 export default async function TrendingPageSection(props: TrendingPageProps) {
-  let pageNumber = Number(props?.searchParams?.page) || 1;
+  const pageNumber = Number(props?.searchParams?.page) || 1;
 
   if (pageNumber <= 0) {
-    pageNumber = 1;
+    redirect("/property/featured?page=1");
   }
 
   //getListOfProperties fetches properties and sorts it by views count by default
-  const listOfTrendingProperties = getListOfProperties(pageNumber);
+  const listOfTrendingProperties = getListOfProperties(pageNumber, 12);
 
   return (
     <PropertyPageContent
@@ -24,7 +25,11 @@ export default async function TrendingPageSection(props: TrendingPageProps) {
       className="pt-6"
     >
       <Suspense fallback={<PropertyCardSkeletonList numberOfSkeletons={6} />}>
-        <PropertyList propertyListPromise={listOfTrendingProperties} />
+        <PropertyList
+          page="trending"
+          currentPage={pageNumber}
+          propertyListPromise={listOfTrendingProperties}
+        />
       </Suspense>
     </PropertyPageContent>
   );

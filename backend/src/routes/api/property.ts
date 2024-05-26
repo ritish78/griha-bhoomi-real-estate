@@ -115,7 +115,7 @@ router
 
 /**
  * @route       /api/v1/property
- * @eg          /api/v1/property?page=2
+ * @eg          /api/v1/property?page=2&limit=12
  * @method      GET
  * @desc        Get properties for homepage and retrieving can be offset as well.
  * @access      Public
@@ -125,6 +125,12 @@ router.route("/").get(async (req: Request, res: Response) => {
   //If the user is in `localhost:5000/api/v1/property` we say that they are in first page
   //and limit the first 10 results. To get to the next page `?page=2` needs to be supplied
   const currentPageNumber: number = Number(req.query.page) || 1;
+  let limit: number = Number(req.query.limit) || PROPERTY_COUNT_LIMIT_PER_PAGE;
+
+  //Setting a guard rail just in case somebody sends in very high limit number
+  if (limit <= 0 || limit > 20) {
+    limit = PROPERTY_COUNT_LIMIT_PER_PAGE;
+  }
 
   //We are doing a count of total number of properties in the table `Property` and
   //yes, I know it will lead to slow db performance if we have like 100 million rows
@@ -138,7 +144,7 @@ router.route("/").get(async (req: Request, res: Response) => {
         "Oh no! No properties are in the database! Please reload again to see if we can retrieve properties listing from the database!"
     });
   }
-  const numberOfPages: number = Math.ceil(numberOfProperties[0].count / PROPERTY_COUNT_LIMIT_PER_PAGE);
+  const numberOfPages: number = Math.ceil(numberOfProperties[0].count / limit);
 
   //If the user tries to visit page number below 1 than the number
   //of pages in the website, we redirect them back to page 1
@@ -153,9 +159,7 @@ router.route("/").get(async (req: Request, res: Response) => {
   }
 
   //Then we get the list of properties according to the page that the user is in
-  const properties = await getListOfPropertiesByPagination(
-    (currentPageNumber - 1) * PROPERTY_COUNT_LIMIT_PER_PAGE
-  );
+  const properties = await getListOfPropertiesByPagination((currentPageNumber - 1) * limit, limit);
 
   return res.status(200).send({ currentPageNumber, numberOfPages, properties });
 });

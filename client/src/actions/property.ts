@@ -2,10 +2,16 @@
 
 import { ListOfProperties, Property } from "@/types/property";
 
-export async function getListOfProperties(pageNumber: number = 1): Promise<ListOfProperties> {
-  const response = await fetch(`http://localhost:5000/api/v1/property?page=${pageNumber}`, {
-    next: { revalidate: 60 } //Cache in seconds to revalidate
-  });
+export async function getListOfProperties(
+  pageNumber: number = 1,
+  limit: number = 6
+): Promise<ListOfProperties> {
+  const response = await fetch(
+    `http://localhost:5000/api/v1/property?page=${pageNumber}&limit=${limit}`,
+    {
+      next: { revalidate: 60 } //Cache in seconds to revalidate
+    }
+  );
 
   const data = await response.json();
 

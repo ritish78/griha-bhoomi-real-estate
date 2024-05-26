@@ -72,7 +72,7 @@ export type PartialProperty = Partial<Property>;
 
 export type ListOfProperties = {
   currentPageNumber: number;
-  numberOfPages?: number;
+  numberOfPages: number;
   limit?: number;
   properties: Property[];
 };
