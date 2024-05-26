@@ -18,11 +18,11 @@ export default function House({ property }: HouseProps) {
           ${formatPrice(property.price)} {property.toRent && "per month"}
         </p>
         <div className="text-sm text-muted-foreground flex items-center">
-          <Badge variant="default" className="mr-4 font-medium px-4">
+          <Badge variant="default" className="mr-4 font-medium px-4 py-1">
             {property.status}
           </Badge>
           <Icons.eye className="mr-2 size-5" />
-          {property.views} views
+          {property.views} {property.views > 1 ? "views" : "view"}
           <span className="mx-4"></span>
           <Icons.calendar className="mr-2 size-5" />
           <span>Posted: {formatListedAtDate(property.listedAt)} ago</span>
@@ -122,7 +122,13 @@ export default function House({ property }: HouseProps) {
             <div className="flex h-[75px] w-full max-w-[400px] flex-col justify-between rounded-md p-2">
               <h3 className="font-bold">House Facing</h3>
               <div className="flex items-center">
-                <Icons.bedroom />
+                {property.houseFacing === "North West" || property.houseFacing === "South East" ? (
+                  <Icons.compassNWSE />
+                ) : property.houseFacing === "North" || property.houseFacing === "South" ? (
+                  <Icons.compassNorthSouth />
+                ) : (
+                  <Icons.compassNESW />
+                )}
                 <p className="text-muted-foreground ml-2">{property.houseFacing}</p>
               </div>
             </div>

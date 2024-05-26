@@ -22,10 +22,16 @@ export async function getPropertyBySlug(slug: string): Promise<Property> {
   return data;
 }
 
-export async function getListOfFeaturedProperties(): Promise<ListOfProperties> {
-  const response = await fetch(`http://localhost:5000/api/v1/property/featured`, {
-    next: { revalidate: 60 } //Cache in seconds to revalidate
-  });
+export async function getListOfFeaturedProperties(
+  page: number,
+  limit: number = 3
+): Promise<ListOfProperties> {
+  const response = await fetch(
+    `http://localhost:5000/api/v1/property/featured?page=${page}&limit=${limit}`,
+    {
+      next: { revalidate: 60 } //Cache in seconds to revalidate
+    }
+  );
 
   const data = await response.json();
 

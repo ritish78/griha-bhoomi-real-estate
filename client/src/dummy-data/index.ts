@@ -18,6 +18,7 @@ export const dummyPropertyData: Property[] = [
     district: "Higashiyama",
     closeLandmark: "Kiyomizu-dera Temple",
     propertyType: "Land",
+    landType: "residential",
     availableFrom: "2024-04-01 12:00:00",
     availableTill: "2025-04-01 12:00:00",
     price: 250000,
@@ -38,7 +39,9 @@ export const dummyPropertyData: Property[] = [
     bathroomCount: null,
     length: "28.3 feet",
     breadth: "10 feet",
-    landArea: "283 square feet"
+    landArea: "283 square feet",
+    landConnectedToRoad: false,
+    landDistanceToRoad: 25
   },
   {
     id: "e7b2d6a4-9c5f-4e3d-a1b8-6c5a7f8d3e2b",
@@ -72,9 +75,12 @@ export const dummyPropertyData: Property[] = [
     featured: true,
     private: false,
     expiresOn: "2024-10-20 18:15:00",
-    views: 0,
+    views: 2,
+    houseType: "Bungalow",
     roomCount: 4,
-    bathroomCount: 1,
+    kitchenCount: 2,
+    bathroomCount: 3,
+    houseConnectedToRoad: true,
     length: null,
     breadth: null,
     houseArea: "180 square feet"
@@ -111,9 +117,13 @@ export const dummyPropertyData: Property[] = [
     featured: true,
     private: false,
     expiresOn: "2024-08-20 18:15:00",
-    views: 1,
+    views: 15,
+    houseType: "Villa",
     roomCount: 8,
     bathroomCount: 4,
+    kitchenCount: 2,
+    houseConnectedToRoad: true,
+    evCharging: true,
     length: null,
     breadth: null,
     houseArea: "755 square feet"

@@ -555,6 +555,64 @@ export const Icons = {
       </g>
     </svg>
   ),
+  compassNorthSouth: (props: IconProps) => (
+    <svg
+      width="24"
+      height="24"
+      xmlns="http://www.w3.org/2000/svg"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2"
+      stroke="currentColor"
+      fill="none"
+    >
+      <g>
+        <circle id="svg_1" r="10" cy="12" cx="12" />
+        <polygon
+          transform="rotate(-45, 12, 12)"
+          id="svg_2"
+          points="16.239999771118164,7.760000228881836 14.119999885559082,14.119999885559082 7.760000228881836,16.239999771118164 9.880000114440918,9.880000114440918 16.239999771118164,7.760000228881836 "
+        />
+      </g>
+    </svg>
+  ),
+  compassNESW: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+    </svg>
+  ),
+  compassNWSE: (props: IconProps) => (
+    <svg
+      width="24"
+      height="24"
+      xmlns="http://www.w3.org/2000/svg"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2"
+      stroke="currentColor"
+      fill="none"
+    >
+      <g>
+        <circle id="svg_1" r="10" cy="12" cx="12" />
+        <polygon
+          transform="rotate(90, 12, 12)"
+          id="svg_2"
+          points="16.239999771118164,7.760000228881836 14.119999885559082,14.119999885559082 7.760000228881836,16.239999771118164 9.880000114440918,9.880000114440918 16.239999771118164,7.760000228881836 "
+        />
+      </g>
+    </svg>
+  ),
   dashboard: DashboardIcon,
   avatar: AvatarIcon,
   placeholder: ImageIcon,

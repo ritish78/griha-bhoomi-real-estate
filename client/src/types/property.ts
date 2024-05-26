@@ -74,5 +74,5 @@ export type ListOfProperties = {
   currentPageNumber: number;
   numberOfPages?: number;
   limit?: number;
-  properties: [] | Property[];
+  properties: Property[];
 };

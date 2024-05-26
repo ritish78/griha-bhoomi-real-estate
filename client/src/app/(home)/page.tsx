@@ -9,7 +9,7 @@ import ErrorBoundary from "./error";
 
 export default async function HomePage() {
   const listOfProperties = getListOfProperties();
-  const listOfFeaturedProperties = getListOfFeaturedProperties();
+  // const listOfFeaturedProperties = getListOfFeaturedProperties();
 
   return (
     <main className="container bg-slate-50 dark:bg-transparent pb-8 pt-6">

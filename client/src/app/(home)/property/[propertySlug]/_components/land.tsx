@@ -19,11 +19,11 @@ export default function Land({ property }: LandProps) {
           ${formatPrice(property.price)} {property.toRent && "per month"}
         </p>
         <div className="text-sm text-muted-foreground flex items-center">
-          <Badge variant="default" className="mr-4 font-medium px-4">
+          <Badge variant="default" className="mr-4 font-medium px-4 py-1">
             {property.status}
           </Badge>
           <Icons.eye className="mr-2 size-5" />
-          {property.views} views
+          {property.views} {property.views > 1 ? "views" : "view"}
           <span className="mx-4"></span>
           <Icons.calendar className="mr-2 size-5" />
           <span>Posted: {formatListedAtDate(property.listedAt)} ago</span>

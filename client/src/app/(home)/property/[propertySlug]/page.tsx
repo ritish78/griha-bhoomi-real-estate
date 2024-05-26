@@ -18,6 +18,7 @@ import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import House from "./_components/house";
 import Land from "./_components/land";
+import { dummyPropertyData } from "@/dummy-data";
 
 interface PropertyPageProps {
   params: {
@@ -25,15 +26,26 @@ interface PropertyPageProps {
   };
 }
 
+//This is just for demonstration purpose. We have dummy data that we can use
+const dummyDataSlug = [
+  "c13f40e1-land-with-a-small-house-for-sale",
+  "e7b2d6a4-seaside-cottage-cornwall",
+  "a65b3f20-charming-villa-tuscany"
+];
+
 //TODO: Generate Metada for individual property page
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const propertySlug = params.propertySlug;
 
-  //TODO: Implement fetching of property by its slug
-  const property = await getPropertyBySlug(propertySlug);
+  let property;
+  if (dummyDataSlug.includes(propertySlug)) {
+    property = dummyPropertyData.find((searchedProperty) => searchedProperty.slug === propertySlug);
+  } else {
+    property = await getPropertyBySlug(propertySlug);
 
-  console.log(property);
+    console.log(property);
+  }
 
   if (!property) {
     return notFound();

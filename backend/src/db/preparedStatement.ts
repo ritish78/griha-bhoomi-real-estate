@@ -289,7 +289,13 @@ export const preparedGetPropertyByFeaturedStatus = db
     street: address.street,
     municipality: address.municipality,
     city: address.municipality,
-    district: address.district
+    district: address.district,
+    roomCount: house.roomCount,
+    bathroomCount: house.bathroomCount,
+    houseArea: house.area,
+    length: land.length,
+    breadth: land.breadth,
+    landArea: land.area
   })
   .from(property)
   .leftJoin(address, eq(property.address, address.id))

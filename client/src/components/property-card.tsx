@@ -92,7 +92,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               <span className="ml-1">Bathrooms</span>
             </Badge>
             <Badge variant="secondary" className="">
-              <Icons.land className="size-4"></Icons.land>
+              <Icons.land className="size-5"></Icons.land>
               <strong className="ml-1">{property.houseArea?.split(" ")[0]}</strong>
               <span className="ml-1">Sq ft</span>
             </Badge>
