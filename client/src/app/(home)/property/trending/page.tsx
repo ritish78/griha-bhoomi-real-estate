@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import PropertyCardSkeletonList from "../../_components/property-skeleton-list";
 import PropertyListPage from "../_components/properties-list-page";
 import { ListOfPropertiesResponse } from "@/types/property";
+import PaginationButton from "@/components/pagination-button";
 
 export interface TrendingPageProps {
   params: { [key: string]: string | string[] | undefined };
@@ -29,7 +30,7 @@ export default async function TrendingPage(props: TrendingPageProps) {
   }
 
   return (
-    <div className="container bg-slate-50 dark:bg-transparent pb-8">
+    <div className="container bg-slate-50 dark:bg-transparent pb-8 flex flex-col space-y-8">
       <PropertyPageContent
         title="Trending Properties"
         description="View properties that are trending right now"
@@ -39,6 +40,7 @@ export default async function TrendingPage(props: TrendingPageProps) {
           <PropertyListPage propertyList={listOfTrendingProperties} />
         </Suspense>
       </PropertyPageContent>
+      <PaginationButton totalPages={listOfTrendingProperties.numberOfPages} page={pageNumber} />
     </div>
   );
 }
