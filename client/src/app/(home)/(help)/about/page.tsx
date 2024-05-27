@@ -3,15 +3,13 @@ import { Icons } from "@/components/icons";
 export default function AboutPage() {
   return (
     <>
-      <section
-        id="features"
-        className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
-      >
+      <section className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24">
         <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">About</h2>
           <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            This project is a real-estate app with features like auth, rate limiting, image upload while
-            having separate backend using Express that Nextjs uses to interact to serve data to the client.
+            This project is a real-estate app with features like auth, rate limiting, image upload
+            while having separate backend using Express that Nextjs uses to interact to serve data
+            to the client.
           </p>
         </div>
         <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-2">
@@ -21,9 +19,10 @@ export default function AboutPage() {
               <div className="space-y-2">
                 <h3 className="font-bold">Sell or rent house</h3>
                 <p className="text-sm text-muted-foreground">
-                  You can view different types of house that are available to buy or rent. You can also browse
-                  the house depending upon various filters such as price, location, close landmark and many
-                  more filters. You could also add house for sale for others to view and all for free.
+                  You can view different types of house that are available to buy or rent. You can
+                  also browse the house depending upon various filters such as price, location,
+                  close landmark and many more filters. You could also add house for sale for others
+                  to view and all for free.
                 </p>
               </div>
             </div>
@@ -34,9 +33,9 @@ export default function AboutPage() {
               <div className="space-y-2">
                 <h3 className="font-bold">Sell or rent land</h3>
                 <p className="text-sm text-muted-foreground">
-                  You can view land that are available to buy or rent. You can also browse land using various
-                  filters such as the length, breadth, area, location and many more filters. You could also
-                  add land for sale for others to view and is also free.
+                  You can view land that are available to buy or rent. You can also browse land
+                  using various filters such as the length, breadth, area, location and many more
+                  filters. You could also add land for sale for others to view and is also free.
                 </p>
               </div>
             </div>
@@ -45,8 +44,9 @@ export default function AboutPage() {
         <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-6 py-6 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">Features</h2>
           <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            This project is a real-estate app with features like auth, rate limiting, image upload while
-            having separate backend using Express that Nextjs uses to interact to serve data to the client.
+            This project is a real-estate app with features like auth, rate limiting, image upload
+            while having separate backend using Express that Nextjs uses to interact to serve data
+            to the client.
           </p>
         </div>
         <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
@@ -172,7 +172,9 @@ export default function AboutPage() {
               <Icons.typescript className="h-12 w-12 fill-current" />
               <div className="space-y-2">
                 <h3 className="font-bold">Typescript</h3>
-                <p className="text-sm text-muted-foreground">Typescript used in both frotend and backend.</p>
+                <p className="text-sm text-muted-foreground">
+                  Typescript used in both frotend and backend.
+                </p>
               </div>
             </div>
           </div>
@@ -190,8 +192,8 @@ export default function AboutPage() {
         </div>
         <div className="mx-auto text-center md:max-w-[58rem]">
           <p className="leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            There are many more features in this web app. Please view the github repository to see it in
-            detail.
+            There are many more features in this web app. Please view the github repository to see
+            it in detail.
           </p>
         </div>
       </section>

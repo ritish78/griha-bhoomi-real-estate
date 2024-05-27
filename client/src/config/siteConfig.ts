@@ -1,6 +1,11 @@
 const links = {
   github: "https://github.com/ritish78",
-  portfolio: "https://ritishtimalsina.com"
+  portfolio: "https://ritishtimalsina.com",
+  composeSync: "https://github.com/ritish78/ComposeSync",
+  byteBuy: "https://github.com/ritish78/ByteBuy",
+  storageDrive: "https://github.com/ritish78/Storage-Drive",
+  codeShare: "https://github.com/ritish78/CodeShare",
+  culinaryCompass: "https://github.com/ritish78/CulinaryCompass"
 };
 
 export type SiteConfig = typeof siteConfig;
@@ -95,6 +100,11 @@ export const siteConfig = {
           title: "D'house",
           href: "https://dribbble.com/shots/21665043-D-house-Real-Estate-Dashboard",
           external: true
+        },
+        {
+          title: "PropertyPro",
+          href: "https://dribbble.com/shots/18786348-PropertyPro-Redesign",
+          external: true
         }
       ]
     },
@@ -134,6 +144,36 @@ export const siteConfig = {
         {
           title: "Portfolio",
           href: links.portfolio,
+          external: true
+        }
+      ]
+    },
+    {
+      title: "Projects",
+      items: [
+        {
+          title: "ComposeSync",
+          href: links.composeSync,
+          external: true
+        },
+        {
+          title: "ByteBuy",
+          href: links.byteBuy,
+          external: true
+        },
+        {
+          title: "StorageDrive",
+          href: links.storageDrive,
+          external: true
+        },
+        {
+          title: "CodeShare",
+          href: links.codeShare,
+          external: true
+        },
+        {
+          title: "CulinaryCompass",
+          href: links.culinaryCompass,
           external: true
         }
       ]

@@ -96,9 +96,9 @@ export const preparedInsertProperty = db
     price: sql.placeholder("price"),
     negotiable: sql.placeholder("negotiable"),
     imageUrl: [
-      "https://placehold.co/600x400",
-      "https://placehold.co/800x800",
-      "https://placehold.co/1200x1000"
+      "https://placehold.co/600x400.png",
+      "https://placehold.co/800x800.png",
+      "https://placehold.co/1200x1000.png"
     ],
     // imageUrl: sql.placeholder("imageUrl"),
     status: sql.placeholder("status"),
@@ -199,27 +199,158 @@ export const preparedGetPropertyById = db
  * @param slug string - slug of the property to fetch from postgres
  */
 export const preparedGetPropertyBySlug = db
-  .select()
+  .select({
+    id: property.id,
+    sellerId: property.sellerId,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    phone: user.phone,
+    profilePicUrl: user.profilePicUrl,
+    title: property.title,
+    slug: property.slug,
+    description: property.description,
+    toRent: property.toRent,
+    closeLandmark: property.closeLandmark,
+    propertyType: property.propertyType,
+    availableFrom: property.availableFrom,
+    availableTill: property.availableTill,
+    price: property.price,
+    negotiable: property.negotiable,
+    imageUrl: property.imageUrl,
+    status: property.status,
+    listedAt: property.listedAt,
+    updatedAt: property.updatedAt,
+    featured: property.featured,
+    private: property.private,
+    expiresOn: property.expiresOn,
+    views: property.views,
+    houseType: house.houseType,
+    roomCount: house.roomCount,
+    floorCount: house.floorCount,
+    kitchenCount: house.kitchenCount,
+    sharedBathroom: house.sharedBathroom,
+    bathroomCount: house.bathroomCount,
+    facilities: house.facilities,
+    houseFacing: house.facing,
+    carParking: house.carParking,
+    bikeParking: house.bikeParking,
+    evCharging: house.evCharging,
+    builtAt: house.builtAt,
+    houseArea: house.area,
+    furnished: house.furnished,
+    houseConnectedToRoad: house.connectedToRoad,
+    houesDistanceToRoad: house.distanceToRoad,
+    landType: land.landType,
+    landArea: land.area,
+    length: land.length,
+    breadth: land.breadth,
+    landConnectedToRoad: land.connectedToRoad,
+    landDistanceToRoad: land.distanceToRoad,
+    houseNumber: address.houseNumber,
+    street: address.street,
+    wardNumber: address.wardNumber,
+    municipality: address.municipality,
+    city: address.city,
+    district: address.district,
+    province: address.province,
+    latitude: address.latitude,
+    longitude: address.longitude
+  })
   .from(property)
+  .leftJoin(user, eq(property.sellerId, user.id))
+  .leftJoin(address, eq(property.address, address.id))
+  .leftJoin(house, eq(property.propertyTypeId, house.id))
+  .leftJoin(land, eq(property.propertyTypeId, land.id))
   .where(eq(property.slug, sql.placeholder("slug")))
   .limit(1)
   .prepare("get-property-by-slug");
+
+const nowToday = new Date();
+const nowTodayInISOString = nowToday.toISOString();
+
+/**
+ * @param limit   number - number of featured properties to fetch from database
+ * @param offset  number - skip this many number of featured properties
+ * @returns       Property[] where featured === true
+ */
+export const preparedGetPropertyByFeaturedStatus = db
+  .select({
+    id: property.id,
+    title: property.title,
+    slug: property.slug,
+    description: property.description,
+    toRent: property.toRent,
+    propertyType: property.propertyType,
+    price: property.price,
+    imageUrl: property.imageUrl,
+    status: property.status,
+    featured: property.featured,
+    views: property.views,
+    street: address.street,
+    municipality: address.municipality,
+    city: address.municipality,
+    district: address.district,
+    roomCount: house.roomCount,
+    bathroomCount: house.bathroomCount,
+    houseArea: house.area,
+    length: land.length,
+    breadth: land.breadth,
+    landArea: land.area
+  })
+  .from(property)
+  .leftJoin(address, eq(property.address, address.id))
+  .leftJoin(house, eq(property.propertyTypeId, house.id))
+  .leftJoin(land, eq(property.propertyTypeId, land.id))
+  .where(
+    and(
+      eq(property.featured, true),
+      eq(property.private, false),
+      gte(property.expiresOn, nowTodayInISOString)
+    )
+  )
+  .orderBy(desc(property.views))
+  .limit(sql.placeholder("limit"))
+  .offset(sql.placeholder("offset"))
+  .prepare("get-featured-properties");
 
 /**
  * @param keyword string - keyword to search the title and description
  */
 export const preparedGetPropertyByKeyword = sql`SELECT id, title, description, ts_rank(search_vector, to_tsquery('english', ${sql.placeholder("keyword")})) as rank FROM property WHERE search_vector @@ to_tsquery('english', ${sql.placeholder("keyword")}) ORDER BY rank desc;`;
 
-const nowToday = new Date();
-const nowTodayInISOString = nowToday.toISOString();
 /**
  * @param limit   number - number of properties to fetch from database
  * @param offset  number - skip this many number of properties
  * @returns       Property[]
  */
 export const getListOfProperties = db
-  .select()
+  .select({
+    id: property.id,
+    title: property.title,
+    slug: property.slug,
+    description: property.description,
+    toRent: property.toRent,
+    propertyType: property.propertyType,
+    price: property.price,
+    imageUrl: property.imageUrl,
+    status: property.status,
+    featured: property.featured,
+    views: property.views,
+    street: address.street,
+    municipality: address.municipality,
+    city: address.municipality,
+    district: address.district,
+    roomCount: house.roomCount,
+    bathroomCount: house.bathroomCount,
+    houseArea: house.area,
+    length: land.length,
+    breadth: land.breadth,
+    landArea: land.area
+  })
   .from(property)
+  .leftJoin(address, eq(property.address, address.id))
+  .leftJoin(house, eq(property.propertyTypeId, house.id))
+  .leftJoin(land, eq(property.propertyTypeId, land.id))
   .where(and(eq(property.private, false), gte(property.expiresOn, nowTodayInISOString)))
   .orderBy(desc(property.featured), desc(property.views), desc(property.listedAt))
   .limit(sql.placeholder("limit"))
@@ -234,6 +365,21 @@ export const getTotalNumberOfProperties = db
   .from(property)
   .where(and(eq(property.private, false), gte(property.expiresOn, nowTodayInISOString)))
   .prepare("get-count-of-properties");
+
+/**
+ * @returns   number - count of the total number of featured properties in the database
+ */
+export const preparedGetTotalNumberOfFeaturedProperties = db
+  .select({ count: count() })
+  .from(property)
+  .where(
+    and(
+      eq(property.private, false),
+      gte(property.expiresOn, nowTodayInISOString),
+      eq(property.featured, true)
+    )
+  )
+  .prepare("get-count-of-featured-properties");
 
 /**
  * @param propertyId    string - property id to delete

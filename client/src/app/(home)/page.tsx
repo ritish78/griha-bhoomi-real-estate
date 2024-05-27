@@ -1,12 +1,16 @@
-// import { getListOfProperties } from "@/actions/property";
+import { getListOfFeaturedProperties, getListOfProperties } from "@/actions/property";
 import { ContentSection } from "@/components/content-section";
 import PropertyCard from "@/components/property-card";
 import { dummyPropertyData } from "@/dummy-data";
+import { Suspense } from "react";
+import PropertyList from "./_components/properties-list";
+import PropertyCardSkeletonList from "./_components/property-skeleton-list";
+import ErrorBoundary from "./error";
+import { ListOfPropertiesResponse } from "@/types/property";
 
-export default async function Home() {
-  // const listOfProperties = await getListOfProperties();
-
-  // console.log("List of properties:", listOfProperties);
+export default async function HomePage() {
+  const listOfProperties: Promise<ListOfPropertiesResponse> = getListOfProperties();
+  // const listOfFeaturedProperties = getListOfFeaturedProperties();
 
   return (
     <main className="container bg-slate-50 dark:bg-transparent pb-8 pt-6">
@@ -16,23 +20,21 @@ export default async function Home() {
         href="/property/featured"
         linkText="View other featured properties"
       >
-        {dummyPropertyData.map((property, index: number) => (
-          <PropertyCard link={property.imageUrl[0] || ""} key={index} />
+        {dummyPropertyData.map((property) => (
+          <PropertyCard property={property} key={property.id} />
         ))}
       </ContentSection>
-      {/* <ContentSection
+      <ContentSection
         title="Trending Property"
         description="View properties that are in high demand"
         href="/property/trending"
         linkText="View other trending properties"
         className="mt-20"
       >
-        
-         {listOfProperties &&
-          listOfProperties.properties.map((property: any, index: number) => (
-            <PropertyCard link={property.imageUrl[0] || ""} key={index} />
-          ))}
-      </ContentSection> */}
+        <Suspense fallback={<PropertyCardSkeletonList numberOfSkeletons={6} />}>
+          <PropertyList propertyListPromise={listOfProperties} />
+        </Suspense>
+      </ContentSection>
     </main>
   );
 }

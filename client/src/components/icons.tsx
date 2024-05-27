@@ -11,7 +11,8 @@ import {
   CheckIcon,
   EyeOpenIcon,
   PlusIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  CalendarIcon
 } from "@radix-ui/react-icons";
 
 export const Icons = {
@@ -228,6 +229,23 @@ export const Icons = {
       <circle cx="12" cy="10" r="3" />
     </svg>
   ),
+  mapPin: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 8c0 4.5-6 9-6 9s-6-4.5-6-9a6 6 0 0 1 12 0" />
+      <circle cx="12" cy="8" r="2" />
+      <path d="M8.835 14H5a1 1 0 0 0-.9.7l-2 6c-.1.1-.1.2-.1.3 0 .6.4 1 1 1h18c.6 0 1-.4 1-1 0-.1 0-.2-.1-.3l-2-6a1 1 0 0 0-.9-.7h-3.835" />
+    </svg>
+  ),
   bathroom: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -264,6 +282,337 @@ export const Icons = {
       <path d="M3 18h18" />
     </svg>
   ),
+  badgeCheck: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  ),
+  award: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+      <circle cx="12" cy="8" r="6" />
+    </svg>
+  ),
+  ruler: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z" />
+      <path d="m14.5 12.5 2-2" />
+      <path d="m11.5 9.5 2-2" />
+      <path d="m8.5 6.5 2-2" />
+      <path d="m17.5 15.5 2-2" />
+    </svg>
+  ),
+  pencilRuler: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m15 5 4 4" />
+      <path d="M13 7 8.7 2.7a2.41 2.41 0 0 0-3.4 0L2.7 5.3a2.41 2.41 0 0 0 0 3.4L7 13" />
+      <path d="m8 6 2-2" />
+      <path d="m2 22 5.5-1.5L21.17 6.83a2.82 2.82 0 0 0-4-4L3.5 16.5Z" />
+      <path d="m18 16 2-2" />
+      <path d="m17 11 4.3 4.3c.94.94.94 2.46 0 3.4l-2.6 2.6c-.94.94-2.46.94-3.4 0L11 17" />
+    </svg>
+  ),
+  area: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M3 12h18" />
+      <path d="M12 3v18" />
+    </svg>
+  ),
+  phone: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  ),
+  building: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+      <path d="M9 22v-4h6v4" />
+      <path d="M8 6h.01" />
+      <path d="M16 6h.01" />
+      <path d="M12 6h.01" />
+      <path d="M12 10h.01" />
+      <path d="M12 14h.01" />
+      <path d="M16 10h.01" />
+      <path d="M16 14h.01" />
+      <path d="M8 10h.01" />
+      <path d="M8 14h.01" />
+    </svg>
+  ),
+  kitchen: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      viewBox="-25.67 0 122.88 122.88"
+    >
+      <g>
+        <path d="M6.14,0H65.4c1.69,0,3.23,0.69,4.34,1.8c1.11,1.11,1.8,2.65,1.8,4.34v29.67v73.73c0,1.69-0.69,3.23-1.8,4.34 c-1.11,1.11-2.65,1.8-4.34,1.8h-4.89v2.72c0,2.47-2.02,4.49-4.49,4.49l0,0c-2.47,0-4.49-2.02-4.49-4.49v-2.72H20.17v2.72 c0,2.47-2.02,4.49-4.49,4.49l0,0c-2.47,0-4.49-2.02-4.49-4.49v-2.72H6.14c-1.69,0-3.23-0.69-4.34-1.8c-1.11-1.11-1.8-2.65-1.8-4.34 V35.81V6.14C0,4.45,0.69,2.91,1.8,1.8C2.91,0.69,4.45,0,6.14,0L6.14,0z M10.2,44.89c0-1.34,1.09-2.43,2.43-2.43 c1.34,0,2.43,1.09,2.43,2.43v20.4c0,1.34-1.09,2.43-2.43,2.43c-1.34,0-2.43-1.09-2.43-2.43V44.89L10.2,44.89z M10.2,10.39 c0-1.34,1.09-2.43,2.43-2.43c1.34,0,2.43,1.09,2.43,2.43v15.15c0,1.34-1.09,2.43-2.43,2.43c-1.34,0-2.43-1.09-2.43-2.43V10.39 L10.2,10.39z M4.87,33.37h61.81V6.14c0-0.35-0.14-0.67-0.38-0.9c-0.23-0.23-0.55-0.38-0.9-0.38H6.14c-0.35,0-0.67,0.14-0.9,0.38 c-0.23,0.23-0.38,0.55-0.38,0.9V33.37L4.87,33.37z M66.67,38.24H4.87v71.29c0,0.35,0.14,0.67,0.38,0.9 c0.23,0.23,0.55,0.38,0.9,0.38H65.4c0.35,0,0.67-0.14,0.9-0.38c0.23-0.23,0.38-0.55,0.38-0.9V38.24L66.67,38.24z" />
+      </g>
+    </svg>
+  ),
+  armChair: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3" />
+      <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z" />
+      <path d="M5 18v2" />
+      <path d="M19 18v2" />
+    </svg>
+  ),
+  car: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+      <circle cx="7" cy="17" r="2" />
+      <path d="M9 17h6" />
+      <circle cx="17" cy="17" r="2" />
+    </svg>
+  ),
+  motorbike: (props: IconProps) => (
+    <svg
+      fill="currentColor"
+      version="1.1"
+      id="Capa_1"
+      xmlns="http://www.w3.org/2000/svg"
+      width="28px"
+      height="28px"
+      strokeWidth="3"
+      viewBox="0 0 476.934 476.934"
+    >
+      <g>
+        <g>
+          <path
+            d="M146.108,308.141c0-40.282-32.772-73.055-73.054-73.055C32.772,235.085,0,267.857,0,308.141
+			c0,40.281,32.772,73.053,73.054,73.053C113.336,381.193,146.108,348.422,146.108,308.141z M73.054,355.193
+			C47.109,355.193,26,334.086,26,308.141c0-25.946,21.108-47.055,47.054-47.055c25.946,0,47.054,21.107,47.054,47.055
+			C120.108,334.086,99,355.193,73.054,355.193z"
+          />
+          <path
+            d="M403.879,232.585c-10.086,0-19.7,2.056-28.448,5.768l-20.231-31.43c8.572-7.838,14.901-13.465,16.925-14.947
+			c3.728-2.254,6.029-6.303,6.029-10.695v-39.416c0-4.259-2.168-8.225-5.754-10.523c-3.584-2.297-8.094-2.612-11.964-0.835
+			l-41.646,19.132l-34.525-48.634c-2.344-3.303-6.143-5.265-10.193-5.265h-30.304c-6.903,0-12.5,5.597-12.5,12.5
+			s5.597,12.5,12.5,12.5h23.849l28.056,39.52l-58.94,27.076L180.1,149.982c-1.484-0.979-3.161-1.63-4.917-1.91L75.02,132.117
+			c-3.615-0.57-7.297,0.462-10.08,2.836c-2.783,2.375-4.386,5.851-4.386,9.509v25.598c0,3.89,1.811,7.557,4.897,9.922l71.225,54.574
+			l44.268,91.92c2.083,4.326,6.46,7.076,11.262,7.076h88.322c0.01,0,0.018,0,0.026,0c0.011,0-9.312,0,0.031,0
+			c9.341,0,10.772-4.43,11.508-6.918c0.679-2.301,22.418-81.808,22.418-81.808c7.357-6.948,14.912-14.034,22.045-20.678
+			l17.878,27.771c-14.502,13.359-23.607,32.494-23.607,53.719c0,40.281,32.771,73.054,73.054,73.054s73.054-32.771,73.054-73.054
+			C476.933,265.358,444.161,232.585,403.879,232.585z M371.978,192.063c-0.202,0.124-0.377,0.214-0.514,0.285
+			C371.638,192.257,371.81,192.161,371.978,192.063z M200.06,308.553l-21.217-44.055l62.363,44.055H200.06z M353.154,175.328
+			c-14.298,12.057-45.227,41.311-58.357,53.732c-1.659,1.569-2.856,3.563-3.462,5.764l-18.099,65.747l-119.182-84.194L85.554,163.89
+			v-4.779l83.032,13.225l60.172,39.69c3.604,2.377,8.178,2.729,12.102,0.924l112.295-51.587V175.328z M403.879,352.693
+			c-25.945,0-47.054-21.107-47.054-47.053c0-12.035,4.547-23.023,12.005-31.354l24.538,38.118c2.39,3.712,6.413,5.736,10.521,5.736
+			c2.317,0,4.662-0.646,6.754-1.991c5.804-3.737,7.481-11.472,3.745-17.276l-24.556-38.146c4.438-1.391,9.154-2.143,14.045-2.143
+			c25.946,0,47.054,21.108,47.054,47.055C450.933,331.586,429.825,352.693,403.879,352.693z"
+          />
+        </g>
+      </g>
+    </svg>
+  ),
+  charging: (props: IconProps) => (
+    <svg
+      fill="currentColor"
+      width="24px"
+      height="28px"
+      viewBox="0 0 32 32"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M 9 5 C 7.355 5 6 6.355 6 8 L 6 27 L 20 27 L 20 20 L 22 20 L 22 24 C 22 25.645 23.355 27 25 27 C 26.645 27 28 25.645 28 24 L 28 13.8125 C 28 13.0155 27.687 12.28075 27.125 11.71875 L 22.40625 7 L 21 8.40625 L 23.84375 11.25 C 22.76975 11.707 22 12.766 22 14 C 22 15.645 23.355 17 25 17 C 25.352 17 25.684 16.9265 26 16.8125 L 26 24 C 26 24.566 25.566 25 25 25 C 24.434 25 24 24.566 24 24 L 24 20 C 24 18.906 23.094 18 22 18 L 20 18 L 20 8 C 20 6.355 18.645 5 17 5 L 9 5 z M 9 7 L 17 7 C 17.566 7 18 7.434 18 8 L 18 11 L 18 12 L 18 14 L 18 18 L 18 25 L 8 25 L 8 18 L 8 14 L 8 12 L 8 11 L 8 8 C 8 7.434 8.434 7 9 7 z M 13.089844 10.560547 L 10.660156 15.439453 L 11.560547 15.910156 L 12.660156 16.439453 L 11.089844 19.560547 L 12.910156 20.439453 L 15.339844 15.560547 L 14.439453 15.089844 L 13.339844 14.560547 L 14.910156 11.439453 L 13.089844 10.560547 z M 25 13 C 25.562 13 26 13.438 26 14 C 26 14.562 25.562 15 25 15 C 24.437 15 24 14.562 24 14 C 24 13.438 24.437 13 25 13 z" />
+    </svg>
+  ),
+  road: (props: IconProps) => (
+    <svg width="24px" height="24px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fill="currentColor"
+        d="M168.4 29.55L24.38 477.6l15.24 4.8L183.6 34.45l-15.2-4.9zm175.2 0l-15.2 4.9 144 447.95 15.2-4.8-144-448.05zM248 32l-.8 20h17.6l-.8-20h-16zm-1.4 36l-.8 20h20.4l-.8-20h-18.8zm-1.5 36l-1.3 32h24.4l-1.3-32h-21.8zm-1.9 48l-2 48h29.6l-2-48h-25.6zm-2.8 68l-2.4 60h36l-2.4-60h-31.2zm-3.3 84l-2.9 72h43.6l-2.9-72h-37.8zm-4 100l-3.1 76h52l-3.1-76h-45.8z"
+      />
+    </svg>
+  ),
+  stairs: (props: IconProps) => (
+    <svg
+      fill="currentColor"
+      height="28px"
+      width="24px"
+      version="1.1"
+      id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      xmlSpace="preserve"
+    >
+      <g>
+        <g>
+          <path
+            d="M425.567,28.444c-5.236,0-8.382,4.161-8.382,9.397v85.418h-67.002c-5.236,0-8.85,4.633-8.85,9.869v75.464h-76.951
+			c-5.236,0-8.382,4.105-8.382,9.341v75.992h-76.428c-5.236,0-8.905,4.165-8.905,9.402v75.932H93.715
+			c-5.236,0-8.382,4.633-8.382,9.869v75.464H0v18.963h93.715c5.236,0,10.581-3.858,10.581-9.094v-76.24h75.275
+			c5.236,0,10.058-3.858,10.058-9.094v-76.24h74.752c5.236,0,10.581-4.325,10.581-9.561v-75.772h75.22
+			c5.236,0,10.113-4.385,10.113-9.622v-75.712h65.271c5.236,0,10.581-3.858,10.581-9.094V47.407H512V28.444H425.567z"
+          />
+        </g>
+      </g>
+      <g>
+        <g>
+          <path
+            d="M425.567,293.926h-56.889c-5.236,0-9.481,4.245-9.481,9.482s4.245,9.482,9.481,9.482h29.417l-55.083,55.042
+			c-3.704,3.704-3.704,9.682,0,13.385c1.852,1.852,4.278,2.767,6.704,2.767c2.426,0,5.402-0.931,7.254-2.783l60.216-59.672v38.583
+			c0,5.236,4.245,9.482,9.482,9.482s9.481-4.246,9.481-9.482v-56.889C436.148,298.087,430.803,293.926,425.567,293.926z"
+          />
+        </g>
+      </g>
+    </svg>
+  ),
+  compassNorthSouth: (props: IconProps) => (
+    <svg
+      width="24"
+      height="24"
+      xmlns="http://www.w3.org/2000/svg"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2"
+      stroke="currentColor"
+      fill="none"
+    >
+      <g>
+        <circle id="svg_1" r="10" cy="12" cx="12" />
+        <polygon
+          transform="rotate(-45, 12, 12)"
+          id="svg_2"
+          points="16.239999771118164,7.760000228881836 14.119999885559082,14.119999885559082 7.760000228881836,16.239999771118164 9.880000114440918,9.880000114440918 16.239999771118164,7.760000228881836 "
+        />
+      </g>
+    </svg>
+  ),
+  compassNESW: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+    </svg>
+  ),
+  compassNWSE: (props: IconProps) => (
+    <svg
+      width="24"
+      height="24"
+      xmlns="http://www.w3.org/2000/svg"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2"
+      stroke="currentColor"
+      fill="none"
+    >
+      <g>
+        <circle id="svg_1" r="10" cy="12" cx="12" />
+        <polygon
+          transform="rotate(90, 12, 12)"
+          id="svg_2"
+          points="16.239999771118164,7.760000228881836 14.119999885559082,14.119999885559082 7.760000228881836,16.239999771118164 9.880000114440918,9.880000114440918 16.239999771118164,7.760000228881836 "
+        />
+      </g>
+    </svg>
+  ),
   dashboard: DashboardIcon,
   avatar: AvatarIcon,
   placeholder: ImageIcon,
@@ -274,5 +623,6 @@ export const Icons = {
   check: CheckIcon,
   eye: EyeOpenIcon,
   plus: PlusIcon,
-  rightArrow: ArrowRightIcon
+  rightArrow: ArrowRightIcon,
+  calendar: CalendarIcon
 };

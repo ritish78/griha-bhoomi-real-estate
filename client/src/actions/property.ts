@@ -1,21 +1,51 @@
-// "use server";
+"use server";
 
-// export async function getListOfProperties(pageNumber: number = 1) {
-//   const response = await fetch(`http://localhost:5000/api/v1/property?page=${pageNumber}`, {
-//     next: { revalidate: 600 } //Cache in seconds to revalidate
-//   });
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
-//   const data = await response.json();
+export async function getListOfProperties(pageNumber: number = 1, limit: number = 6) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/v1/property?page=${pageNumber}&limit=${limit}`,
+      {
+        next: { revalidate: 60 } //Cache in seconds to revalidate
+      }
+    );
 
-//   return data;
-// }
+    const data = await response.json();
 
-// export async function getPropertyBySlug(slug: string) {
-//   const response = await fetch(`http://localhost:5000/api/v1/property/${slug}`, {
-//     next: { revalidate: 600 } //Cache in seconds to revalidate
-//   });
+    return data;
+  } catch (error: unknown) {
+    return { error: getErrorMessage(error) };
+  }
+}
 
-//   const data = await response.json();
+export async function getPropertyBySlug(slug: string) {
+  try {
+    const response = await fetch(`http://localhost:5000/api/v1/property/${slug}`, {
+      next: { revalidate: 60 } //Cache in seconds to revalidate
+    });
 
-//   return data;
-// }
+    const data = await response.json();
+
+    return data;
+  } catch (error: unknown) {
+    return { error: getErrorMessage(error) };
+  }
+}
+
+export async function getListOfFeaturedProperties(page: number, limit: number = 3) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/v1/property/featured?page=${page}&limit=${limit}`,
+      {
+        next: { revalidate: 60 } //Cache in seconds to revalidate
+      }
+    );
+
+    const data = await response.json();
+
+    return data;
+  } catch (error: unknown) {
+    return { error: getErrorMessage(error) };
+  }
+}
