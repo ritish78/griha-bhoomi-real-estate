@@ -31,7 +31,7 @@ export default function PaginationButton({ totalPages, page = 1 }: PaginationBut
     canShowPrevEllipsis
   });
 
-  const getPagesToShow = () => {
+  const getPagesToShow = React.useMemo(() => {
     // let startPage = currentPage === 1 ? 1 : currentPage - 1;
     // let endPage = totalPages > currentPage ? currentPage + 1 : totalPages;
     let startPage = currentPage - 2;
@@ -45,9 +45,9 @@ export default function PaginationButton({ totalPages, page = 1 }: PaginationBut
     }
 
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-  };
+  }, [currentPage, totalPages]);
 
-  const pages = getPagesToShow();
+  //   const pages = getPagesToShow();
 
   return (
     <Pagination>
@@ -62,7 +62,7 @@ export default function PaginationButton({ totalPages, page = 1 }: PaginationBut
             <PaginationEllipsis />
           </PaginationItem>
         ) : null}
-        {pages.map((p, i) => (
+        {getPagesToShow.map((p, i) => (
           <PaginationItem key={i}>
             <PaginationLink
               href={`?page=${p}`}
