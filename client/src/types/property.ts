@@ -70,9 +70,15 @@ export interface Property extends Address, Land, House, User {
 
 export type PartialProperty = Partial<Property>;
 
-export type ListOfProperties = {
+export interface ListOfPropertiesSuccess {
   currentPageNumber: number;
   numberOfPages: number;
   limit?: number;
   properties: Property[];
-};
+}
+
+export interface ListOfPropertiesError {
+  error: string;
+}
+
+export type ListOfPropertiesResponse = ListOfPropertiesSuccess | ListOfPropertiesError;

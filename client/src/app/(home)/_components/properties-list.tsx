@@ -1,41 +1,25 @@
-import PaginationButton from "@/components/pagination-button";
 import PropertyCard from "@/components/property-card";
-import { ListOfProperties } from "@/types/property";
-import { redirect } from "next/navigation";
+import { ListOfPropertiesResponse } from "@/types/property";
 
 interface PropertyListProps {
-  currentPage?: number;
-  page?: string;
-  propertyListPromise: Promise<ListOfProperties>;
+  propertyListPromise: Promise<ListOfPropertiesResponse>;
 }
 //Just for testing purpose
 function simulateNetworkDelay(milliseconds: number): Promise<any> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export default async function PropertyList({
-  currentPage = 1,
-  page = "home",
-  propertyListPromise
-}: PropertyListProps) {
-  const listOfProperties = await propertyListPromise;
+export default async function PropertyList({ propertyListPromise }: PropertyListProps) {
+  let listOfProperties: ListOfPropertiesResponse;
 
-  if (currentPage > listOfProperties.numberOfPages) {
-    //TODO: Is it better to redirect user here or in server actions?
-    //https://nextjs.org/docs/app/building-your-application/routing/redirecting
-    redirect(`/property/${page}?page=${listOfProperties.numberOfPages}`);
-  }
-
+  listOfProperties = await propertyListPromise;
   await simulateNetworkDelay(1000);
 
-  return (
-    <>
-      {listOfProperties.properties.map((property) => (
-        <PropertyCard property={property} key={property.id} />
-      ))}
-      <div className="flex justify-center mt-5">
-        <PaginationButton totalPages={listOfProperties.numberOfPages} page={currentPage} />
-      </div>
-    </>
-  );
+  if ("error" in listOfProperties) {
+    return <p>Oops! An error occurred! {listOfProperties.error}</p>;
+  }
+
+  return listOfProperties.properties.map((property) => (
+    <PropertyCard property={property} key={property.id} />
+  ));
 }

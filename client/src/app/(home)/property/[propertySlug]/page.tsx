@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import House from "./_components/house";
 import Land from "./_components/land";
 import { dummyPropertyData } from "@/dummy-data";
+import { Property } from "@/types/property";
 
 interface PropertyPageProps {
   params: {
@@ -44,6 +45,10 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
   } else {
     property = await getPropertyBySlug(propertySlug);
 
+    if (property.error) {
+      return <p>Oops! An error occurred! {property.error}</p>;
+    }
+
     console.log(property);
   }
 
@@ -68,8 +73,8 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 src={property.profilePicUrl ?? "https://ui.shadcn.com/avatars/04.png"}
               />
               <AvatarFallback>
-                {property.firstName?.[0]}
-                {property.lastName?.[0]}
+                {property.firstName[0]}
+                {property.lastName[0]}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-center">

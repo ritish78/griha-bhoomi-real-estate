@@ -6,9 +6,10 @@ import { Suspense } from "react";
 import PropertyList from "./_components/properties-list";
 import PropertyCardSkeletonList from "./_components/property-skeleton-list";
 import ErrorBoundary from "./error";
+import { ListOfPropertiesResponse } from "@/types/property";
 
 export default async function HomePage() {
-  const listOfProperties = getListOfProperties();
+  const listOfProperties: Promise<ListOfPropertiesResponse> = getListOfProperties();
   // const listOfFeaturedProperties = getListOfFeaturedProperties();
 
   return (
