@@ -15,8 +15,12 @@ export interface TrendingPageProps {
 export default async function TrendingPage(props: TrendingPageProps) {
   const pageNumber = Number(props?.searchParams?.page) || 1;
 
-  if (pageNumber <= 0) {
-    redirect("/property/featured?page=1");
+  if (
+    pageNumber < 1 ||
+    Number(props?.searchParams?.page) === 0 ||
+    isNaN(Number(props?.searchParams?.page))
+  ) {
+    redirect("/property/trending?page=1");
   }
 
   //getListOfProperties fetches properties and sorts it by views count by default
@@ -27,6 +31,10 @@ export default async function TrendingPage(props: TrendingPageProps) {
 
   if ("error" in listOfTrendingProperties) {
     return <p>Oops! An error occurred! {listOfTrendingProperties.error}</p>;
+  }
+
+  if (pageNumber > listOfTrendingProperties.numberOfPages) {
+    redirect(`/property/trending?page=${listOfTrendingProperties.numberOfPages}`);
   }
 
   return (

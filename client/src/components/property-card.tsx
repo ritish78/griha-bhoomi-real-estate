@@ -83,8 +83,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           <>
             <Badge variant="secondary" className="mr-2">
               <Icons.bedroom className="mb-1"></Icons.bedroom>
-              <strong className="ml-1">{property.roomCount}</strong>
-              <span className="ml-1">Bedrooms</span>
+              <strong className="ml-1">
+                {property.roomCount && property.kitchenCount
+                  ? property.roomCount + property.kitchenCount
+                  : property.roomCount}
+              </strong>
+              <span className="ml-1">Rooms</span>
             </Badge>
             <Badge variant="secondary" className="mr-2">
               <Icons.bathroom className="mb-1"></Icons.bathroom>
@@ -92,7 +96,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               <span className="ml-1">Bathrooms</span>
             </Badge>
             <Badge variant="secondary" className="">
-              <Icons.land className="size-5"></Icons.land>
+              <Icons.land className="size-4"></Icons.land>
               <strong className="ml-1">{property.houseArea?.split(" ")[0]}</strong>
               <span className="ml-1">Sq ft</span>
             </Badge>
@@ -110,7 +114,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               <span className="ml-1">Breadth</span>
             </Badge>
             <Badge variant="secondary" className="">
-              <Icons.land className="size-5"></Icons.land>
+              <Icons.land className="size-4"></Icons.land>
               <strong className="ml-1">{property.landArea?.split(" ")[0]}</strong>
               <span className="ml-1">Sq ft</span>
             </Badge>

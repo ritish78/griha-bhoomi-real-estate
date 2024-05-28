@@ -10,11 +10,25 @@ interface HouseProps {
 }
 
 export default function House({ property }: HouseProps) {
+  console.log("House Distance to road", property.houseDistanceToRoad);
+  console.log("House Distance to road", property.houseDistanceToRoad);
+  console.log("House Distance to road", property.houseDistanceToRoad);
+  console.log("House Distance to road", property.houseDistanceToRoad);
+  console.log("House Distance to road", property.houseDistanceToRoad);
   return (
     <div className="flex w-full flex-col gap-4 md:w-1/2">
       <div className="space-y-2">
         <h2 className="line-clamp-1 font-bold text-2xl">{property.title}</h2>
-        <p className="text-muted-foreground text-base font-medium">
+        <div className="flex h-5 mr-auto gap-x-2">
+          <Icons.mapPin className="size-5"></Icons.mapPin>
+          <span className="text-muted-foreground text-base font-medium">
+            {property.street && `${property.street}, `}
+            {property.municipality && `${property.municipality}, `}
+            {property.city && `${property.city}, `}
+            {property.district && `${property.district}`}
+          </span>
+        </div>
+        <p className="text-muted-foreground font-bold text-xl">
           ${formatPrice(property.price)} {property.toRent && "per month"}
         </p>
         <div className="text-sm text-muted-foreground flex items-center">
@@ -126,6 +140,8 @@ export default function House({ property }: HouseProps) {
                   <Icons.compassNWSE />
                 ) : property.houseFacing === "North" || property.houseFacing === "South" ? (
                   <Icons.compassNorthSouth />
+                ) : property.houseFacing === "East" || property.houseFacing === "West" ? (
+                  <Icons.compassEW />
                 ) : (
                   <Icons.compassNESW />
                 )}
@@ -185,7 +201,7 @@ export default function House({ property }: HouseProps) {
               <h3 className="font-bold">Distance to road</h3>
               <div className="flex items-center">
                 <Icons.ruler />
-                <p className="text-muted-foreground ml-2">{property.houseDistanceToRoad}</p>
+                <p className="text-muted-foreground ml-2">{property.houseDistanceToRoad} meters</p>
               </div>
             </div>
           </div>

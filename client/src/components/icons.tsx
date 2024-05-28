@@ -249,8 +249,8 @@ export const Icons = {
   bathroom: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
+      width="18"
+      height="18"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -268,8 +268,8 @@ export const Icons = {
   bedroom: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
+      width="18"
+      height="18"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -317,8 +317,8 @@ export const Icons = {
   ruler: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
+      width="18"
+      height="18"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -336,8 +336,8 @@ export const Icons = {
   pencilRuler: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="22"
-      height="22"
+      width="18"
+      height="18"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -609,6 +609,28 @@ export const Icons = {
           transform="rotate(90, 12, 12)"
           id="svg_2"
           points="16.239999771118164,7.760000228881836 14.119999885559082,14.119999885559082 7.760000228881836,16.239999771118164 9.880000114440918,9.880000114440918 16.239999771118164,7.760000228881836 "
+        />
+      </g>
+    </svg>
+  ),
+  compassEW: (props: IconProps) => (
+    <svg
+      width="24"
+      height="24"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <g>
+        <title>Layer 1</title>
+        <circle cx="12" cy="12" r="10" id="svg_1" />
+        <polygon
+          transform="rotate(45, 12, 12)"
+          points="16.239999771118164,7.760000228881836 14.119999885559082,14.119999885559082 7.760000228881836,16.239999771118164 9.880000114440918,9.880000114440918 16.239999771118164,7.760000228881836 "
+          id="svg_2"
         />
       </g>
     </svg>
