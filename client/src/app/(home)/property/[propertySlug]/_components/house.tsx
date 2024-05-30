@@ -10,11 +10,6 @@ interface HouseProps {
 }
 
 export default function House({ property }: HouseProps) {
-  console.log("House Distance to road", property.houseDistanceToRoad);
-  console.log("House Distance to road", property.houseDistanceToRoad);
-  console.log("House Distance to road", property.houseDistanceToRoad);
-  console.log("House Distance to road", property.houseDistanceToRoad);
-  console.log("House Distance to road", property.houseDistanceToRoad);
   return (
     <div className="flex w-full flex-col gap-4 md:w-1/2">
       <div className="space-y-2">

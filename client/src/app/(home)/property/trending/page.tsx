@@ -48,7 +48,7 @@ export default async function TrendingPage(props: TrendingPageProps) {
           <PropertyListPage propertyList={listOfTrendingProperties} />
         </Suspense>
       </PropertyPageContent>
-      <PaginationButton totalPages={listOfTrendingProperties.numberOfPages} page={pageNumber} />
+      {/* <PaginationButton totalPages={listOfTrendingProperties.numberOfPages} page={pageNumber} /> */}
     </div>
   );
 }

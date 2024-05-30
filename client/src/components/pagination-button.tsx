@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 import {
   Pagination,
@@ -12,10 +15,16 @@ import {
 
 interface PaginationButtonProps extends React.HTMLAttributes<HTMLDivElement> {
   totalPages: number;
-  page?: number;
+  page: number;
+  searchParams: Record<string, string | number | null>;
 }
 
-export default function PaginationButton({ totalPages, page = 1 }: PaginationButtonProps) {
+export default function PaginationButton({
+  totalPages,
+  page,
+  searchParams
+  // createQueryString
+}: PaginationButtonProps) {
   const currentPage = Math.min(Math.max(page, 1), totalPages);
   const hasNextPage = totalPages > currentPage;
   const hasPrevPage = page > 1;
@@ -39,13 +48,28 @@ export default function PaginationButton({ totalPages, page = 1 }: PaginationBut
   }, [currentPage, totalPages]);
 
   //   const pages = getPagesToShow();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const createQueryString = (params: Record<string, string | number | null>, newPage: number) => {
+    const newSearchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        newSearchParams.append(key, String(value));
+      }
+    }
+    newSearchParams.set("page", String(newPage));
+    return newSearchParams.toString();
+  };
 
   return (
     <Pagination>
       <PaginationContent>
         {hasPrevPage ? (
           <PaginationItem>
-            <PaginationPrevious href={`?page=${currentPage - 1}`} />
+            <PaginationPrevious
+              href={`${pathname}?${createQueryString(searchParams, currentPage - 1)}`}
+            />
           </PaginationItem>
         ) : null}
         {canShowPrevEllipsis ? (
@@ -56,7 +80,7 @@ export default function PaginationButton({ totalPages, page = 1 }: PaginationBut
         {getPagesToShow.map((p, i) => (
           <PaginationItem key={i}>
             <PaginationLink
-              href={`?page=${p}`}
+              href={`${pathname}?${createQueryString(searchParams, p)}`}
               isActive={p === currentPage}
               //   className={p === currentPage ? "font-bold border border-foreground" : undefined}
             >
@@ -72,7 +96,9 @@ export default function PaginationButton({ totalPages, page = 1 }: PaginationBut
         {hasNextPage ? (
           <>
             <PaginationItem>
-              <PaginationNext href={`?page=${currentPage + 1}`} />
+              <PaginationNext
+                href={`${pathname}?${createQueryString(searchParams, currentPage + 1)}`}
+              />
             </PaginationItem>
           </>
         ) : null}

@@ -49,3 +49,17 @@ export async function getListOfFeaturedProperties(page: number, limit: number = 
     return { error: getErrorMessage(error) };
   }
 }
+
+export async function getFilteredListOfProperties(filters: string) {
+  try {
+    const response = await fetch(`http://localhost:5000/api/v1/property/filter?${filters}`, {
+      next: { revalidate: 60 } //Cache in seconds to revalidate
+    });
+
+    const data = await response.json();
+
+    return data;
+  } catch (error: unknown) {
+    return { error: getErrorMessage(error) };
+  }
+}

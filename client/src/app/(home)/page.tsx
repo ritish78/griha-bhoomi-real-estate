@@ -17,7 +17,7 @@ export default async function HomePage() {
       <ContentSection
         title="Featured Property"
         description="View properties that we think you might be interested in"
-        href="/property/featured"
+        href="/property/featured?page=1"
         linkText="View other featured properties"
       >
         {dummyPropertyData.map((property) => (
@@ -27,7 +27,7 @@ export default async function HomePage() {
       <ContentSection
         title="Trending Property"
         description="View properties that are in high demand"
-        href="/property/trending"
+        href="/property/trending?page=1"
         linkText="View other trending properties"
         className="mt-20"
       >

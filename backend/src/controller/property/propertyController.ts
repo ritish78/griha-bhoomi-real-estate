@@ -471,7 +471,8 @@ export const filterProperties = async (filters) => {
       "listedat",
       "updatedat",
       "sortby",
-      "order"
+      "order",
+      "page"
     ];
 
     const validHouseFilterOptions: string[] = [
@@ -739,7 +740,7 @@ export const filterProperties = async (filters) => {
             ? eq(house.evCharging, mapHouseFilterOptions.get("evcharging"))
             : undefined,
           //To get the built at, if user only provides the year; we create
-          //date object where it specifies the first day othe year and if
+          //date object where it specifies the first day of the year and if
           //the user supplies date like; 2004-05-01, then we use it instead
           //of having to create a date object
           mapHouseFilterOptions.get("builtat")
@@ -827,13 +828,13 @@ export const filterProperties = async (filters) => {
      */
 
     return {
-      currentPage: filters.page ? Number(filters.page) : 1,
+      currentPageNumber: filters.page ? Number(filters.page) : 1,
       numberOfPages:
         filteredProperties.length > 0
           ? Math.ceil(filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE)
-          : 0,
-      listOfFilteredProperties:
-        filteredProperties.length > 0 ? filteredProperties.map((result) => result.listOfProperties) : {}
+          : 1,
+      properties:
+        filteredProperties.length > 0 ? filteredProperties.map((result) => result.listOfProperties) : []
     };
   } catch (error) {
     console.log("Error occurred while filtering results!");
@@ -865,6 +866,7 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
   //to get the property by keyword, however it did not work as intended as I was not able to pass
   //value of `keyword` into the `sql.placeholder("keyword")`
   try {
+    //TODO:
     //Here there are two database query which is inefficient. Will merge the `filterProperties` and this function
     //once searching by ts_vector gets implemented.
     const propertyByKeyword = await db.execute(
