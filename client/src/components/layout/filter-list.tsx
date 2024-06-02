@@ -6,7 +6,6 @@ import {
   CommandItem,
   CommandList
 } from "@/components/ui/command";
-import { CheckIcon } from "@radix-ui/react-icons";
 
 export type Filter = {
   value: string;

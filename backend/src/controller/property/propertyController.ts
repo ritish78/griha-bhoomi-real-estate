@@ -499,8 +499,8 @@ export const filterProperties = async (filters) => {
       "bikeparking",
       "evcharging",
       "builtat",
-      "connectedtoroad",
-      "distancetoroad"
+      "houseconnectedtoroad",
+      "housedistancetoroad"
     ];
 
     const validLandFilterOptions: string[] = [
@@ -508,8 +508,8 @@ export const filterProperties = async (filters) => {
       "area",
       "length",
       "breadth",
-      "connectedtoroad",
-      "distancetoroad"
+      "landconnectedtoroad",
+      "landdistancetoroad"
     ];
 
     const validAddressFilterOptions: string[] = [
@@ -560,9 +560,9 @@ export const filterProperties = async (filters) => {
         //If `connectedtoroad` and `distancetoroad` fields are provided in the context
         //of land, we add to it. We could simplify it by storing those two fields in
         //property table itself instead of having both fields on both House and Land table
-        if (key === "connectedtoroad" || key === "distancetoroad") {
-          mapLandFilterOptions.set(key, filters[key]);
-        }
+        // if (key === "connectedtoroad" || key === "distancetoroad") {
+        //   mapLandFilterOptions.set(key, filters[key]);
+        // }
       } else if (validLandFilterOptions.includes(key) && !mapLandFilterOptions.has(key)) {
         mapLandFilterOptions.set(key, filters[key]);
       } else if (validAddressFilterOptions.includes(key) && !mapAddressFilterOptions.has(key)) {
@@ -603,6 +603,8 @@ export const filterProperties = async (filters) => {
 
     const nowToday = new Date();
     const nowTodayInISOString = nowToday.toISOString();
+
+    console.log("Map Land Filter Options:", mapLandFilterOptions);
 
     //To get the number of filtered properties, we use one select() from dizzle where we
     //get the count and also the list of properties from where() clause.
@@ -751,11 +753,11 @@ export const filterProperties = async (filters) => {
                   : new Date(mapHouseFilterOptions.get("builtat"), 0, 1)
               )
             : undefined,
-          mapHouseFilterOptions.get("connectedtoroad")
-            ? eq(house.connectedToRoad, mapHouseFilterOptions.get("connectedtoroad"))
+          mapHouseFilterOptions.get("houseconnectedtoroad")
+            ? eq(house.connectedToRoad, mapHouseFilterOptions.get("houseconnectedtoroad"))
             : undefined,
-          mapHouseFilterOptions.get("distancetoroad")
-            ? lte(house.distanceToRoad, mapHouseFilterOptions.get("distancetoroad"))
+          mapHouseFilterOptions.get("housedistancetoroad")
+            ? lte(house.distanceToRoad, mapHouseFilterOptions.get("housedistancetoroad"))
             : undefined,
           //Now, filtering options for Land
           mapLandFilterOptions.get("landtype")
@@ -763,11 +765,14 @@ export const filterProperties = async (filters) => {
             : undefined,
           // mapLandFilterOptions.get("length")
           //TODO: Area, length and breadth are of type string
-          mapLandFilterOptions.get("connectedtoroad")
-            ? eq(land.connectedToRoad, mapLandFilterOptions.get("connectedToRoad"))
+          mapLandFilterOptions.get("landconnectedtoroad")
+            ? eq(land.connectedToRoad, mapLandFilterOptions.get("landconnectedtoroad"))
             : undefined,
-          mapLandFilterOptions.get("distancetoroad")
-            ? lte(land.distanceToRoad, mapLandFilterOptions.get("distancetoroad"))
+          mapLandFilterOptions.get("landdistancetoroad")
+            ? and(
+                eq(land.connectedToRoad, false),
+                lte(land.distanceToRoad, mapLandFilterOptions.get("landdistancetoroad"))
+              )
             : undefined,
 
           //Now filtering options for Address
