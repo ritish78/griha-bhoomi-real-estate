@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import {
   Drawer,
   DrawerContent,
@@ -13,15 +13,15 @@ import {
   DrawerTitle,
   DrawerDescription
 } from "@/components/ui/drawer";
-import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { cn, isDesktop } from "@/lib/utlis";
 import { Icons } from "@/components/icons";
 
 import { FilterList, type Filter } from "@/components/layout/filter-list";
-import { format } from "date-fns";
+
+interface SearchFilterProps extends React.HTMLAttributes<HTMLElement> {
+  isOnDesktop: boolean;
+}
 
 const propertyFilter: Filter[] = [
   {
@@ -315,7 +315,7 @@ const landTypeFilter: Filter[] = [
   }
 ];
 
-export default function SearchFilter() {
+export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   const [isPropertyTypeOpen, setIsPropertyTypeOpen] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState<Filter | null>(null);
   const [isRentOpen, setIsRentOpen] = useState(false);
@@ -387,8 +387,6 @@ export default function SearchFilter() {
 
     return years;
   }, []);
-
-  const isOnDesktop = isDesktop();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -775,66 +773,93 @@ export default function SearchFilter() {
   const ContentShell = isOnDesktop ? PopoverContent : DrawerContent;
 
   return (
-    <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7">
-      <ParentShell open={isPropertyTypeOpen} onOpenChange={setIsPropertyTypeOpen}>
-        <ChildrenShell asChild>
-          <Button variant="outline" className="w-[125px] justify-between p-2">
-            {selectedPropertyType ? <>{selectedPropertyType.label}</> : <>House/Land:</>}
-            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </ChildrenShell>
-        <ContentShell
-          className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
-          align="start"
-        >
-          {!isOnDesktop && (
-            <DrawerHeader>
-              <DrawerTitle>Property Type</DrawerTitle>
-              <DrawerDescription>Specify the type of property</DrawerDescription>
-            </DrawerHeader>
-          )}
-          <FilterList
-            setIsOpen={setIsPropertyTypeOpen}
-            setSelectedFilter={setSelectedPropertyType}
-            toFilter={propertyFilter}
-          />
-        </ContentShell>
-      </ParentShell>
-      <ParentShell open={isRentOpen} onOpenChange={setIsRentOpen}>
-        <ChildrenShell asChild>
-          <Button variant="outline" className="w-[125px] justify-between p-2">
-            {selectedRent ? <>{selectedRent.label}</> : <>Buy/Rent:</>}
-            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </ChildrenShell>
-        <ContentShell
-          className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
-          align="start"
-        >
-          {!isOnDesktop && (
-            <DrawerHeader>
-              <DrawerTitle>Status</DrawerTitle>
-              <DrawerDescription>Do you want to buy or rent?</DrawerDescription>
-            </DrawerHeader>
-          )}
-          <FilterList
-            setIsOpen={setIsRentOpen}
-            setSelectedFilter={setSelectedRent}
-            toFilter={rentFilter}
-          />
-        </ContentShell>
-      </ParentShell>
+    <div
+      className={
+        isOnDesktop
+          ? `grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1 md:gap-2 lg:gap:3`
+          : `grid grid-cols-2 gap-1`
+      }
+    >
+      <div>
+        <p className="text-sm">Property Type:</p>
+        <ParentShell open={isPropertyTypeOpen} onOpenChange={setIsPropertyTypeOpen}>
+          <ChildrenShell asChild>
+            <Button
+              variant="outline"
+              className={
+                isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+              }
+            >
+              {selectedPropertyType ? <>{selectedPropertyType.label}</> : <>House/Land:</>}
+              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </ChildrenShell>
+          <ContentShell
+            className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+            align="start"
+          >
+            {!isOnDesktop && (
+              <DrawerHeader>
+                <DrawerTitle>Property Type</DrawerTitle>
+                <DrawerDescription>Specify the type of property</DrawerDescription>
+              </DrawerHeader>
+            )}
+            <FilterList
+              setIsOpen={setIsPropertyTypeOpen}
+              setSelectedFilter={setSelectedPropertyType}
+              toFilter={propertyFilter}
+            />
+          </ContentShell>
+        </ParentShell>
+      </div>
+      <div>
+        <p className="text-sm">Property Type:</p>
+        <ParentShell open={isRentOpen} onOpenChange={setIsRentOpen}>
+          <ChildrenShell asChild>
+            <Button
+              variant="outline"
+              className={
+                isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+              }
+            >
+              {selectedRent ? <>{selectedRent.label}</> : <>Buy/Rent:</>}
+              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </ChildrenShell>
+          <ContentShell
+            className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+            align="start"
+          >
+            {!isOnDesktop && (
+              <DrawerHeader>
+                <DrawerTitle>Status</DrawerTitle>
+                <DrawerDescription>Do you want to buy or rent?</DrawerDescription>
+              </DrawerHeader>
+            )}
+            <FilterList
+              setIsOpen={setIsRentOpen}
+              setSelectedFilter={setSelectedRent}
+              toFilter={rentFilter}
+            />
+          </ContentShell>
+        </ParentShell>
+      </div>
       {selectedPropertyType && selectedPropertyType.value === "House" ? (
         <>
           <ParentShell open={isHouseTypeOpen} onOpenChange={setIsHouseTypeOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedHouseType ? <>{selectedHouseType.label}</> : <>House Type:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -852,13 +877,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isRoomCountOpen} onOpenChange={setIsRoomCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedRoomCount ? <>{selectedRoomCount.label}</> : <>Room Count:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -878,13 +908,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMinRoomCountOpen} onOpenChange={setIsMinRoomCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMinRoomCount ? <>{selectedMinRoomCount.label}</> : <>Min Room:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -902,13 +937,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMaxRoomCountOpen} onOpenChange={setIsMaxRoomCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMaxRoomCount ? <>{selectedMaxRoomCount.label}</> : <>Max Room:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -926,13 +966,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isFloorCountOpen} onOpenChange={setIsFloorCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>Floors:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -952,13 +997,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMinFloorCountOpen} onOpenChange={setIsMinFloorCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMinFloorCount ? <>{selectedMinFloorCount.label}</> : <>Min Floor:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -976,13 +1026,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMaxFloorCountOpen} onOpenChange={setIsMaxFloorCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMaxFloorCount ? <>{selectedMaxFloorCount.label}</> : <>Max Floor:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1000,13 +1055,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isKitchenCountOpen} onOpenChange={setIsKitchenCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedKitchenCount ? <>{selectedKitchenCount.label}</> : <>Kitchen:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1024,13 +1084,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMinKitchenCountOpen} onOpenChange={setIsMinKitchenCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMinKitchenCount ? <>{selectedMinKitchenCount.label}</> : <>Min Kitchen:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1048,13 +1113,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMaxKitchenCountOpen} onOpenChange={setIsMaxKitchenCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMaxKitchenCount ? <>{selectedMaxKitchenCount.label}</> : <>Max Kitchen:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1075,7 +1145,12 @@ export default function SearchFilter() {
             onOpenChange={setIsSharedBathroomOptionOpen}
           >
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[160px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedSharedBathroomOption ? (
                   <>{selectedSharedBathroomOption.label}</>
                 ) : (
@@ -1085,7 +1160,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1105,7 +1180,12 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMinBathroomCountOpen} onOpenChange={setIsMinBathroomCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMinBathroomCount ? (
                   <>{selectedMinBathroomCount.label}</>
                 ) : (
@@ -1115,7 +1195,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1133,7 +1213,12 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isMaxBathroomCountOpen} onOpenChange={setIsMaxBathroomCountOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedMaxBathroomCount ? (
                   <>{selectedMaxBathroomCount.label}</>
                 ) : (
@@ -1143,7 +1228,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1161,13 +1246,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isFurnishedOptionOpen} onOpenChange={setIsFurnishedOptionOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedFurnishedOption ? <>{selectedFurnishedOption.label}</> : <>Furnished:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1185,13 +1275,18 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isFacingOptionOpen} onOpenChange={setIsFacingOptionOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedFacingOption ? <>{selectedFacingOption.label}</> : <>Facing:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1211,7 +1306,12 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isCarParkingOptionOpen} onOpenChange={setIsCarParkingOptionOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedCarParkingOption ? (
                   <>{selectedCarParkingOption.label}</>
                 ) : (
@@ -1221,7 +1321,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1241,7 +1341,12 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isBikeParkingOptionOpen} onOpenChange={setIsBikeParkingOptionOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[125px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedBikeParkingOption ? (
                   <>{selectedBikeParkingOption.label}</>
                 ) : (
@@ -1251,7 +1356,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1271,7 +1376,12 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isEVChargingOptionOpen} onOpenChange={setIsEVChargingOptionOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[135px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedEVChargingOption ? (
                   <>{selectedEVChargingOption.label}</>
                 ) : (
@@ -1281,7 +1391,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1301,7 +1411,12 @@ export default function SearchFilter() {
           </ParentShell>
           <ParentShell open={isCalendarOptionOpen} onOpenChange={setIsCalendarOptionOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[135px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedEVChargingOption ? (
                   <>{selectedEVChargingOption.label}</>
                 ) : (
@@ -1311,7 +1426,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1336,7 +1451,12 @@ export default function SearchFilter() {
             onOpenChange={setIsHouseConnectedToRoadOptionOpen}
           >
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[150px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedHouseConnectedToRoad ? (
                   <>{selectedHouseConnectedToRoad.label}</>
                 ) : (
@@ -1346,7 +1466,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1371,7 +1491,14 @@ export default function SearchFilter() {
                 onOpenChange={setIsHouseDistanceToRoadOptionOpen}
               >
                 <ChildrenShell asChild>
-                  <Button variant="outline" className="w-[200px] justify-between p-2">
+                  <Button
+                    variant="outline"
+                    className={
+                      isOnDesktop
+                        ? "w-[175px] justify-between p-2"
+                        : "w-[165px] justify-between p-2"
+                    }
+                  >
                     {selectedHouseDistanceToRoad ? (
                       <>{selectedHouseDistanceToRoad.label}</>
                     ) : (
@@ -1381,7 +1508,7 @@ export default function SearchFilter() {
                   </Button>
                 </ChildrenShell>
                 <ContentShell
-                  className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+                  className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
                   align="start"
                 >
                   {!isOnDesktop && (
@@ -1406,13 +1533,13 @@ export default function SearchFilter() {
         <>
           <ParentShell open={isLandTypeOptionOpen} onOpenChange={setIsLandTypeOptionOpen}>
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[250px] justify-between p-2 overflow-hidden">
+              <Button variant="outline" className="w-[175px] justify-between p-2 overflow-hidden">
                 {selectedLandTypeOption ? <>{selectedLandTypeOption.label}</> : <>Land Type:</>}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[250px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1433,7 +1560,12 @@ export default function SearchFilter() {
             onOpenChange={setIsLandConnectedToRoadOptionOpen}
           >
             <ChildrenShell asChild>
-              <Button variant="outline" className="w-[150px] justify-between p-2">
+              <Button
+                variant="outline"
+                className={
+                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                }
+              >
                 {selectedLandConnectedToRoad ? (
                   <>{selectedLandConnectedToRoad.label}</>
                 ) : (
@@ -1443,7 +1575,7 @@ export default function SearchFilter() {
               </Button>
             </ChildrenShell>
             <ContentShell
-              className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
               align="start"
             >
               {!isOnDesktop && (
@@ -1468,7 +1600,14 @@ export default function SearchFilter() {
                 onOpenChange={setIsLandDistanceToRoadOptionOpen}
               >
                 <ChildrenShell asChild>
-                  <Button variant="outline" className="w-[200px] justify-between p-2">
+                  <Button
+                    variant="outline"
+                    className={
+                      isOnDesktop
+                        ? "w-[175px] justify-between p-2"
+                        : "w-[165px] justify-between p-2"
+                    }
+                  >
                     {selectedLandDistanceToRoad ? (
                       <>{selectedLandDistanceToRoad.label}</>
                     ) : (
@@ -1478,7 +1617,7 @@ export default function SearchFilter() {
                   </Button>
                 </ChildrenShell>
                 <ContentShell
-                  className={isOnDesktop ? `w-[125px] p-0` : "mt-10 mb-5 border-t"}
+                  className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
                   align="start"
                 >
                   {!isOnDesktop && (

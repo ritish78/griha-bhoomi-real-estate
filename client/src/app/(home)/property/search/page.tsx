@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import SearchFilter from "./_components/search-filter";
 import { getFilteredListOfProperties } from "@/actions/property";
 import { ListOfPropertiesResponse } from "@/types/property";
 import { PropertyPageContent } from "@/components/property-page-content";
@@ -7,6 +6,8 @@ import { Suspense, useCallback, useMemo } from "react";
 import PropertyCardSkeletonList from "../../_components/property-skeleton-list";
 import PropertyListPage from "../_components/properties-list-page";
 import PaginationButton from "@/components/pagination-button";
+
+import SearchSheet from "./_components/search-sheet";
 
 export interface SearchPropertyPageProps {
   params: { [key: string]: string | string[] | undefined };
@@ -63,7 +64,12 @@ export default async function SearchPropertyPage(props: SearchPropertyPageProps)
   return (
     <div className="container bg-slate-50 dark:bg-transparent pb-8 flex flex-col space-y-8">
       <div>
-        <SearchFilter />
+        <div className="mt-4 pb-4">
+          <h2 className="text-lg font-bold leading-[1.1] md:text-xl mb-2">
+            Apply filters to get your perfect property
+          </h2>
+          <SearchSheet />
+        </div>
         <PropertyPageContent
           title="Your properties search result"
           description="View properties that you filtered"
