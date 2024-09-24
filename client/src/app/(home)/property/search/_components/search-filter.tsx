@@ -17,7 +17,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 
-import { Slider } from "@nextui-org/slider";
+import { Input } from "@/components/ui/input";
+
+// import { Slider } from "@nextui-org/slider";
 
 import { FilterList, type Filter } from "@/components/layout/filter-list";
 
@@ -323,7 +325,10 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   const [isRentOpen, setIsRentOpen] = useState(false);
   const [selectedRent, setSelectedRent] = useState<Filter | null>(null);
   //For range slider
-  const [value, setValue] = useState([1, 4]);
+  // const [value, setValue] = useState([1, 4]);
+
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   //House Filtering
   const [isHouseTypeOpen, setIsHouseTypeOpen] = useState(false);
@@ -474,6 +479,42 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
       });
     });
   }, [selectedRent]);
+
+  useEffect(() => {
+    startTransition(() => {
+      const newQueryString = createQueryString({
+        minPrice:
+          minPrice.trim().length > 0 &&
+          (maxPrice.trim().length === 0 ||
+            Number(maxPrice) === 0 ||
+            Number(minPrice) < Number(maxPrice))
+            ? minPrice
+            : null
+      });
+
+      router.push(`${pathname}?${newQueryString}`, {
+        scroll: false
+      });
+    });
+  }, [minPrice]);
+
+  useEffect(() => {
+    startTransition(() => {
+      const newQueryString = createQueryString({
+        maxPrice:
+          maxPrice.trim().length > 0 &&
+          (minPrice.trim().length === 0 ||
+            Number(minPrice) === 0 ||
+            Number(maxPrice) > Number(minPrice))
+            ? maxPrice
+            : null
+      });
+
+      router.push(`${pathname}?${newQueryString}`, {
+        scroll: false
+      });
+    });
+  }, [maxPrice]);
 
   useEffect(() => {
     startTransition(() => {
@@ -848,6 +889,32 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
             />
           </ContentShell>
         </ParentShell>
+      </div>
+      <div>
+        <Label htmlFor="minPrice">Minimum Price:</Label>
+        <div className="flex items-center gap-5">
+          <Input
+            type="number"
+            id="minPrice"
+            min={0}
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="0"
+            className="rounded-md p-2 w-[175px]"
+          />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="maxPrice">Maximum Price:</Label>
+        <Input
+          type="number"
+          id="maxPrice"
+          min={0}
+          value={maxPrice}
+          placeholder="0"
+          className="rounded-md p-2 w-[175px]"
+          onChange={(e) => setMaxPrice(e.target.value)}
+        />
       </div>
       {selectedPropertyType && selectedPropertyType.value === "House" ? (
         <>
