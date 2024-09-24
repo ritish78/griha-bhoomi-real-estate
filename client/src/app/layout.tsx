@@ -8,6 +8,8 @@ import { Toaster } from "sonner";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
+import { NextUIProvider } from "@nextui-org/react";
+
 export const metadata: Metadata = {
   title: "GrihaBhoomi",
   description: "A real-estate website to share listings of land or house for sale or rent."
@@ -35,8 +37,13 @@ export default function RootLayout({
           GeistMono.variable
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NextUIProvider>{children}</NextUIProvider>
           <TailwindIndicator />
         </ThemeProvider>
         <Toaster />

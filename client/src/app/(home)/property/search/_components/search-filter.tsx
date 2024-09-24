@@ -17,6 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 
+import { Slider } from "@nextui-org/slider";
+
 import { FilterList, type Filter } from "@/components/layout/filter-list";
 
 interface SearchFilterProps extends React.HTMLAttributes<HTMLElement> {
@@ -36,12 +38,12 @@ const propertyFilter: Filter[] = [
 
 const rentFilter: Filter[] = [
   {
-    value: "Rent",
-    label: "Rent"
+    value: "Sale",
+    label: "Buy"
   },
   {
-    value: "Sale",
-    label: "Sale"
+    value: "Rent",
+    label: "Rent"
   }
 ];
 
@@ -320,6 +322,9 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   const [selectedPropertyType, setSelectedPropertyType] = useState<Filter | null>(null);
   const [isRentOpen, setIsRentOpen] = useState(false);
   const [selectedRent, setSelectedRent] = useState<Filter | null>(null);
+  //For range slider
+  const [value, setValue] = useState([1, 4]);
+
   //House Filtering
   const [isHouseTypeOpen, setIsHouseTypeOpen] = useState(false);
   const [selectedHouseType, setSelectedHouseType] = useState<Filter | null>(null);
@@ -813,7 +818,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
         </ParentShell>
       </div>
       <div>
-        <p className="text-sm">Property Type:</p>
+        <p className="text-sm">Buy or Rent:</p>
         <ParentShell open={isRentOpen} onOpenChange={setIsRentOpen}>
           <ChildrenShell asChild>
             <Button
@@ -846,795 +851,887 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
       </div>
       {selectedPropertyType && selectedPropertyType.value === "House" ? (
         <>
-          <ParentShell open={isHouseTypeOpen} onOpenChange={setIsHouseTypeOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+          <div>
+            <p className="text-sm">House Type:</p>
+            <ParentShell open={isHouseTypeOpen} onOpenChange={setIsHouseTypeOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedHouseType ? <>{selectedHouseType.label}</> : <>House Type:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedHouseType ? <>{selectedHouseType.label}</> : <>House Type:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>House Type</DrawerTitle>
-                  <DrawerDescription>Select the type of house</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsHouseTypeOpen}
-                setSelectedFilter={setSelectedHouseType}
-                toFilter={houseTypeFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isRoomCountOpen} onOpenChange={setIsRoomCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedRoomCount ? <>{selectedRoomCount.label}</> : <>Room Count:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Number of rooms</DrawerTitle>
-                  <DrawerDescription>
-                    Specify the number of rooms that you are looking for
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsRoomCountOpen}
-                setSelectedFilter={setSelectedRoomCount}
-                toFilter={roomCountFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMinRoomCountOpen} onOpenChange={setIsMinRoomCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedMinRoomCount ? <>{selectedMinRoomCount.label}</> : <>Min Room:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Minimum number of rooms</DrawerTitle>
-                  <DrawerDescription>Select the minimum number of rooms</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMinRoomCountOpen}
-                setSelectedFilter={setSelectedMinRoomCount}
-                toFilter={roomCountFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMaxRoomCountOpen} onOpenChange={setIsMaxRoomCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedMaxRoomCount ? <>{selectedMaxRoomCount.label}</> : <>Max Room:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Maximum number of rooms</DrawerTitle>
-                  <DrawerDescription>Select the maximum number of rooms</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMaxRoomCountOpen}
-                setSelectedFilter={setSelectedMaxRoomCount}
-                toFilter={roomCountFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isFloorCountOpen} onOpenChange={setIsFloorCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>Floors:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Number of floors</DrawerTitle>
-                  <DrawerDescription>
-                    Select the number of floors the house needs to have
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsFloorCountOpen}
-                setSelectedFilter={setSelectedFloorCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMinFloorCountOpen} onOpenChange={setIsMinFloorCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedMinFloorCount ? <>{selectedMinFloorCount.label}</> : <>Min Floor:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Minimum number of floors</DrawerTitle>
-                  <DrawerDescription>Select the minimum number of floors</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMinFloorCountOpen}
-                setSelectedFilter={setSelectedMinFloorCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMaxFloorCountOpen} onOpenChange={setIsMaxFloorCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedMaxFloorCount ? <>{selectedMaxFloorCount.label}</> : <>Max Floor:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Maximum number of floors</DrawerTitle>
-                  <DrawerDescription>Select the maximum number of floors</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMaxFloorCountOpen}
-                setSelectedFilter={setSelectedMaxFloorCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isKitchenCountOpen} onOpenChange={setIsKitchenCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedKitchenCount ? <>{selectedKitchenCount.label}</> : <>Kitchen:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Number of Kitchen</DrawerTitle>
-                  <DrawerDescription>Select number of Kitchen</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsKitchenCountOpen}
-                setSelectedFilter={setSelectedKitchenCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMinKitchenCountOpen} onOpenChange={setIsMinKitchenCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedMinKitchenCount ? <>{selectedMinKitchenCount.label}</> : <>Min Kitchen:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Minimum number of Kitchen</DrawerTitle>
-                  <DrawerDescription>Select minimum number of Kitchen</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMinKitchenCountOpen}
-                setSelectedFilter={setSelectedMinKitchenCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMaxKitchenCountOpen} onOpenChange={setIsMaxKitchenCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedMaxKitchenCount ? <>{selectedMaxKitchenCount.label}</> : <>Max Kitchen:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Maximum number of Kitchen</DrawerTitle>
-                  <DrawerDescription>Select maximum number of Kitchen</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMaxKitchenCountOpen}
-                setSelectedFilter={setSelectedMaxKitchenCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell
-            open={isSharedBathroomOptionOpen}
-            onOpenChange={setIsSharedBathroomOptionOpen}
-          >
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedSharedBathroomOption ? (
-                  <>{selectedSharedBathroomOption.label}</>
-                ) : (
-                  <>Shared Bathroom:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>House Type</DrawerTitle>
+                    <DrawerDescription>Select the type of house</DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Shared Bathroom</DrawerTitle>
-                  <DrawerDescription>
-                    Do you want to have share bathroom with other?
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsSharedBathroomOptionOpen}
-                setSelectedFilter={setSelectedBathroomOption}
-                toFilter={sharedBathroomFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMinBathroomCountOpen} onOpenChange={setIsMinBathroomCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+                <FilterList
+                  setIsOpen={setIsHouseTypeOpen}
+                  setSelectedFilter={setSelectedHouseType}
+                  toFilter={houseTypeFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          {/* <div>
+            <p className="text-sm">Number of rooms:</p>
+            <Slider
+              label="Room Count"
+              step={1}
+              minValue={1}
+              maxValue={25}
+              value={value}
+              onChange={setValue}
+              className="max-w-md"
+            />
+          </div> */}
+          <div>
+            <p className="text-sm">Number of rooms:</p>
+            <ParentShell open={isRoomCountOpen} onOpenChange={setIsRoomCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedRoomCount ? <>{selectedRoomCount.label}</> : <>Room Count:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedMinBathroomCount ? (
-                  <>{selectedMinBathroomCount.label}</>
-                ) : (
-                  <>Min Bathroom:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Number of rooms</DrawerTitle>
+                    <DrawerDescription>
+                      Specify the number of rooms that you are looking for
+                    </DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Minimum number of bathroom</DrawerTitle>
-                  <DrawerDescription>Select the minimum number of bathroom</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMinBathroomCountOpen}
-                setSelectedFilter={setSelectedMinBathroomCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isMaxBathroomCountOpen} onOpenChange={setIsMaxBathroomCountOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+                <FilterList
+                  setIsOpen={setIsRoomCountOpen}
+                  setSelectedFilter={setSelectedRoomCount}
+                  toFilter={roomCountFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Minimum number of rooms:</p>
+            <ParentShell open={isMinRoomCountOpen} onOpenChange={setIsMinRoomCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMinRoomCount ? <>{selectedMinRoomCount.label}</> : <>Min Room:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedMaxBathroomCount ? (
-                  <>{selectedMaxBathroomCount.label}</>
-                ) : (
-                  <>Max Bathroom:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Minimum number of rooms</DrawerTitle>
+                    <DrawerDescription>Select the minimum number of rooms</DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Maximum number of bathroom</DrawerTitle>
-                  <DrawerDescription>Select the maximum number of bathroom</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsMaxBathroomCountOpen}
-                setSelectedFilter={setSelectedMaxBathroomCount}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isFurnishedOptionOpen} onOpenChange={setIsFurnishedOptionOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+                <FilterList
+                  setIsOpen={setIsMinRoomCountOpen}
+                  setSelectedFilter={setSelectedMinRoomCount}
+                  toFilter={roomCountFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Maximum number of rooms:</p>
+            <ParentShell open={isMaxRoomCountOpen} onOpenChange={setIsMaxRoomCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMaxRoomCount ? <>{selectedMaxRoomCount.label}</> : <>Max Room:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedFurnishedOption ? <>{selectedFurnishedOption.label}</> : <>Furnished:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Furnished</DrawerTitle>
-                  <DrawerDescription>Do you want the house to be furnished?</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsFurnishedOptionOpen}
-                setSelectedFilter={setSelectedFurnishedOption}
-                toFilter={furnishedFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isFacingOptionOpen} onOpenChange={setIsFacingOptionOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedFacingOption ? <>{selectedFacingOption.label}</> : <>Facing:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>House Facing</DrawerTitle>
-                  <DrawerDescription>
-                    What direction do you want the house to face?
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsFacingOptionOpen}
-                setSelectedFilter={setSelectedFacingOption}
-                toFilter={facingFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isCarParkingOptionOpen} onOpenChange={setIsCarParkingOptionOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
-              >
-                {selectedCarParkingOption ? (
-                  <>{selectedCarParkingOption.label}</>
-                ) : (
-                  <>Car Parking:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Maximum number of rooms</DrawerTitle>
+                    <DrawerDescription>Select the maximum number of rooms</DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Car Parking</DrawerTitle>
-                  <DrawerDescription>
-                    Select number of car parking spaces that you need
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsCarParkingOptionOpen}
-                setSelectedFilter={setSelectedCarParkingOption}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isBikeParkingOptionOpen} onOpenChange={setIsBikeParkingOptionOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+                <FilterList
+                  setIsOpen={setIsMaxRoomCountOpen}
+                  setSelectedFilter={setSelectedMaxRoomCount}
+                  toFilter={roomCountFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Number of floors:</p>
+            <ParentShell open={isFloorCountOpen} onOpenChange={setIsFloorCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>Floors:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedBikeParkingOption ? (
-                  <>{selectedBikeParkingOption.label}</>
-                ) : (
-                  <>Bike Parking:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Number of floors</DrawerTitle>
+                    <DrawerDescription>
+                      Select the number of floors the house needs to have
+                    </DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Bike Parking</DrawerTitle>
-                  <DrawerDescription>
-                    Select number of bike parking spaces that you need
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsBikeParkingOptionOpen}
-                setSelectedFilter={setSelectedBikeParkingOption}
-                toFilter={uptoTenCount}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isEVChargingOptionOpen} onOpenChange={setIsEVChargingOptionOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+                <FilterList
+                  setIsOpen={setIsFloorCountOpen}
+                  setSelectedFilter={setSelectedFloorCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Minimum number of floors:</p>
+            <ParentShell open={isMinFloorCountOpen} onOpenChange={setIsMinFloorCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMinFloorCount ? <>{selectedMinFloorCount.label}</> : <>Min Floor:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedEVChargingOption ? (
-                  <>{selectedEVChargingOption.label}</>
-                ) : (
-                  <>EV Charging:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Minimum number of floors</DrawerTitle>
+                    <DrawerDescription>Select the minimum number of floors</DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>EV Charging Facility</DrawerTitle>
-                  <DrawerDescription>
-                    Do you want to have EV Charging Facility already available?
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsEVChargingOptionOpen}
-                setSelectedFilter={setSelectedEVChargingOption}
-                toFilter={evChargingFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell open={isCalendarOptionOpen} onOpenChange={setIsCalendarOptionOpen}>
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+                <FilterList
+                  setIsOpen={setIsMinFloorCountOpen}
+                  setSelectedFilter={setSelectedMinFloorCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Maximum number of floors:</p>
+            <ParentShell open={isMaxFloorCountOpen} onOpenChange={setIsMaxFloorCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMaxFloorCount ? <>{selectedMaxFloorCount.label}</> : <>Max Floor:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedEVChargingOption ? (
-                  <>{selectedEVChargingOption.label}</>
-                ) : (
-                  <>Built Year:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Maximum number of floors</DrawerTitle>
+                    <DrawerDescription>Select the maximum number of floors</DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Built year</DrawerTitle>
-                  <DrawerDescription>
-                    Only the house that are built after the year that you chose will be displayed
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                withCommandInput
-                withCommandText="Search Year"
-                setIsOpen={setIsCalendarOptionOpen}
-                setSelectedFilter={setSelectedCalendarYear}
-                toFilter={yearList}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell
-            open={isHouseConnectedToRoadOptionOpen}
-            onOpenChange={setIsHouseConnectedToRoadOptionOpen}
-          >
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+                <FilterList
+                  setIsOpen={setIsMaxFloorCountOpen}
+                  setSelectedFilter={setSelectedMaxFloorCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Number of Kitchen:</p>
+            <ParentShell open={isKitchenCountOpen} onOpenChange={setIsKitchenCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedKitchenCount ? <>{selectedKitchenCount.label}</> : <>Kitchen:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedHouseConnectedToRoad ? (
-                  <>{selectedHouseConnectedToRoad.label}</>
-                ) : (
-                  <>Connected to road:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Number of Kitchen</DrawerTitle>
+                    <DrawerDescription>Select number of Kitchen</DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
+                <FilterList
+                  setIsOpen={setIsKitchenCountOpen}
+                  setSelectedFilter={setSelectedKitchenCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Minimum number of Kitchen:</p>
+            <ParentShell open={isMinKitchenCountOpen} onOpenChange={setIsMinKitchenCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMinKitchenCount ? (
+                    <>{selectedMinKitchenCount.label}</>
+                  ) : (
+                    <>Min Kitchen:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Minimum number of Kitchen</DrawerTitle>
+                    <DrawerDescription>Select minimum number of Kitchen</DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsMinKitchenCountOpen}
+                  setSelectedFilter={setSelectedMinKitchenCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Maximum number of Kitchen:</p>
+            <ParentShell open={isMaxKitchenCountOpen} onOpenChange={setIsMaxKitchenCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMaxKitchenCount ? (
+                    <>{selectedMaxKitchenCount.label}</>
+                  ) : (
+                    <>Max Kitchen:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Maximum number of Kitchen</DrawerTitle>
+                    <DrawerDescription>Select maximum number of Kitchen</DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsMaxKitchenCountOpen}
+                  setSelectedFilter={setSelectedMaxKitchenCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Shared Bathroom:</p>
+            <ParentShell
+              open={isSharedBathroomOptionOpen}
+              onOpenChange={setIsSharedBathroomOptionOpen}
             >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>House connected to road</DrawerTitle>
-                  <DrawerDescription>
-                    Does the house needs to be connected with the road?
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsHouseConnectedToRoadOptionOpen}
-                setSelectedFilter={setSelectedHouseConnectedToRoad}
-                toFilter={roadConnected}
-              />
-            </ContentShell>
-          </ParentShell>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedSharedBathroomOption ? (
+                    <>{selectedSharedBathroomOption.label}</>
+                  ) : (
+                    <>Shared Bathroom:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Shared Bathroom</DrawerTitle>
+                    <DrawerDescription>
+                      Do you want to have share bathroom with other?
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsSharedBathroomOptionOpen}
+                  setSelectedFilter={setSelectedBathroomOption}
+                  toFilter={sharedBathroomFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Minimum number of Bathroom:</p>
+            <ParentShell open={isMinBathroomCountOpen} onOpenChange={setIsMinBathroomCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMinBathroomCount ? (
+                    <>{selectedMinBathroomCount.label}</>
+                  ) : (
+                    <>Min Bathroom:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Minimum number of bathroom</DrawerTitle>
+                    <DrawerDescription>Select the minimum number of bathroom</DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsMinBathroomCountOpen}
+                  setSelectedFilter={setSelectedMinBathroomCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Maximum number of bathroom:</p>
+            <ParentShell open={isMaxBathroomCountOpen} onOpenChange={setIsMaxBathroomCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedMaxBathroomCount ? (
+                    <>{selectedMaxBathroomCount.label}</>
+                  ) : (
+                    <>Max Bathroom:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Maximum number of bathroom</DrawerTitle>
+                    <DrawerDescription>Select the maximum number of bathroom</DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsMaxBathroomCountOpen}
+                  setSelectedFilter={setSelectedMaxBathroomCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Furnished:</p>
+            <ParentShell open={isFurnishedOptionOpen} onOpenChange={setIsFurnishedOptionOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedFurnishedOption ? <>{selectedFurnishedOption.label}</> : <>Furnished:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Furnished</DrawerTitle>
+                    <DrawerDescription>Do you want the house to be furnished?</DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsFurnishedOptionOpen}
+                  setSelectedFilter={setSelectedFurnishedOption}
+                  toFilter={furnishedFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Facing direction:</p>
+            <ParentShell open={isFacingOptionOpen} onOpenChange={setIsFacingOptionOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedFacingOption ? <>{selectedFacingOption.label}</> : <>Facing:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>House Facing</DrawerTitle>
+                    <DrawerDescription>
+                      What direction do you want the house to face?
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsFacingOptionOpen}
+                  setSelectedFilter={setSelectedFacingOption}
+                  toFilter={facingFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Car Parking:</p>
+            <ParentShell open={isCarParkingOptionOpen} onOpenChange={setIsCarParkingOptionOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedCarParkingOption ? (
+                    <>{selectedCarParkingOption.label}</>
+                  ) : (
+                    <>Car Parking:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Car Parking</DrawerTitle>
+                    <DrawerDescription>
+                      Select number of car parking spaces that you need
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsCarParkingOptionOpen}
+                  setSelectedFilter={setSelectedCarParkingOption}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Bike Parking:</p>
+            <ParentShell open={isBikeParkingOptionOpen} onOpenChange={setIsBikeParkingOptionOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedBikeParkingOption ? (
+                    <>{selectedBikeParkingOption.label}</>
+                  ) : (
+                    <>Bike Parking:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Bike Parking</DrawerTitle>
+                    <DrawerDescription>
+                      Select number of bike parking spaces that you need
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsBikeParkingOptionOpen}
+                  setSelectedFilter={setSelectedBikeParkingOption}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">EV Charging:</p>
+            <ParentShell open={isEVChargingOptionOpen} onOpenChange={setIsEVChargingOptionOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedEVChargingOption ? (
+                    <>{selectedEVChargingOption.label}</>
+                  ) : (
+                    <>EV Charging:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>EV Charging Facility</DrawerTitle>
+                    <DrawerDescription>
+                      Do you want to have EV Charging Facility already available?
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsEVChargingOptionOpen}
+                  setSelectedFilter={setSelectedEVChargingOption}
+                  toFilter={evChargingFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Built Year:</p>
+            <ParentShell open={isCalendarOptionOpen} onOpenChange={setIsCalendarOptionOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedEVChargingOption ? (
+                    <>{selectedEVChargingOption.label}</>
+                  ) : (
+                    <>Built Year:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Built year</DrawerTitle>
+                    <DrawerDescription>
+                      Only the house that are built after the year that you chose will be displayed
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  withCommandInput
+                  withCommandText="Search Year"
+                  setIsOpen={setIsCalendarOptionOpen}
+                  setSelectedFilter={setSelectedCalendarYear}
+                  toFilter={yearList}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Connected to road:</p>
+            <ParentShell
+              open={isHouseConnectedToRoadOptionOpen}
+              onOpenChange={setIsHouseConnectedToRoadOptionOpen}
+            >
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedHouseConnectedToRoad ? (
+                    <>{selectedHouseConnectedToRoad.label}</>
+                  ) : (
+                    <>Connected to road:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>House connected to road</DrawerTitle>
+                    <DrawerDescription>
+                      Does the house needs to be connected with the road?
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsHouseConnectedToRoadOptionOpen}
+                  setSelectedFilter={setSelectedHouseConnectedToRoad}
+                  toFilter={roadConnected}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
           {selectedHouseConnectedToRoad?.value ? (
             selectedHouseConnectedToRoad.value === "false" ? (
-              <ParentShell
-                open={isHouseDistanceToRoadOptionOpen}
-                onOpenChange={setIsHouseDistanceToRoadOptionOpen}
-              >
-                <ChildrenShell asChild>
-                  <Button
-                    variant="outline"
-                    className={
-                      isOnDesktop
-                        ? "w-[175px] justify-between p-2"
-                        : "w-[165px] justify-between p-2"
-                    }
-                  >
-                    {selectedHouseDistanceToRoad ? (
-                      <>{selectedHouseDistanceToRoad.label}</>
-                    ) : (
-                      <>Distance to road:</>
-                    )}
-                    <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </ChildrenShell>
-                <ContentShell
-                  className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-                  align="start"
+              <div>
+                <p className="text-sm">Distance to road:</p>
+                <ParentShell
+                  open={isHouseDistanceToRoadOptionOpen}
+                  onOpenChange={setIsHouseDistanceToRoadOptionOpen}
                 >
-                  {!isOnDesktop && (
-                    <DrawerHeader>
-                      <DrawerTitle>Distance to road</DrawerTitle>
-                      <DrawerDescription>
-                        Select the distance the house needs to be from the road
-                      </DrawerDescription>
-                    </DrawerHeader>
-                  )}
-                  <FilterList
-                    setIsOpen={setIsHouseDistanceToRoadOptionOpen}
-                    setSelectedFilter={setSelectedHouseDistanceToRoad}
-                    toFilter={distanceToRoad}
-                  />
-                </ContentShell>
-              </ParentShell>
+                  <ChildrenShell asChild>
+                    <Button
+                      variant="outline"
+                      className={
+                        isOnDesktop
+                          ? "w-[175px] justify-between p-2"
+                          : "w-[165px] justify-between p-2"
+                      }
+                    >
+                      {selectedHouseDistanceToRoad ? (
+                        <>{selectedHouseDistanceToRoad.label}</>
+                      ) : (
+                        <>Distance to road:</>
+                      )}
+                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </ChildrenShell>
+                  <ContentShell
+                    className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                    align="start"
+                  >
+                    {!isOnDesktop && (
+                      <DrawerHeader>
+                        <DrawerTitle>Distance to road</DrawerTitle>
+                        <DrawerDescription>
+                          Select the distance the house needs to be from the road
+                        </DrawerDescription>
+                      </DrawerHeader>
+                    )}
+                    <FilterList
+                      setIsOpen={setIsHouseDistanceToRoadOptionOpen}
+                      setSelectedFilter={setSelectedHouseDistanceToRoad}
+                      toFilter={distanceToRoad}
+                    />
+                  </ContentShell>
+                </ParentShell>
+              </div>
             ) : null
           ) : null}
         </>
       ) : selectedPropertyType?.value === "Land" ? (
         <>
-          <ParentShell open={isLandTypeOptionOpen} onOpenChange={setIsLandTypeOptionOpen}>
-            <ChildrenShell asChild>
-              <Button variant="outline" className="w-[175px] justify-between p-2 overflow-hidden">
-                {selectedLandTypeOption ? <>{selectedLandTypeOption.label}</> : <>Land Type:</>}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[250px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
-            >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Land Type</DrawerTitle>
-                  <DrawerDescription>Select the type of land</DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsLandTypeOptionOpen}
-                setSelectedFilter={setSelectedLandTypeOption}
-                toFilter={landTypeFilter}
-              />
-            </ContentShell>
-          </ParentShell>
-          <ParentShell
-            open={isLandConnectedToRoadOptionOpen}
-            onOpenChange={setIsLandConnectedToRoadOptionOpen}
-          >
-            <ChildrenShell asChild>
-              <Button
-                variant="outline"
-                className={
-                  isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
-                }
+          <div>
+            <p className="text-sm">Land Type:</p>
+            <ParentShell open={isLandTypeOptionOpen} onOpenChange={setIsLandTypeOptionOpen}>
+              <ChildrenShell asChild>
+                <Button variant="outline" className="w-[175px] justify-between p-2 overflow-hidden">
+                  {selectedLandTypeOption ? <>{selectedLandTypeOption.label}</> : <>Land Type:</>}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[250px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
               >
-                {selectedLandConnectedToRoad ? (
-                  <>{selectedLandConnectedToRoad.label}</>
-                ) : (
-                  <>Connected to road:</>
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Land Type</DrawerTitle>
+                    <DrawerDescription>Select the type of land</DrawerDescription>
+                  </DrawerHeader>
                 )}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </ChildrenShell>
-            <ContentShell
-              className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-              align="start"
+                <FilterList
+                  setIsOpen={setIsLandTypeOptionOpen}
+                  setSelectedFilter={setSelectedLandTypeOption}
+                  toFilter={landTypeFilter}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div>
+            <p className="text-sm">Connected to road:</p>
+            <ParentShell
+              open={isLandConnectedToRoadOptionOpen}
+              onOpenChange={setIsLandConnectedToRoadOptionOpen}
             >
-              {!isOnDesktop && (
-                <DrawerHeader>
-                  <DrawerTitle>Connected to road</DrawerTitle>
-                  <DrawerDescription>
-                    Do you want the land to be connected to the road?
-                  </DrawerDescription>
-                </DrawerHeader>
-              )}
-              <FilterList
-                setIsOpen={setIsLandConnectedToRoadOptionOpen}
-                setSelectedFilter={setSelectedLandConnectedToRoad}
-                toFilter={roadConnected}
-              />
-            </ContentShell>
-          </ParentShell>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                  }
+                >
+                  {selectedLandConnectedToRoad ? (
+                    <>{selectedLandConnectedToRoad.label}</>
+                  ) : (
+                    <>Connected to road:</>
+                  )}
+                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Connected to road</DrawerTitle>
+                    <DrawerDescription>
+                      Do you want the land to be connected to the road?
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsLandConnectedToRoadOptionOpen}
+                  setSelectedFilter={setSelectedLandConnectedToRoad}
+                  toFilter={roadConnected}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
           {selectedLandConnectedToRoad?.value ? (
             selectedLandConnectedToRoad.value === "false" ? (
-              <ParentShell
-                open={isLandDistanceToRoadOptionOpen}
-                onOpenChange={setIsLandDistanceToRoadOptionOpen}
-              >
-                <ChildrenShell asChild>
-                  <Button
-                    variant="outline"
-                    className={
-                      isOnDesktop
-                        ? "w-[175px] justify-between p-2"
-                        : "w-[165px] justify-between p-2"
-                    }
-                  >
-                    {selectedLandDistanceToRoad ? (
-                      <>{selectedLandDistanceToRoad.label}</>
-                    ) : (
-                      <>Distance to road:</>
-                    )}
-                    <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </ChildrenShell>
-                <ContentShell
-                  className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-                  align="start"
+              <div>
+                <p className="text-sm">Distance to road:</p>
+                <ParentShell
+                  open={isLandDistanceToRoadOptionOpen}
+                  onOpenChange={setIsLandDistanceToRoadOptionOpen}
                 >
-                  {!isOnDesktop && (
-                    <DrawerHeader>
-                      <DrawerTitle>Distance to road</DrawerTitle>
-                      <DrawerDescription>
-                        Select the distance the land needs to be from the road
-                      </DrawerDescription>
-                    </DrawerHeader>
-                  )}
-                  <FilterList
-                    setIsOpen={setIsLandDistanceToRoadOptionOpen}
-                    setSelectedFilter={setSelectedLandDistanceToRoad}
-                    toFilter={distanceToRoad}
-                  />
-                </ContentShell>
-              </ParentShell>
+                  <ChildrenShell asChild>
+                    <Button
+                      variant="outline"
+                      className={
+                        isOnDesktop
+                          ? "w-[175px] justify-between p-2"
+                          : "w-[165px] justify-between p-2"
+                      }
+                    >
+                      {selectedLandDistanceToRoad ? (
+                        <>{selectedLandDistanceToRoad.label}</>
+                      ) : (
+                        <>Distance to road:</>
+                      )}
+                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </ChildrenShell>
+                  <ContentShell
+                    className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                    align="start"
+                  >
+                    {!isOnDesktop && (
+                      <DrawerHeader>
+                        <DrawerTitle>Distance to road</DrawerTitle>
+                        <DrawerDescription>
+                          Select the distance the land needs to be from the road
+                        </DrawerDescription>
+                      </DrawerHeader>
+                    )}
+                    <FilterList
+                      setIsOpen={setIsLandDistanceToRoadOptionOpen}
+                      setSelectedFilter={setSelectedLandDistanceToRoad}
+                      toFilter={distanceToRoad}
+                    />
+                  </ContentShell>
+                </ParentShell>
+              </div>
             ) : null
           ) : null}
         </>
