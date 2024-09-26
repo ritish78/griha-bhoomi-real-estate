@@ -15,7 +15,11 @@ export interface FeaturedPageProps {
 export default async function FeaturedPage(props: FeaturedPageProps) {
   const pageNumber = Number(props?.searchParams?.page) || 1;
 
-  if (pageNumber <= 0) {
+  if (
+    pageNumber < 1 ||
+    Number(props?.searchParams?.page) === 0 ||
+    isNaN(Number(props?.searchParams?.page))
+  ) {
     redirect("/property/featured?page=1");
   }
 
@@ -26,6 +30,10 @@ export default async function FeaturedPage(props: FeaturedPageProps) {
 
   if ("error" in listOfFeaturedProperties) {
     return <p>Oops! An error occurred! {listOfFeaturedProperties.error}</p>;
+  }
+
+  if (pageNumber > listOfFeaturedProperties.numberOfPages) {
+    redirect(`/property/featured?page=${listOfFeaturedProperties}`);
   }
 
   return (

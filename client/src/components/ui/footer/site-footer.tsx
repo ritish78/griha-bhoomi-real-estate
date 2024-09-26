@@ -62,7 +62,7 @@ export function SiteFooter() {
           </div>
           <div className="flex items-center space-x-1">
             <Link
-              href={siteConfig.links.github}
+              href={`${siteConfig.links.github}/griha-bhoomi-real-estate`}
               target="_blank"
               rel="noreferrer"
               className={cn(

@@ -22,15 +22,6 @@ export default function PaginationButton({ totalPages, page = 1 }: PaginationBut
   const canShowNextEllipsis = currentPage + 3 <= totalPages;
   const canShowPrevEllipsis = currentPage - 3 >= 1;
 
-  console.log({
-    currentPage,
-    totalPages,
-    hasNextPage,
-    hasPrevPage,
-    canShowNextEllipsis,
-    canShowPrevEllipsis
-  });
-
   const getPagesToShow = React.useMemo(() => {
     // let startPage = currentPage === 1 ? 1 : currentPage - 1;
     // let endPage = totalPages > currentPage ? currentPage + 1 : totalPages;

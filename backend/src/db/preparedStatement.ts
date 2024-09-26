@@ -239,7 +239,7 @@ export const preparedGetPropertyBySlug = db
     houseArea: house.area,
     furnished: house.furnished,
     houseConnectedToRoad: house.connectedToRoad,
-    houesDistanceToRoad: house.distanceToRoad,
+    houseDistanceToRoad: house.distanceToRoad,
     landType: land.landType,
     landArea: land.area,
     length: land.length,
