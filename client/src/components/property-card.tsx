@@ -19,7 +19,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Card
       className={cn(
-        // `${property.featured ? "featured-property" : null} border shadow-md size-full relative overflow-hidden rounded-md`
+        // `${property.featured ? "dark-featured-property" : null} border shadow-md size-full relative overflow-hidden rounded-md`
         "border shadow-md size-full relative overflow-hidden rounded-md flex flex-col"
       )}
     >
@@ -57,7 +57,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </AspectRatio>
         </CardHeader>
       </Link>
-      <CardContent className="p-4 border-b border-gray-200 flex flex-col flex-grow">
+      <CardContent className="p-4 border-b-2 flex flex-col flex-grow">
         <div className="flex-grow">
           <CardTitle className="text-lg mb-2">
             <strong>

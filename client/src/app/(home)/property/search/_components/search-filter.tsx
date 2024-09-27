@@ -483,7 +483,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   useEffect(() => {
     startTransition(() => {
       const newQueryString = createQueryString({
-        minPrice:
+        minprice:
           minPrice.trim().length > 0 &&
           (maxPrice.trim().length === 0 ||
             Number(maxPrice) === 0 ||
@@ -501,7 +501,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   useEffect(() => {
     startTransition(() => {
       const newQueryString = createQueryString({
-        maxPrice:
+        maxprice:
           maxPrice.trim().length > 0 &&
           (minPrice.trim().length === 0 ||
             Number(minPrice) === 0 ||
@@ -1565,11 +1565,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedEVChargingOption ? (
-                    <>{selectedEVChargingOption.label}</>
-                  ) : (
-                    <>Built Year:</>
-                  )}
+                  {selectedCalendarYear ? <>{selectedCalendarYear.label}</> : <>Built Year:</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>

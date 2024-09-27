@@ -16,13 +16,9 @@ export default async function FeaturedPage(props: FeaturedPageProps) {
   const searchParams = props.searchParams;
   const pageNumber = Number(props?.searchParams?.page) || 1;
 
-  if (
-    pageNumber < 1 ||
-    Number(props?.searchParams?.page) === 0 ||
-    isNaN(Number(props?.searchParams?.page))
-  ) {
-    redirect("/property/featured?page=1");
-  }
+  // if (pageNumber < 1 || pageNumber === 0 || isNaN(Number(props?.searchParams?.page))) {
+  //   redirect("/property/featured?page=1");
+  // }
 
   const listOfFeaturedProperties: ListOfPropertiesResponse = await getListOfFeaturedProperties(
     pageNumber,
@@ -32,6 +28,8 @@ export default async function FeaturedPage(props: FeaturedPageProps) {
   if ("error" in listOfFeaturedProperties) {
     return <p>Oops! An error occurred! {listOfFeaturedProperties.error}</p>;
   }
+
+  console.log("Number of pages:", listOfFeaturedProperties.numberOfPages);
 
   if (pageNumber > listOfFeaturedProperties.numberOfPages) {
     redirect(`/property/featured?page=${listOfFeaturedProperties.numberOfPages}`);
