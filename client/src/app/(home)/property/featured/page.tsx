@@ -9,10 +9,11 @@ import PaginationButton from "@/components/pagination-button";
 
 export interface FeaturedPageProps {
   params: { [key: string]: string | string[] | undefined };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Record<string, string | number | null>;
 }
 
 export default async function FeaturedPage(props: FeaturedPageProps) {
+  const searchParams = props.searchParams;
   const pageNumber = Number(props?.searchParams?.page) || 1;
 
   if (
@@ -33,7 +34,7 @@ export default async function FeaturedPage(props: FeaturedPageProps) {
   }
 
   if (pageNumber > listOfFeaturedProperties.numberOfPages) {
-    redirect(`/property/featured?page=${listOfFeaturedProperties}`);
+    redirect(`/property/featured?page=${listOfFeaturedProperties.numberOfPages}`);
   }
 
   return (
@@ -47,7 +48,11 @@ export default async function FeaturedPage(props: FeaturedPageProps) {
           <PropertyListPage propertyList={listOfFeaturedProperties} />
         </Suspense>
       </PropertyPageContent>
-      <PaginationButton totalPages={listOfFeaturedProperties.numberOfPages} page={pageNumber} />
+      <PaginationButton
+        searchParams={searchParams}
+        totalPages={listOfFeaturedProperties.numberOfPages}
+        page={pageNumber}
+      />
     </div>
   );
 }

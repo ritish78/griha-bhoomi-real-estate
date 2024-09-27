@@ -9,10 +9,11 @@ import PaginationButton from "@/components/pagination-button";
 
 export interface TrendingPageProps {
   params: { [key: string]: string | string[] | undefined };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Record<string, string | number | null>;
 }
 
 export default async function TrendingPage(props: TrendingPageProps) {
+  const searchParams = props.searchParams;
   const pageNumber = Number(props?.searchParams?.page) || 1;
 
   if (
@@ -48,7 +49,11 @@ export default async function TrendingPage(props: TrendingPageProps) {
           <PropertyListPage propertyList={listOfTrendingProperties} />
         </Suspense>
       </PropertyPageContent>
-      {/* <PaginationButton totalPages={listOfTrendingProperties.numberOfPages} page={pageNumber} /> */}
+      <PaginationButton
+        searchParams={searchParams}
+        totalPages={listOfTrendingProperties.numberOfPages}
+        page={pageNumber}
+      />
     </div>
   );
 }

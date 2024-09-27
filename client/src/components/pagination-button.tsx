@@ -35,7 +35,7 @@ export default function PaginationButton({
     // let startPage = currentPage === 1 ? 1 : currentPage - 1;
     // let endPage = totalPages > currentPage ? currentPage + 1 : totalPages;
     let startPage = currentPage - 2;
-    let endPage = totalPages > currentPage ? currentPage + 2 : totalPages;
+    let endPage = totalPages > 2 ? (currentPage ? currentPage + 2 : totalPages) : totalPages;
 
     if (currentPage <= 3) {
       startPage = 1;

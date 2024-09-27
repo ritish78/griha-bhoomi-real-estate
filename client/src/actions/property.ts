@@ -33,7 +33,7 @@ export async function getPropertyBySlug(slug: string) {
   }
 }
 
-export async function getListOfFeaturedProperties(page: number, limit: number = 3) {
+export async function getListOfFeaturedProperties(page: number, limit: number = 12) {
   try {
     const response = await fetch(
       `http://localhost:5000/api/v1/property/featured?page=${page}&limit=${limit}`,
