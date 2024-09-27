@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardContent
 } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+// import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ImageSkeleton } from "@/components/ui/image-skeleton";
 
 interface PropertyCardSkeletonProps extends React.ComponentPropsWithoutRef<typeof Card> {}

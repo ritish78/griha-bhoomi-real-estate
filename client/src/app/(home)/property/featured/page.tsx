@@ -9,7 +9,6 @@ import PaginationButton from "@/components/pagination-button";
 
 export interface FeaturedPageProps {
   params: { [key: string]: string | string[] | undefined };
-  // searchParams?: { [key: string]: string | string[] | undefined };
   searchParams: Record<string, string | number | null>;
 }
 
