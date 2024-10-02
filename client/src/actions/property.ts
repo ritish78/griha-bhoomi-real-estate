@@ -33,7 +33,7 @@ export async function getPropertyBySlug(slug: string) {
   }
 }
 
-export async function getListOfFeaturedProperties(page: number, limit: number = 12) {
+export async function getListOfFeaturedProperties(page: number, limit: number = 18) {
   try {
     const response = await fetch(
       `http://localhost:5000/api/v1/property/featured?page=${page}&limit=${limit}`,
@@ -50,11 +50,14 @@ export async function getListOfFeaturedProperties(page: number, limit: number = 
   }
 }
 
-export async function getFilteredListOfProperties(filters: string) {
+export async function getFilteredListOfProperties(filters: string, limit: number = 18) {
   try {
-    const response = await fetch(`http://localhost:5000/api/v1/property/filter?${filters}`, {
-      next: { revalidate: 60 } //Cache in seconds to revalidate
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/v1/property/filter?${filters}&limit=${limit}`,
+      {
+        next: { revalidate: 60 } //Cache in seconds to revalidate
+      }
+    );
 
     const data = await response.json();
 

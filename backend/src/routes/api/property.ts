@@ -131,7 +131,7 @@ router.route("/").get(async (req: Request, res: Response) => {
   let limit: number = Number(req.query.limit) || PROPERTY_COUNT_LIMIT_PER_PAGE;
 
   //Setting a guard rail just in case somebody sends in very high limit number
-  if (limit <= 0 || limit > 20) {
+  if (limit <= 0 || limit > 24) {
     limit = PROPERTY_COUNT_LIMIT_PER_PAGE;
   }
 
@@ -205,8 +205,8 @@ router.route("/featured").get(async (req: Request, res: Response) => {
 
   //If the user submits the limit of less than 0 or greater than 12, then we set
   //the defauly value to 12 as someone might send very high number of limit count
-  if (limit <= 0 || limit >= 12) {
-    limit = 12;
+  if (limit <= 0 || limit >= 24) {
+    limit = 24;
   }
 
   const numberOfPages = Math.ceil(numberOfProperties[0].count / limit);

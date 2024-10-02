@@ -22,7 +22,7 @@ export default async function FeaturedPage(props: FeaturedPageProps) {
 
   const listOfFeaturedProperties: ListOfPropertiesResponse = await getListOfFeaturedProperties(
     pageNumber,
-    12
+    18
   );
 
   if ("error" in listOfFeaturedProperties) {

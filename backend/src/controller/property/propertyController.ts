@@ -604,13 +604,31 @@ export const filterProperties = async (filters) => {
     const nowToday = new Date();
     const nowTodayInISOString = nowToday.toISOString();
 
-    console.log("Map Land Filter Options:", mapLandFilterOptions);
-
     //To get the number of filtered properties, we use one select() from dizzle where we
     //get the count and also the list of properties from where() clause.
     const filteredProperties = await db
       .select({
-        listOfProperties: property,
+        id: property.id,
+        title: property.title,
+        slug: property.slug,
+        description: property.description,
+        toRent: property.toRent,
+        propertyType: property.propertyType,
+        price: property.price,
+        imageUrl: property.imageUrl,
+        status: property.status,
+        featured: property.featured,
+        views: property.views,
+        street: address.street,
+        municipality: address.municipality,
+        city: address.municipality,
+        district: address.district,
+        roomCount: house.roomCount,
+        bathroomCount: house.bathroomCount,
+        houseArea: house.area,
+        length: land.length,
+        breadth: land.breadth,
+        landArea: land.area,
         numberOfFilteredProperties: sql<number>`count(*) over()`
         // tsrank: sql`ts_rank(search_vector, to_tsquery('english', '${mapPropertyFilterOptions.get("keyword").replace(" ", " | ")}')) as rank`
       })
@@ -800,7 +818,7 @@ export const filterProperties = async (filters) => {
       .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
       .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
 
-    console.log("Filtered properties", filteredProperties);
+    // console.log("Filtered properties", filteredProperties);
 
     //We are returning in the shape of:
     /**
@@ -838,8 +856,7 @@ export const filterProperties = async (filters) => {
         filteredProperties.length > 0
           ? Math.ceil(filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE)
           : 1,
-      properties:
-        filteredProperties.length > 0 ? filteredProperties.map((result) => result.listOfProperties) : []
+      properties: filteredProperties.length > 0 ? filteredProperties : []
     };
   } catch (error) {
     console.log("Error occurred while filtering results!");

@@ -27,7 +27,7 @@ export default async function TrendingPage(props: TrendingPageProps) {
   //getListOfProperties fetches properties and sorts it by views count by default
   const listOfTrendingProperties: ListOfPropertiesResponse = await getListOfProperties(
     pageNumber,
-    12
+    18
   );
 
   if ("error" in listOfTrendingProperties) {
