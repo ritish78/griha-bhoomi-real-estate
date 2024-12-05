@@ -29,6 +29,10 @@ interface SearchFilterProps extends React.HTMLAttributes<HTMLElement> {
 
 const propertyFilter: Filter[] = [
   {
+    value: null,
+    label: "Any"
+  },
+  {
     value: "House",
     label: "House"
   },
@@ -40,6 +44,10 @@ const propertyFilter: Filter[] = [
 
 const rentFilter: Filter[] = [
   {
+    value: null,
+    label: "Any"
+  },
+  {
     value: "Sale",
     label: "Buy"
   },
@@ -50,6 +58,10 @@ const rentFilter: Filter[] = [
 ];
 
 const houseTypeFilter: Filter[] = [
+  {
+    value: null,
+    label: "Any"
+  },
   {
     value: "House",
     label: "House"
@@ -73,6 +85,10 @@ const houseTypeFilter: Filter[] = [
 ];
 
 const roomCountFilter: Filter[] = [
+  {
+    value: null,
+    label: "Any"
+  },
   {
     value: "1",
     label: "1"
@@ -141,6 +157,10 @@ const roomCountFilter: Filter[] = [
 
 const uptoTenCount: Filter[] = [
   {
+    value: null,
+    label: "Any"
+  },
+  {
     value: "1",
     label: "1"
   },
@@ -184,6 +204,10 @@ const uptoTenCount: Filter[] = [
 
 const sharedBathroomFilter: Filter[] = [
   {
+    value: null,
+    label: "Any"
+  },
+  {
     value: "true",
     label: "Sharing"
   },
@@ -195,6 +219,10 @@ const sharedBathroomFilter: Filter[] = [
 
 const furnishedFilter: Filter[] = [
   {
+    value: null,
+    label: "Any"
+  },
+  {
     value: "true",
     label: "Furnished"
   },
@@ -205,6 +233,10 @@ const furnishedFilter: Filter[] = [
 ];
 
 const facingFilter: Filter[] = [
+  {
+    value: null,
+    label: "Any"
+  },
   {
     value: "North",
     label: "North"
@@ -241,6 +273,10 @@ const facingFilter: Filter[] = [
 
 const evChargingFilter: Filter[] = [
   {
+    value: null,
+    label: "Any"
+  },
+  {
     value: "true",
     label: "Yes - available"
   },
@@ -252,6 +288,10 @@ const evChargingFilter: Filter[] = [
 
 const roadConnected: Filter[] = [
   {
+    value: null,
+    label: "Any"
+  },
+  {
     value: "true",
     label: "Yes - connected"
   },
@@ -262,6 +302,10 @@ const roadConnected: Filter[] = [
 ];
 
 const distanceToRoad: Filter[] = [
+  {
+    value: null,
+    label: "Any"
+  },
   {
     value: "10",
     label: "less than 10 meters"
@@ -301,6 +345,10 @@ const distanceToRoad: Filter[] = [
 ];
 
 const landTypeFilter: Filter[] = [
+  {
+    value: null,
+    label: "Any"
+  },
   {
     value: "residential",
     label: "Residential - To build home"
@@ -422,7 +470,39 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
 
   useEffect(() => {
     startTransition(() => {
-      if (selectedPropertyType?.value === "House") {
+      if (selectedPropertyType?.value == null) {
+        const newQueryString = createQueryString({
+          propertytype: null,
+          landtype: null,
+          landconnectedtoroad: null,
+          landdistancetoroad: null,
+          housetype: null,
+          roomcount: null,
+          minroomcount: null,
+          maxroomcount: null,
+          floorcount: null,
+          minfloorcount: null,
+          maxfloorcount: null,
+          kitchencount: null,
+          minkitchencount: null,
+          maxkitchencount: null,
+          sharedbathroom: null,
+          minbathroomcount: null,
+          maxbathroomcount: null,
+          furnished: null,
+          facing: null,
+          carparking: null,
+          bikeparking: null,
+          evcharging: null,
+          builtat: null,
+          houseconnectedtoroad: null,
+          housedistancetoroad: null
+        });
+
+        router.push(`${pathname}?${newQueryString}`, {
+          scroll: false
+        });
+      } else if (selectedPropertyType?.value === "House") {
         //Setting default value of null if the user switches from "Land" to "House", the applied filters will disappear
         const newQueryString = createQueryString({
           propertytype: selectedPropertyType?.value ? selectedPropertyType.value : null,
@@ -836,7 +916,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                 isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
               }
             >
-              {selectedPropertyType ? <>{selectedPropertyType.label}</> : <>House/Land:</>}
+              {selectedPropertyType ? <>{selectedPropertyType.label}</> : <>{"\u00A0"}</>}
               <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </ChildrenShell>
@@ -868,7 +948,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                 isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
               }
             >
-              {selectedRent ? <>{selectedRent.label}</> : <>Buy/Rent:</>}
+              {selectedRent ? <>{selectedRent.label}</> : <>{"\u00A0"}</>}
               <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </ChildrenShell>
@@ -928,7 +1008,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedHouseType ? <>{selectedHouseType.label}</> : <>House Type:</>}
+                  {selectedHouseType ? <>{selectedHouseType.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -972,7 +1052,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedRoomCount ? <>{selectedRoomCount.label}</> : <>Room Count:</>}
+                  {selectedRoomCount ? <>{selectedRoomCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1006,7 +1086,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedMinRoomCount ? <>{selectedMinRoomCount.label}</> : <>Min Room:</>}
+                  {selectedMinRoomCount ? <>{selectedMinRoomCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1038,7 +1118,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedMaxRoomCount ? <>{selectedMaxRoomCount.label}</> : <>Max Room:</>}
+                  {selectedMaxRoomCount ? <>{selectedMaxRoomCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1070,7 +1150,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>Floors:</>}
+                  {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1104,7 +1184,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedMinFloorCount ? <>{selectedMinFloorCount.label}</> : <>Min Floor:</>}
+                  {selectedMinFloorCount ? <>{selectedMinFloorCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1136,7 +1216,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedMaxFloorCount ? <>{selectedMaxFloorCount.label}</> : <>Max Floor:</>}
+                  {selectedMaxFloorCount ? <>{selectedMaxFloorCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1168,7 +1248,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedKitchenCount ? <>{selectedKitchenCount.label}</> : <>Kitchen:</>}
+                  {selectedKitchenCount ? <>{selectedKitchenCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1200,11 +1280,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedMinKitchenCount ? (
-                    <>{selectedMinKitchenCount.label}</>
-                  ) : (
-                    <>Min Kitchen:</>
-                  )}
+                  {selectedMinKitchenCount ? <>{selectedMinKitchenCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1236,11 +1312,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedMaxKitchenCount ? (
-                    <>{selectedMaxKitchenCount.label}</>
-                  ) : (
-                    <>Max Kitchen:</>
-                  )}
+                  {selectedMaxKitchenCount ? <>{selectedMaxKitchenCount.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1278,7 +1350,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedSharedBathroomOption ? (
                     <>{selectedSharedBathroomOption.label}</>
                   ) : (
-                    <>Shared Bathroom:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1316,7 +1388,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedMinBathroomCount ? (
                     <>{selectedMinBathroomCount.label}</>
                   ) : (
-                    <>Min Bathroom:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1352,7 +1424,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedMaxBathroomCount ? (
                     <>{selectedMaxBathroomCount.label}</>
                   ) : (
-                    <>Max Bathroom:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1385,7 +1457,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedFurnishedOption ? <>{selectedFurnishedOption.label}</> : <>Furnished:</>}
+                  {selectedFurnishedOption ? <>{selectedFurnishedOption.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1417,7 +1489,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedFacingOption ? <>{selectedFacingOption.label}</> : <>Facing:</>}
+                  {selectedFacingOption ? <>{selectedFacingOption.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1454,7 +1526,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedCarParkingOption ? (
                     <>{selectedCarParkingOption.label}</>
                   ) : (
-                    <>Car Parking:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1492,7 +1564,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedBikeParkingOption ? (
                     <>{selectedBikeParkingOption.label}</>
                   ) : (
-                    <>Bike Parking:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1530,7 +1602,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedEVChargingOption ? (
                     <>{selectedEVChargingOption.label}</>
                   ) : (
-                    <>EV Charging:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1565,7 +1637,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                     isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
                   }
                 >
-                  {selectedCalendarYear ? <>{selectedCalendarYear.label}</> : <>Built Year:</>}
+                  {selectedCalendarYear ? <>{selectedCalendarYear.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1607,7 +1679,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedHouseConnectedToRoad ? (
                     <>{selectedHouseConnectedToRoad.label}</>
                   ) : (
-                    <>Connected to road:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1652,7 +1724,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                       {selectedHouseDistanceToRoad ? (
                         <>{selectedHouseDistanceToRoad.label}</>
                       ) : (
-                        <>Distance to road:</>
+                        <>{"\u00A0"}</>
                       )}
                       <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -1687,7 +1759,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
             <ParentShell open={isLandTypeOptionOpen} onOpenChange={setIsLandTypeOptionOpen}>
               <ChildrenShell asChild>
                 <Button variant="outline" className="w-[175px] justify-between p-2 overflow-hidden">
-                  {selectedLandTypeOption ? <>{selectedLandTypeOption.label}</> : <>Land Type:</>}
+                  {selectedLandTypeOption ? <>{selectedLandTypeOption.label}</> : <>{"\u00A0"}</>}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
@@ -1725,7 +1797,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                   {selectedLandConnectedToRoad ? (
                     <>{selectedLandConnectedToRoad.label}</>
                   ) : (
-                    <>Connected to road:</>
+                    <>{"\u00A0"}</>
                   )}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -1770,7 +1842,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                       {selectedLandDistanceToRoad ? (
                         <>{selectedLandDistanceToRoad.label}</>
                       ) : (
-                        <>Distance to road:</>
+                        <>{"\u00A0"}</>
                       )}
                       <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>

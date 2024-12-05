@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/command";
 
 export type Filter = {
-  value: string;
+  value: string | null;
   label: string;
 };
 
@@ -33,18 +33,24 @@ export function FilterList({
       <CommandList>
         {withCommandInput ? <CommandEmpty>No results found.</CommandEmpty> : null}
         <CommandGroup>
-          {toFilter.map((item) => (
-            <CommandItem
-              key={item.value}
-              value={item.value}
-              onSelect={(value) => {
-                setSelectedFilter(toFilter.find((priority) => priority.value === value) || null);
-                setIsOpen(false);
-              }}
-            >
-              {item.label}
-            </CommandItem>
-          ))}
+          {toFilter.map(
+            (item) => (
+              // item.value !== null ? (
+              <CommandItem
+                key={item.label}
+                value={item.value ?? ""}
+                onSelect={(value) => {
+                  setSelectedFilter(toFilter.find((priority) => priority.value === value) || null);
+                  setIsOpen(false);
+                }}
+              >
+                {item.label}
+              </CommandItem>
+            )
+            // ) : (
+
+            // )
+          )}
         </CommandGroup>
       </CommandList>
     </Command>
