@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/drawer";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
-import { Icons } from "@/components/icons";
 
 import { Input } from "@/components/ui/input";
 
@@ -30,7 +29,7 @@ interface SearchFilterProps extends React.HTMLAttributes<HTMLElement> {
 const propertyFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "House",
@@ -45,7 +44,7 @@ const propertyFilter: Filter[] = [
 const rentFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "Sale",
@@ -60,7 +59,7 @@ const rentFilter: Filter[] = [
 const houseTypeFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "House",
@@ -87,7 +86,7 @@ const houseTypeFilter: Filter[] = [
 const roomCountFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "1",
@@ -158,7 +157,7 @@ const roomCountFilter: Filter[] = [
 const uptoTenCount: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "1",
@@ -205,7 +204,7 @@ const uptoTenCount: Filter[] = [
 const sharedBathroomFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "true",
@@ -220,7 +219,7 @@ const sharedBathroomFilter: Filter[] = [
 const furnishedFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "true",
@@ -235,7 +234,7 @@ const furnishedFilter: Filter[] = [
 const facingFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "North",
@@ -274,7 +273,7 @@ const facingFilter: Filter[] = [
 const evChargingFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "true",
@@ -289,7 +288,7 @@ const evChargingFilter: Filter[] = [
 const roadConnected: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "true",
@@ -304,7 +303,7 @@ const roadConnected: Filter[] = [
 const distanceToRoad: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "10",
@@ -347,7 +346,7 @@ const distanceToRoad: Filter[] = [
 const landTypeFilter: Filter[] = [
   {
     value: null,
-    label: "Any"
+    label: "---Any---"
   },
   {
     value: "residential",
@@ -367,11 +366,85 @@ const landTypeFilter: Filter[] = [
   }
 ];
 
+// interface SearchFilters {
+//   [key: string]: Filter | null;
+// [key: string]: string | null;
+// propertyType: Filter | null;
+// status: Filter | null;
+// minprice: Filter | null;
+// maxprice: Filter | null;
+// houseType: Filter | null;
+// roomcount: Filter | null;
+// minroomcount: Filter | null;
+// maxroomcount: Filter | null;
+// floorcount: Filter | null;
+// minfloorcount: Filter | null;
+// maxfloorcount: Filter | null;
+// kitchencount: Filter | null;
+// minkitchencount: Filter | null;
+// maxkitchencount: Filter | null;
+// sharedbathroom: Filter | null;
+// minbathroomcount: Filter | null;
+// maxbathroomcount: Filter | null;
+// furnished: Filter | null;
+// facing: Filter | null;
+// carparking: Filter | null;
+// bikeparking: Filter | null;
+// evcharging: Filter | null;
+// builtat: Filter | null;
+// houseconnectedtoroad: Filter | null;
+// landType: Filter | null;
+// landconnectedtoroad: Filter | null;
+// }
+
+// const defaultParams: SearchFilters = {
+//   propertyType: null,
+//   status: null,
+//   minprice: null,
+//   maxprice: null,
+//   houseType: null,
+//   roomcount: null,
+//   minroomcount: null,
+//   maxroomcount: null,
+//   floorcount: null,
+//   minfloorcount: null,
+//   maxfloorcount: null,
+//   kitchencount: null,
+//   minkitchencount: null,
+//   maxkitchencount: null,
+//   sharedbathroom: null,
+//   minbathroomcount: null,
+//   maxbathroomcount: null,
+//   furnished: null,
+//   facing: null,
+//   carparking: null,
+//   bikeparking: null,
+//   evcharging: null,
+//   builtat: null,
+//   houseconnectedtoroad: null,
+//   landType: null,
+//   landconnectedtoroad: null
+// };
+
 export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
+  const searchParams = useSearchParams();
+
+  //TODO:
+  //When the user refreshes the page, the search parameters are there but
+  //the drop down menu does not reflect the searched parameters.
+  // const [filters, setFilters] = useState<SearchFilters>(defaultParams);
+
+  // Object.keys(defaultParams).forEach((key) => {
+  //   const typedKey = key as keyof SearchFilters;
+  //   const value = searchParams.get(key);
+  //   defaultParams[typedKey] = value ?? null;
+  // });
+
   const [isPropertyTypeOpen, setIsPropertyTypeOpen] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState<Filter | null>(null);
   const [isRentOpen, setIsRentOpen] = useState(false);
   const [selectedRent, setSelectedRent] = useState<Filter | null>(null);
+
   //For range slider
   // const [value, setValue] = useState([1, 4]);
 
@@ -448,7 +521,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
 
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const createQueryString = useCallback(
