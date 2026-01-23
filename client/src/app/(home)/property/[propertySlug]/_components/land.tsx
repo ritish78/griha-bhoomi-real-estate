@@ -15,9 +15,9 @@ export default function Land({ property }: LandProps) {
     <div className="flex w-full flex-col gap-4 md:w-1/2">
       <div className="space-y-2">
         <h2 className="line-clamp-1 font-bold text-2xl">{property.title}</h2>
-        <div className="flex h-5 mr-auto mb-1 gap-x-2">
-          <Icons.mapPin className="size-5"></Icons.mapPin>
-          <span className="text-muted-foreground text-base font-medium">
+        <div className="flex mr-auto gap-x-2 items-start">
+          <Icons.mapPin className="size-5 mt-0.5 flex-shrink-0"></Icons.mapPin>
+          <span className="text-muted-foreground text-base font-medium break-words">
             {property.street && `${property.street}, `}
             {property.municipality && `${property.municipality}, `}
             {property.city && `${property.city}, `}
