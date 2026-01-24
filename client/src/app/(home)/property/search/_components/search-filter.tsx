@@ -429,7 +429,7 @@ const landTypeFilter: Filter[] = [
 export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   const searchParams = useSearchParams();
 
-  //TODO:
+  //TODO: FIXED. YAAAAY!!!! Jan 24, 2026
   //When the user refreshes the page, the search parameters are there but
   //the drop down menu does not reflect the searched parameters.
   // const [filters, setFilters] = useState<SearchFilters>(defaultParams);
@@ -542,6 +542,232 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   );
 
   //TODO: too many useEffect hooks. Will commit this code and then refactor it.
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const propertyTypeFromUrl = params.get('propertytype');
+    if (propertyTypeFromUrl) {
+      //In the below code, we are checking if the propertytype = House or Land. We could directly
+      //check if the property type is House or Land directly but incase we add more property types
+      //in the future, we don't need to change the code here
+      const propertyType = propertyFilter.find(element => element.value === propertyTypeFromUrl);
+      if (propertyType) {
+        setSelectedPropertyType(propertyType);
+      }
+    }
+
+  
+    const rentStatusFromUrl = params.get('status');
+    if (rentStatusFromUrl) {
+      const rentStatus = rentFilter.find(element => element.value === rentStatusFromUrl);
+      if (rentStatus) {
+        setSelectedRent(rentStatus);
+      }
+    }
+
+    const minPriceFromUrl = params.get('minprice');
+    if (minPriceFromUrl) {
+      setMinPrice(minPriceFromUrl);
+    }
+
+    const maxPriceFromUrl = params.get('maxprice');
+    if (maxPriceFromUrl) {
+      setMaxPrice(maxPriceFromUrl);
+    }
+
+    const houseTypeFromUrl = params.get('housetype');
+    if (houseTypeFromUrl) {
+      const houseType = houseTypeFilter.find(element => element.value === houseTypeFromUrl);
+      if (houseType) {
+        setSelectedHouseType(houseType);
+      }
+    }
+    
+    const roomCountFromUrl = params.get('roomcount');
+    if (roomCountFromUrl) {
+      const roomCount = roomCountFilter.find(element => element.value === roomCountFromUrl);
+      if (roomCount) {
+        setSelectedRoomCount(roomCount);
+      }
+    }
+    
+    const minRoomCountFromUrl = params.get('minroomcount');
+    if (minRoomCountFromUrl) {
+      const minRoomCount = roomCountFilter.find(element => element.value === minRoomCountFromUrl);
+      if (minRoomCount) {
+        setSelectedMinRoomCount(minRoomCount);
+      }
+    }
+
+    const maxRoomCountFromUrl = params.get('maxroomcount');
+    if (maxRoomCountFromUrl) {
+      const maxRoomCount = roomCountFilter.find(element => element.value === maxRoomCountFromUrl);
+      if (maxRoomCount) {
+        setSelectedMaxRoomCount(maxRoomCount);
+      }
+    }
+
+    const floorCountFromUrl = params.get('floorcount');
+    if (floorCountFromUrl) {
+      const floorCount = uptoTenCount.find(element => element.value === floorCountFromUrl);
+      if (floorCount) {
+        setSelectedFloorCount(floorCount);
+      }
+    }
+
+    const minFloorCountFromUrl = params.get('minfloorcount');
+    if (minFloorCountFromUrl) {
+      const minFloorCount = uptoTenCount.find(element => element.value === minFloorCountFromUrl);
+      if (minFloorCount) {
+        setSelectedMinFloorCount(minFloorCount);
+      }
+    }
+
+    const maxFloorCountFromUrl = params.get('maxfloorcount');
+    if (maxFloorCountFromUrl) {
+      const maxFloorCount = uptoTenCount.find(element => element.value === maxFloorCountFromUrl);
+      if (maxFloorCount) {
+        setSelectedMaxFloorCount(maxFloorCount);
+      }
+    }
+    
+    const kitchenCountFromUrl = params.get('kitchencount');
+    if (kitchenCountFromUrl) {
+      const kitchenCount = uptoTenCount.find(element => element.value === kitchenCountFromUrl);
+      if (kitchenCount) {
+        setSelectedKitchenCount(kitchenCount);
+      }
+    }
+    
+    const minKitchenCountFromUrl = params.get('minkitchencount');
+    if (minKitchenCountFromUrl) {
+      const minKitchenCount = uptoTenCount.find(element => element.value === minKitchenCountFromUrl);
+      if (minKitchenCount) {
+        setSelectedMinKitchenCount(minKitchenCount);
+      }
+    }
+
+    const maxKitchenCountFromUrl = params.get('maxkitchencount');
+    if (maxKitchenCountFromUrl) {
+      const maxKitchenCount = uptoTenCount.find(element => element.value === maxKitchenCountFromUrl);
+      if (maxKitchenCount) {
+        setSelectedMaxKitchenCount(maxKitchenCount);
+      }
+    }
+    const sharedBathroomFromUrl = params.get('sharedbathroom');
+    if (sharedBathroomFromUrl) {
+      const sharedBathroom = sharedBathroomFilter.find(element => element.value === sharedBathroomFromUrl);
+      if (sharedBathroom) {
+        setSelectedBathroomOption(sharedBathroom);
+      }
+    }
+
+    const minBathroomCountFromUrl = params.get('minbathroomcount');
+    if (minBathroomCountFromUrl) {
+      const minBathroomCount = roomCountFilter.find(element => element.value === minBathroomCountFromUrl);
+      if (minBathroomCount) {
+        setSelectedMinBathroomCount(minBathroomCount);
+      }
+    }
+
+    const maxBathroomCountFromUrl = params.get('maxbathroomcount');
+    if (maxBathroomCountFromUrl) {
+      const maxBathroomCount = roomCountFilter.find(element => element.value === maxBathroomCountFromUrl);
+      if (maxBathroomCount) {
+        setSelectedMaxBathroomCount(maxBathroomCount);
+      }
+    }
+
+    const furnishedFromUrl = params.get('furnished');
+    if (furnishedFromUrl) {
+      const furnished = furnishedFilter.find(element => element.value === furnishedFromUrl);
+      if (furnished) {
+        setSelectedFurnishedOption(furnished);
+      }
+    }
+  
+    const facingFromUrl = params.get('facing');
+    if (facingFromUrl) {
+      const facing = facingFilter.find(element => element.value === facingFromUrl);
+      if (facing) {
+        setSelectedFacingOption(facing);
+      }
+    }
+  
+    const carParkingFromUrl = params.get('carparking');
+    if (carParkingFromUrl) {
+      const carParking = uptoTenCount.find(element => element.value === carParkingFromUrl);
+      if (carParking) {
+        setSelectedCarParkingOption(carParking);
+      }
+    }
+    
+    const bikeParkingFromUrl = params.get('bikeparking');
+    if (bikeParkingFromUrl) {
+      const bikeParking = uptoTenCount.find(element => element.value === bikeParkingFromUrl);
+      if (bikeParking) {
+        setSelectedBikeParkingOption(bikeParking);
+      }
+    }
+    
+    const evChargingFromUrl = params.get('evcharging');
+    if (evChargingFromUrl) {
+      const evCharging = evChargingFilter.find(element => element.value === evChargingFromUrl);
+      if (evCharging) {
+        setSelectedEVChargingOption(evCharging);
+      }
+    }
+    
+    const builtYearFromUrl = params.get('builtat');
+    if (builtYearFromUrl) {
+      const builtYear = yearList.find(element => element.value === builtYearFromUrl);
+      if (builtYear) {
+        setSelectedCalendarYear(builtYear);
+      }
+    }
+    
+    const houseConnectedToRoadFromUrl = params.get('houseconnectedtoroad');
+    if (houseConnectedToRoadFromUrl) {
+      const houseConnectedToRoad = roadConnected.find(element => element.value === houseConnectedToRoadFromUrl);
+      if (houseConnectedToRoad) {
+        setSelectedHouseConnectedToRoad(houseConnectedToRoad);
+      }
+    }
+    
+    const houseDistanceToRoadFromUrl = params.get('housedistancetoroad');
+    if (houseDistanceToRoadFromUrl) {
+      const houseDistanceToRoad = uptoTenCount.find(element => element.value === houseDistanceToRoadFromUrl);
+      if (houseDistanceToRoad) {
+        setSelectedHouseDistanceToRoad(houseDistanceToRoad);
+      }
+    }
+    
+    const landTypeFromUrl = params.get('landtype');
+    if (landTypeFromUrl) {
+      const landType = landTypeFilter.find(element => element.value === landTypeFromUrl);
+      if (landType) {
+        setSelectedLandTypeOption(landType);
+      }
+    }
+    
+    const landConnectedToRoadFromUrl = params.get('landconnectedtoroad');
+    if (landConnectedToRoadFromUrl) {
+      const landConnectedToRoad = roadConnected.find(element => element.value === landConnectedToRoadFromUrl);
+      if (landConnectedToRoad) {
+        setSelectedLandConnectedToRoad(landConnectedToRoad);
+      }
+    }
+    
+    const landDistanceToRoadFromUrl = params.get('landdistancetoroad');
+    if (landDistanceToRoadFromUrl) {
+      const landDistanceToRoad = uptoTenCount.find(element => element.value === landDistanceToRoadFromUrl);
+      if (landDistanceToRoad) {
+        setSelectedLandDistanceToRoad(landDistanceToRoad);
+      }
+    }
+  }, [])
+
   useEffect(() => {
     //If the user hasn't selected a property type, don't update the query string
     if (selectedPropertyType == null && !window.location.search.includes('propertytype')) {
