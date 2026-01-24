@@ -12,33 +12,41 @@ interface LandProps {
 
 export default function Land({ property }: LandProps) {
   return (
-    <div className="flex w-full flex-col gap-4 md:w-1/2">
-      <div className="space-y-2">
-        <h2 className="line-clamp-1 font-bold text-2xl">{property.title}</h2>
-        <div className="flex mr-auto gap-x-2 items-start">
-          <Icons.mapPin className="size-5 mt-0.5 flex-shrink-0"></Icons.mapPin>
-          <span className="text-muted-foreground text-base font-medium break-words">
-            {property.street && `${property.street}, `}
-            {property.municipality && `${property.municipality}, `}
-            {property.city && `${property.city}, `}
-            {property.district && `${property.district}`}
-          </span>
+    <div className="flex w-full flex-col gap-6 md:w-1/2">
+      <div className="space-y-4">
+        <div>
+          <h2 className="line-clamp-2 font-bold text-3xl mb-3 leading-tight">{property.title}</h2>
+          <div className="flex mr-auto gap-x-2 items-start mb-3">
+            <Icons.mapPin className="size-5 mt-0.5 flex-shrink-0 text-muted-foreground"></Icons.mapPin>
+            <span className="text-muted-foreground text-base font-medium break-words leading-relaxed">
+              {property.street && `${property.street}, `}
+              {property.municipality && `${property.municipality}, `}
+              {property.city && `${property.city}, `}
+              {property.district && `${property.district}`}
+            </span>
+          </div>
         </div>
-        <p className="text-muted-foreground font-bold text-xl">
-          ${formatPrice(property.price)} {property.toRent && "per month"}
-        </p>
-        <div className="text-sm text-muted-foreground flex items-center">
-          <Badge variant="default" className="mr-4 font-medium px-4 py-1">
-            {property.status}
-          </Badge>
-          <Icons.eye className="mr-2 size-5" />
-          {property.views} {property.views > 1 ? "views" : "view"}
-          <span className="mx-4"></span>
-          <Icons.calendar className="mr-2 size-5" />
-          <span>Posted: {formatListedAtDate(property.listedAt)} ago</span>
+        <div className="flex flex-col gap-3">
+          <p className="text-foreground font-bold text-3xl">
+            ${formatPrice(property.price)} 
+            {property.toRent && <span className="text-xl text-muted-foreground font-normal"> per month</span>}
+          </p>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <Badge variant="default" className="font-medium px-3 py-1.5">
+              {property.status}
+            </Badge>
+            <div className="flex items-center gap-1.5">
+              <Icons.eye className="size-4" />
+              <span>{property.views} {property.views > 1 ? "views" : "view"}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Icons.calendar className="size-4" />
+              <span>Posted {formatListedAtDate(property.listedAt)} ago</span>
+            </div>
+          </div>
         </div>
       </div>
-      <Separator className="my-1.5" />
+      <Separator className="my-2" />
       <div className="grid grid-cols-2 justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-2 lg:grid-cols-3">
         <div className="relative overflow-hidden rounded-lg border bg-background p-2">
           <div className="flex h-[75px] w-full max-w-[400px] flex-col justify-between rounded-md p-2">

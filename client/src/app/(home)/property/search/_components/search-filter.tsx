@@ -541,7 +541,13 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
     [searchParams]
   );
 
+  //TODO: too many useEffect hooks. Will commit this code and then refactor it.
   useEffect(() => {
+    //If the user hasn't selected a property type, don't update the query string
+    if (selectedPropertyType == null && !window.location.search.includes('propertytype')) {
+      return;
+    }
+
     startTransition(() => {
       if (selectedPropertyType?.value == null) {
         const newQueryString = createQueryString({
@@ -976,17 +982,17 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
       className={
         isOnDesktop
           ? `grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1 md:gap-2 lg:gap:3`
-          : `grid grid-cols-2 gap-1`
+          : `grid grid-cols-2 gap-3 items-start`
       }
     >
-      <div>
-        <p className="text-sm">Property Type:</p>
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm">Property Type:</Label>
         <ParentShell open={isPropertyTypeOpen} onOpenChange={setIsPropertyTypeOpen}>
           <ChildrenShell asChild>
             <Button
               variant="outline"
               className={
-                isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
               }
             >
               {selectedPropertyType ? <>{selectedPropertyType.label}</> : <>{"\u00A0"}</>}
@@ -1011,14 +1017,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
           </ContentShell>
         </ParentShell>
       </div>
-      <div>
-        <p className="text-sm">Buy or Rent:</p>
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm">Buy or Rent:</Label>
         <ParentShell open={isRentOpen} onOpenChange={setIsRentOpen}>
           <ChildrenShell asChild>
             <Button
               variant="outline"
               className={
-                isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
               }
             >
               {selectedRent ? <>{selectedRent.label}</> : <>{"\u00A0"}</>}
@@ -1043,42 +1049,40 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
           </ContentShell>
         </ParentShell>
       </div>
-      <div>
-        <Label htmlFor="minPrice">Minimum Price:</Label>
-        <div className="flex items-center gap-5">
-          <Input
-            type="number"
-            id="minPrice"
-            min={0}
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            placeholder="0"
-            className="rounded-md p-2 w-[175px]"
-          />
-        </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="minPrice" className="text-sm">Minimum Price:</Label>
+        <Input
+          type="number"
+          id="minPrice"
+          min={0}
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+          placeholder="0"
+          className={isOnDesktop ? "rounded-md p-2 w-[175px]" : "rounded-md p-2 w-full"}
+        />
       </div>
-      <div>
-        <Label htmlFor="maxPrice">Maximum Price:</Label>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="maxPrice" className="text-sm">Maximum Price:</Label>
         <Input
           type="number"
           id="maxPrice"
           min={0}
           value={maxPrice}
           placeholder="0"
-          className="rounded-md p-2 w-[175px]"
+          className={isOnDesktop ? "rounded-md p-2 w-[175px]" : "rounded-md p-2 w-full"}
           onChange={(e) => setMaxPrice(e.target.value)}
         />
       </div>
       {selectedPropertyType && selectedPropertyType.value === "House" ? (
         <>
-          <div>
-            <p className="text-sm">House Type:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">House Type:</Label>
             <ParentShell open={isHouseTypeOpen} onOpenChange={setIsHouseTypeOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedHouseType ? <>{selectedHouseType.label}</> : <>{"\u00A0"}</>}
@@ -1115,14 +1119,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               className="max-w-md"
             />
           </div> */}
-          <div>
-            <p className="text-sm">Number of rooms:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Number of rooms:</Label>
             <ParentShell open={isRoomCountOpen} onOpenChange={setIsRoomCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedRoomCount ? <>{selectedRoomCount.label}</> : <>{"\u00A0"}</>}
@@ -1149,14 +1153,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Minimum number of rooms:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Minimum number of rooms:</Label>
             <ParentShell open={isMinRoomCountOpen} onOpenChange={setIsMinRoomCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMinRoomCount ? <>{selectedMinRoomCount.label}</> : <>{"\u00A0"}</>}
@@ -1181,14 +1185,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Maximum number of rooms:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Maximum number of rooms:</Label>
             <ParentShell open={isMaxRoomCountOpen} onOpenChange={setIsMaxRoomCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMaxRoomCount ? <>{selectedMaxRoomCount.label}</> : <>{"\u00A0"}</>}
@@ -1213,14 +1217,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Number of floors:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Number of floors:</Label>
             <ParentShell open={isFloorCountOpen} onOpenChange={setIsFloorCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>{"\u00A0"}</>}
@@ -1247,14 +1251,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Minimum number of floors:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Minimum number of floors:</Label>
             <ParentShell open={isMinFloorCountOpen} onOpenChange={setIsMinFloorCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMinFloorCount ? <>{selectedMinFloorCount.label}</> : <>{"\u00A0"}</>}
@@ -1279,14 +1283,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Maximum number of floors:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Maximum number of floors:</Label>
             <ParentShell open={isMaxFloorCountOpen} onOpenChange={setIsMaxFloorCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMaxFloorCount ? <>{selectedMaxFloorCount.label}</> : <>{"\u00A0"}</>}
@@ -1311,14 +1315,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Number of Kitchen:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Number of Kitchen:</Label>
             <ParentShell open={isKitchenCountOpen} onOpenChange={setIsKitchenCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedKitchenCount ? <>{selectedKitchenCount.label}</> : <>{"\u00A0"}</>}
@@ -1343,14 +1347,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Minimum number of Kitchen:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Minimum number of Kitchen:</Label>
             <ParentShell open={isMinKitchenCountOpen} onOpenChange={setIsMinKitchenCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMinKitchenCount ? <>{selectedMinKitchenCount.label}</> : <>{"\u00A0"}</>}
@@ -1375,14 +1379,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Maximum number of Kitchen:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Maximum number of Kitchen:</Label>
             <ParentShell open={isMaxKitchenCountOpen} onOpenChange={setIsMaxKitchenCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMaxKitchenCount ? <>{selectedMaxKitchenCount.label}</> : <>{"\u00A0"}</>}
@@ -1407,8 +1411,8 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Shared Bathroom:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Shared Bathroom:</Label>
             <ParentShell
               open={isSharedBathroomOptionOpen}
               onOpenChange={setIsSharedBathroomOptionOpen}
@@ -1417,7 +1421,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedSharedBathroomOption ? (
@@ -1448,14 +1452,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Minimum number of Bathroom:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Minimum number of Bathroom:</Label>
             <ParentShell open={isMinBathroomCountOpen} onOpenChange={setIsMinBathroomCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMinBathroomCount ? (
@@ -1484,14 +1488,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Maximum number of bathroom:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Maximum number of bathroom:</Label>
             <ParentShell open={isMaxBathroomCountOpen} onOpenChange={setIsMaxBathroomCountOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedMaxBathroomCount ? (
@@ -1520,14 +1524,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Furnished:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Furnished:</Label>
             <ParentShell open={isFurnishedOptionOpen} onOpenChange={setIsFurnishedOptionOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedFurnishedOption ? <>{selectedFurnishedOption.label}</> : <>{"\u00A0"}</>}
@@ -1552,14 +1556,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Facing direction:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Facing direction:</Label>
             <ParentShell open={isFacingOptionOpen} onOpenChange={setIsFacingOptionOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedFacingOption ? <>{selectedFacingOption.label}</> : <>{"\u00A0"}</>}
@@ -1586,14 +1590,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Car Parking:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Car Parking:</Label>
             <ParentShell open={isCarParkingOptionOpen} onOpenChange={setIsCarParkingOptionOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedCarParkingOption ? (
@@ -1624,14 +1628,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Bike Parking:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Bike Parking:</Label>
             <ParentShell open={isBikeParkingOptionOpen} onOpenChange={setIsBikeParkingOptionOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedBikeParkingOption ? (
@@ -1662,14 +1666,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">EV Charging:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">EV Charging:</Label>
             <ParentShell open={isEVChargingOptionOpen} onOpenChange={setIsEVChargingOptionOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedEVChargingOption ? (
@@ -1700,14 +1704,14 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Built Year:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Built Year:</Label>
             <ParentShell open={isCalendarOptionOpen} onOpenChange={setIsCalendarOptionOpen}>
               <ChildrenShell asChild>
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedCalendarYear ? <>{selectedCalendarYear.label}</> : <>{"\u00A0"}</>}
@@ -1736,8 +1740,8 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Connected to road:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Connected to road:</Label>
             <ParentShell
               open={isHouseConnectedToRoadOptionOpen}
               onOpenChange={setIsHouseConnectedToRoadOptionOpen}
@@ -1746,7 +1750,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedHouseConnectedToRoad ? (
@@ -1779,8 +1783,8 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
           </div>
           {selectedHouseConnectedToRoad?.value ? (
             selectedHouseConnectedToRoad.value === "false" ? (
-              <div>
-                <p className="text-sm">Distance to road:</p>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm">Distance to road:</Label>
                 <ParentShell
                   open={isHouseDistanceToRoadOptionOpen}
                   onOpenChange={setIsHouseDistanceToRoadOptionOpen}
@@ -1827,8 +1831,8 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
         </>
       ) : selectedPropertyType?.value === "Land" ? (
         <>
-          <div>
-            <p className="text-sm">Land Type:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Land Type:</Label>
             <ParentShell open={isLandTypeOptionOpen} onOpenChange={setIsLandTypeOptionOpen}>
               <ChildrenShell asChild>
                 <Button variant="outline" className="w-[175px] justify-between p-2 overflow-hidden">
@@ -1854,8 +1858,8 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
               </ContentShell>
             </ParentShell>
           </div>
-          <div>
-            <p className="text-sm">Connected to road:</p>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Connected to road:</Label>
             <ParentShell
               open={isLandConnectedToRoadOptionOpen}
               onOpenChange={setIsLandConnectedToRoadOptionOpen}
@@ -1864,7 +1868,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
                 <Button
                   variant="outline"
                   className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-[165px] justify-between p-2"
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
                   }
                 >
                   {selectedLandConnectedToRoad ? (
@@ -1897,8 +1901,8 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
           </div>
           {selectedLandConnectedToRoad?.value ? (
             selectedLandConnectedToRoad.value === "false" ? (
-              <div>
-                <p className="text-sm">Distance to road:</p>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm">Distance to road:</Label>
                 <ParentShell
                   open={isLandDistanceToRoadOptionOpen}
                   onOpenChange={setIsLandDistanceToRoadOptionOpen}
