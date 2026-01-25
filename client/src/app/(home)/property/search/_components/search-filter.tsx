@@ -532,6 +532,7 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   );
 
 
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
