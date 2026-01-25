@@ -429,16 +429,6 @@ const landTypeFilter: Filter[] = [
 export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   const searchParams = useSearchParams();
 
-  //TODO: FIXED. YAAAAY!!!! Jan 24, 2026
-  //When the user refreshes the page, the search parameters are there but
-  //the drop down menu does not reflect the searched parameters.
-  // const [filters, setFilters] = useState<SearchFilters>(defaultParams);
-
-  // Object.keys(defaultParams).forEach((key) => {
-  //   const typedKey = key as keyof SearchFilters;
-  //   const value = searchParams.get(key);
-  //   defaultParams[typedKey] = value ?? null;
-  // });
 
   const [isPropertyTypeOpen, setIsPropertyTypeOpen] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState<Filter | null>(null);
@@ -541,7 +531,6 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
     [searchParams]
   );
 
-  //TODO: too many useEffect hooks. Will commit this code and then refactor it.
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -769,435 +758,135 @@ export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   }, [])
 
   useEffect(() => {
-    //If the user hasn't selected a property type, don't update the query string
-    if (selectedPropertyType == null && !window.location.search.includes('propertytype')) {
+    const hasUrlParams = window.location.search.length > 0;
+    const hasState = selectedPropertyType || selectedRent || minPrice || maxPrice || selectedHouseType || 
+                              selectedRoomCount || selectedMinRoomCount || selectedMaxRoomCount || selectedFloorCount || 
+                              selectedMinFloorCount || selectedMaxFloorCount || selectedKitchenCount || 
+                              selectedMinKitchenCount || selectedMaxKitchenCount || selectedSharedBathroomOption || 
+                              selectedMinBathroomCount || selectedMaxBathroomCount || selectedFurnishedOption || 
+                              selectedFacingOption || selectedCarParkingOption || selectedBikeParkingOption || 
+                              selectedEVChargingOption || selectedCalendarYear || selectedHouseConnectedToRoad || 
+                              selectedHouseDistanceToRoad || selectedLandTypeOption || selectedLandConnectedToRoad || 
+                              selectedLandDistanceToRoad;
+  
+    if (!hasUrlParams && !hasState) {
       return;
     }
 
     startTransition(() => {
-      if (selectedPropertyType?.value == null) {
-        const newQueryString = createQueryString({
-          propertytype: null,
-          landtype: null,
-          landconnectedtoroad: null,
-          landdistancetoroad: null,
-          housetype: null,
-          roomcount: null,
-          minroomcount: null,
-          maxroomcount: null,
-          floorcount: null,
-          minfloorcount: null,
-          maxfloorcount: null,
-          kitchencount: null,
-          minkitchencount: null,
-          maxkitchencount: null,
-          sharedbathroom: null,
-          minbathroomcount: null,
-          maxbathroomcount: null,
-          furnished: null,
-          facing: null,
-          carparking: null,
-          bikeparking: null,
-          evcharging: null,
-          builtat: null,
-          houseconnectedtoroad: null,
-          housedistancetoroad: null
-        });
-
-        router.push(`${pathname}?${newQueryString}`, {
-          scroll: false
-        });
-      } else if (selectedPropertyType?.value === "House") {
-        //Setting default value of null if the user switches from "Land" to "House", the applied filters will disappear
-        const newQueryString = createQueryString({
-          propertytype: selectedPropertyType?.value ? selectedPropertyType.value : null,
-          landtype: null,
-          landconnectedtoroad: null,
-          landdistancetoroad: null
-        });
-
-        router.push(`${pathname}?${newQueryString}`, {
-          scroll: false
-        });
-      } else if (selectedPropertyType?.value === "Land") {
-        //Setting default value of null if the user switches from "House" to "Land", the applied filters will disappear
-        const newQueryString = createQueryString({
-          propertytype: selectedPropertyType?.value ? selectedPropertyType.value : null,
-          housetype: null,
-          roomcount: null,
-          minroomcount: null,
-          maxroomcount: null,
-          floorcount: null,
-          minfloorcount: null,
-          maxfloorcount: null,
-          kitchencount: null,
-          minkitchencount: null,
-          maxkitchencount: null,
-          sharedbathroom: null,
-          minbathroomcount: null,
-          maxbathroomcount: null,
-          furnished: null,
-          facing: null,
-          carparking: null,
-          bikeparking: null,
-          evcharging: null,
-          builtat: null,
-          houseconnectedtoroad: null,
-          housedistancetoroad: null
-        });
-
-        router.push(`${pathname}?${newQueryString}`, {
-          scroll: false
-        });
-      }
-    });
-  }, [selectedPropertyType]);
-
-  useEffect(() => {
-    startTransition(() => {
       const newQueryString = createQueryString({
-        status: selectedRent?.value ? selectedRent.value : null
+        propertytype: selectedPropertyType?.value || null,
+        status: selectedRent?.value || null,
+        minprice: minPrice.trim().length > 0 && (maxPrice.trim().length === 0 || Number(maxPrice) === 0 || Number(minPrice) < Number(maxPrice)) ? minPrice : null,
+        maxprice: maxPrice.trim().length > 0 && (minPrice.trim().length === 0 || Number(minPrice) === 0 || Number(maxPrice) > Number(minPrice)) ? maxPrice : null,
+        housetype: selectedHouseType?.value ? selectedHouseType.value : null,
+        roomcount: selectedRoomCount?.value ? selectedRoomCount.value : null,
+        minroomcount: selectedMinRoomCount?.value ? selectedMinRoomCount.value : null,
+        maxroomcount: selectedMaxRoomCount?.value ? selectedMaxRoomCount.value : null,
+        floorcount: selectedFloorCount?.value ? selectedFloorCount.value : null,
+        minfloorcount: selectedMinFloorCount?.value ? selectedMinFloorCount.value : null,
+        maxfloorcount: selectedMaxFloorCount?.value ? selectedMaxFloorCount.value : null,
+        kitchencount: selectedKitchenCount?.value ? selectedKitchenCount.value : null,
+        minkitchencount: selectedMinKitchenCount?.value ? selectedMinKitchenCount.value : null,
+        maxkitchencount: selectedMaxKitchenCount?.value ? selectedMaxKitchenCount.value : null,
+        sharedbathroom: selectedSharedBathroomOption?.value ? selectedSharedBathroomOption.value : null,
+        minbathroomcount: selectedMinBathroomCount?.value ? selectedMinBathroomCount.value : null,
+        maxbathroomcount: selectedMaxBathroomCount?.value ? selectedMaxBathroomCount.value : null,
+        furnished: selectedFurnishedOption?.value ? selectedFurnishedOption.value : null,
+        facing: selectedFacingOption?.value ? selectedFacingOption.value : null,
+        carparking: selectedCarParkingOption?.value ? selectedCarParkingOption.value : null,
+        bikeparking: selectedBikeParkingOption?.value ? selectedBikeParkingOption.value : null,
+        evcharging: selectedEVChargingOption?.value ? selectedEVChargingOption.value : null,
+        builtat: selectedCalendarYear?.value ? selectedCalendarYear.value : null,
+        houseconnectedtoroad: selectedHouseConnectedToRoad?.value ? selectedHouseConnectedToRoad.value : null,
+        housedistancetoroad: selectedHouseDistanceToRoad?.value ? selectedHouseDistanceToRoad.value : null,
+        landtype: selectedLandTypeOption?.value ? selectedLandTypeOption.value : null,
+        landconnectedtoroad: selectedLandConnectedToRoad?.value ? selectedLandConnectedToRoad.value : null,
+        landdistancetoroad: selectedLandDistanceToRoad?.value ? selectedLandDistanceToRoad.value : null,
       });
+
+      //console.log(newQueryString);
 
       router.push(`${pathname}?${newQueryString}`, {
         scroll: false
       });
-    });
-  }, [selectedRent]);
 
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        minprice:
-          minPrice.trim().length > 0 &&
-          (maxPrice.trim().length === 0 ||
-            Number(maxPrice) === 0 ||
-            Number(minPrice) < Number(maxPrice))
-            ? minPrice
-            : null
-      });
+    })
 
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [minPrice]);
+  }, [selectedPropertyType, selectedRent, minPrice, maxPrice, selectedHouseType, selectedRoomCount, selectedMinRoomCount, 
+      selectedMaxRoomCount, selectedFloorCount, selectedMinFloorCount, selectedMaxFloorCount, selectedKitchenCount, 
+      selectedMinKitchenCount, selectedMaxKitchenCount, selectedSharedBathroomOption, selectedMinBathroomCount, 
+      selectedMaxBathroomCount, selectedFurnishedOption, selectedFacingOption, selectedCarParkingOption, 
+      selectedBikeParkingOption, selectedEVChargingOption, selectedCalendarYear, selectedHouseConnectedToRoad, 
+      selectedHouseDistanceToRoad, selectedLandTypeOption, selectedLandConnectedToRoad, selectedLandDistanceToRoad]);
 
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        maxprice:
-          maxPrice.trim().length > 0 &&
-          (minPrice.trim().length === 0 ||
-            Number(minPrice) === 0 ||
-            Number(maxPrice) > Number(minPrice))
-            ? maxPrice
-            : null
-      });
 
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [maxPrice]);
+useEffect(() => {
+  if (selectedPropertyType === null && !window.location.search.includes('propertytype')) {
+    return;
+  }
 
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        housetype: selectedHouseType?.value ? selectedHouseType.value : null
-      });
+  if (selectedPropertyType?.value == null) {
+    setSelectedHouseType(null);
+    setSelectedRoomCount(null);
+    setSelectedMinRoomCount(null);
+    setSelectedMaxRoomCount(null);
+    setSelectedFloorCount(null);
+    setSelectedMinFloorCount(null);
+    setSelectedMaxFloorCount(null);
+    setSelectedKitchenCount(null);
+    setSelectedMinKitchenCount(null);
+    setSelectedMaxKitchenCount(null);
+    setSelectedBathroomOption(null);
+    setSelectedMinBathroomCount(null);
+    setSelectedMaxBathroomCount(null);
+    setSelectedFurnishedOption(null);
+    setSelectedFacingOption(null);
+    setSelectedCarParkingOption(null);
+    setSelectedBikeParkingOption(null);
+    setSelectedEVChargingOption(null);
+    setSelectedCalendarYear(null);
+    setSelectedHouseConnectedToRoad(null);
+    setSelectedHouseDistanceToRoad(null);
+    setSelectedLandTypeOption(null);
+    setSelectedLandConnectedToRoad(null);
+    setSelectedLandDistanceToRoad(null);
+  }
+  
 
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedHouseType]);
+  else if (selectedPropertyType?.value === "House") {
+    setSelectedLandTypeOption(null);
+    setSelectedLandConnectedToRoad(null);
+    setSelectedLandDistanceToRoad(null);
+  }
+  
 
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        roomcount: selectedRoomCount?.value ? selectedRoomCount.value : null
-      });
+  else if (selectedPropertyType?.value === "Land") {
+    setSelectedHouseType(null);
+    setSelectedRoomCount(null);
+    setSelectedMinRoomCount(null);
+    setSelectedMaxRoomCount(null);
+    setSelectedFloorCount(null);
+    setSelectedMinFloorCount(null);
+    setSelectedMaxFloorCount(null);
+    setSelectedKitchenCount(null);
+    setSelectedMinKitchenCount(null);
+    setSelectedMaxKitchenCount(null);
+    setSelectedBathroomOption(null);
+    setSelectedMinBathroomCount(null);
+    setSelectedMaxBathroomCount(null);
+    setSelectedFurnishedOption(null);
+    setSelectedFacingOption(null);
+    setSelectedCarParkingOption(null);
+    setSelectedBikeParkingOption(null);
+    setSelectedEVChargingOption(null);
+    setSelectedCalendarYear(null);
+    setSelectedHouseConnectedToRoad(null);
+    setSelectedHouseDistanceToRoad(null);
+  }
+}, [selectedPropertyType]);
 
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedRoomCount]);
 
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        minroomcount: selectedMinRoomCount?.value ? selectedMinRoomCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMinRoomCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        maxroomcount: selectedMaxRoomCount?.value ? selectedMaxRoomCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMaxRoomCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        floorcount: selectedFloorCount?.value ? selectedFloorCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedFloorCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        minfloorcount: selectedMinFloorCount?.value ? selectedMinFloorCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMinFloorCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        maxfloorcount: selectedMaxFloorCount?.value ? selectedMaxFloorCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMaxFloorCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        kitchencount: selectedKitchenCount?.value ? selectedKitchenCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedKitchenCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        minkitchencount: selectedMinKitchenCount?.value ? selectedMinKitchenCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMinKitchenCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        maxkitchencount: selectedMaxKitchenCount?.value ? selectedMaxKitchenCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMaxKitchenCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        sharedbathroom: selectedSharedBathroomOption?.value
-          ? selectedSharedBathroomOption.value
-          : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedSharedBathroomOption]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        minbathroomcount: selectedMinBathroomCount?.value ? selectedMinBathroomCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMinBathroomCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        maxbathroomcount: selectedMaxBathroomCount?.value ? selectedMaxBathroomCount.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedMaxBathroomCount]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        furnished: selectedFurnishedOption?.value ? selectedFurnishedOption.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedFurnishedOption]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        facing: selectedFacingOption?.value ? selectedFacingOption.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedFacingOption]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        carparking: selectedCarParkingOption?.value ? selectedCarParkingOption.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedCarParkingOption]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        bikeparking: selectedBikeParkingOption?.value ? selectedBikeParkingOption.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedBikeParkingOption]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        evcharging: selectedEVChargingOption?.value ? selectedEVChargingOption.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedEVChargingOption]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        builtat: selectedCalendarYear?.value ? selectedCalendarYear.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedCalendarYear]);
-
-  useEffect(() => {
-    startTransition(() => {
-      let houseConnectedToRoad = selectedHouseConnectedToRoad?.value
-        ? selectedHouseConnectedToRoad.value
-        : null;
-
-      let houseDistance = selectedHouseDistanceToRoad?.value
-        ? selectedHouseDistanceToRoad.value
-        : null;
-
-      if (selectedHouseConnectedToRoad?.value) {
-        if (selectedHouseConnectedToRoad.value === "true") {
-          // setSelectedHouseDistanceToRoad(null);
-          houseDistance = null;
-        }
-      }
-
-      const newQueryString = createQueryString({
-        houseconnectedtoroad: houseConnectedToRoad,
-        housedistancetoroad: houseDistance
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedHouseConnectedToRoad, selectedHouseDistanceToRoad]);
-
-  useEffect(() => {
-    startTransition(() => {
-      const newQueryString = createQueryString({
-        landtype: selectedLandTypeOption?.value ? selectedLandTypeOption.value : null
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedLandTypeOption]);
-
-  useEffect(() => {
-    startTransition(() => {
-      let landConnectedToRoad = selectedLandConnectedToRoad?.value
-        ? selectedLandConnectedToRoad.value
-        : null;
-
-      let landDistance = selectedLandDistanceToRoad?.value
-        ? selectedLandDistanceToRoad.value
-        : null;
-
-      if (selectedLandConnectedToRoad?.value) {
-        if (selectedLandConnectedToRoad.value === "true") {
-          // setSelectedHouseDistanceToRoad(null);
-          landDistance = null;
-        }
-      }
-
-      const newQueryString = createQueryString({
-        landconnectedtoroad: landConnectedToRoad,
-        landdistancetoroad: landDistance
-      });
-
-      router.push(`${pathname}?${newQueryString}`, {
-        scroll: false
-      });
-    });
-  }, [selectedLandConnectedToRoad, selectedLandDistanceToRoad]);
 
   const ParentShell = isOnDesktop ? Popover : Drawer;
   const ChildrenShell = isOnDesktop ? PopoverTrigger : DrawerTrigger;
