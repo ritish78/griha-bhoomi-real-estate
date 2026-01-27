@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 
 import { registerSchema, loginSchema } from "src/controller/auth/authSchema";
 
-import { registerUser, authUser } from "src/controller/auth/authController";
+import { registerUser, authUser, getUserById } from "src/controller/auth/authController";
 import { validateRequest } from "src/middleware/validateRequest";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
 import { BadRequestError } from "src/utils/error";
@@ -77,7 +77,12 @@ router
       req.session.email = userByEmail.email;
       req.session.save();
 
-      return res.status(200).send({ message: "Login Successful!" });
+      return res.status(200).send({ message: "Login Successful!", user: {
+        id: userByEmail.id,
+        firstName: userByEmail.firstName,
+        lastName: userByEmail.lastName,
+        email: userByEmail.email,
+      } });
     } catch (error) {
       next(error);
     }
@@ -100,6 +105,37 @@ router.route("/logout").post(onlyIfLoggedIn, async (req: Request, res: Response)
       // res.redirect("/");
     }
   });
+});
+
+
+/**
+ * @route       /api/v1/auth/me
+ * @method      GET
+ * @desc        Get current logged in user
+ * @access      Private
+ */
+router.route("/me").get(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //Since we have used `onlyIfLoggedIn` middleware we shouldn't need to check
+    //if the session contains userId, but tsx does not feel safe. So added another check
+    if (!req.session.userId) return;
+
+    const user = await getUserById(req.session.userId);
+
+    
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        profilePicUrl: user.profilePicUrl
+      }
+    });
+  } catch (error) {
+    // console.log(error);
+    next(error);
+  }
 });
 
 export default router;
