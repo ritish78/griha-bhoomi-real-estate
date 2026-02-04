@@ -10,6 +10,7 @@ interface User {
   email: string;
   phone: string;
   dob: string;
+  profilePicUrl?: string;
 }
 
 interface AuthContextType {
@@ -91,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await checkAuth();
       
       //Redirect to the intended page or default to dashboard
-      router.push(redirectTo || '/dashboard');
+      router.push(redirectTo ||'/');
     } catch (error) {
       throw error;
     }

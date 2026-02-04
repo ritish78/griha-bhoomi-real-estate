@@ -92,7 +92,15 @@ interface MobileLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> 
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function MobileLink({ children, href, disabled, segment, setOpen, className, ...props }: MobileLinkProps) {
+function MobileLink({
+  children,
+  href,
+  disabled,
+  segment,
+  setOpen,
+  className,
+  ...props
+}: MobileLinkProps) {
   return (
     <Link
       href={href}
