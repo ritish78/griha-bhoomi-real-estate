@@ -69,7 +69,6 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             <Avatar className="mr-4 h-20 w-20">
               <AvatarImage
                 alt="Profile Image"
-                fill
                 src={property.profilePicUrl ?? "https://ui.shadcn.com/avatars/04.png"}
               />
               <AvatarFallback>
