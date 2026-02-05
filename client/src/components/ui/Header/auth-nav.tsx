@@ -27,8 +27,8 @@ export function AuthNav() {
     return (
       <Button asChild size="sm" className="z-30">
         <Link href={`/login?redirect=${encodeURIComponent(pathname)}`}>
-            <Icons.user className="mr-2 h-4 w-4" />
-          Login
+          {/* <Icons.user className="mr-2 h-4 w-4" /> */}
+          <span>Login</span>
         </Link>
       </Button>
     );
@@ -60,7 +60,7 @@ export function AuthNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
-          Log out
+          <Icons.logout className="mr-2 size-4" /><span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

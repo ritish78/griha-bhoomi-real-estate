@@ -1,4 +1,10 @@
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Privacy - GrihaBhoomi",
+  description: "Privacy Policy at GrihaBhoomi",
+};
 
 export default function PrivacyPolicyPage() {
   return (

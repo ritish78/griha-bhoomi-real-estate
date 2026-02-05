@@ -112,7 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        const error = new Error(data.message || 'Registration failed');
+        if (data.errors) {
+          (error as any).errors = data.errors;
+        }
+        throw error;
       }
 
       //After registration, login to get user data
@@ -130,12 +134,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       setUser(null);
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('Logout failed:', error);
       //Still clear user locally even if request fails
       setUser(null);
-      router.push('/login');
+      router.push('/');
     }
   };
 

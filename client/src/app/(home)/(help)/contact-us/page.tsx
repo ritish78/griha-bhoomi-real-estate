@@ -1,5 +1,11 @@
 import ProtectedRoute from "@/components/protected-route";
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Contact Us - GrihaBhoomi",
+  description: "Contact us at GrihaBhoomi",
+};
 
 export default function ContactUsPage() {
   return (

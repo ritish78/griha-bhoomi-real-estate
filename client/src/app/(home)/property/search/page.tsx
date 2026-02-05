@@ -8,11 +8,17 @@ import PropertyListPage from "../_components/properties-list-page";
 import PaginationButton from "@/components/pagination-button";
 import { Shell } from "@/components/shell";
 import SearchSheet from "./_components/search-sheet";
+import { Metadata } from "next";
 
 export interface SearchPropertyPageProps {
   params: { [key: string]: string | string[] | undefined };
   searchParams: Record<string, string | number | null>;
 }
+
+export const metadata: Metadata = {
+  title: "Search Properties- GrihaBhoomi",
+  description: "Search your perfect properties at GrihaBhoomi",
+};
 
 function createQueryString(params: Record<string, string | number | null>, newPage: number): string {
   const newSearchParams = new URLSearchParams();

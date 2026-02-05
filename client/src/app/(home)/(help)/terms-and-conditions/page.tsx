@@ -1,4 +1,10 @@
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Terms and Conditions - GrihaBhoomi",
+  description: "Terms and Conditions at GrihaBhoomi"
+}
 
 export default function TermsAndConditionPage() {
   return (

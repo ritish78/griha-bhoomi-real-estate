@@ -15,7 +15,8 @@ import {
   CalendarIcon,
   ExclamationTriangleIcon,
   EyeClosedIcon,
-  PersonIcon
+  PersonIcon,
+  ExitIcon
 } from "@radix-ui/react-icons";
 
 export const Icons = {
@@ -653,6 +654,7 @@ export const Icons = {
   calendar: CalendarIcon,
   alert: ExclamationTriangleIcon,
   user: PersonIcon,
+  logout: ExitIcon,
   google: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

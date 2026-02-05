@@ -6,11 +6,17 @@ import PropertyCardSkeletonList from "../../_components/property-skeleton-list";
 import PropertyListPage from "../_components/properties-list-page";
 import { ListOfPropertiesResponse } from "@/types/property";
 import PaginationButton from "@/components/pagination-button";
+import { Metadata } from "next";
 
 export interface TrendingPageProps {
   params: { [key: string]: string | string[] | undefined };
   searchParams: Record<string, string | number | null>;
 }
+
+export const metadata: Metadata = {
+  title: "Trending Properties - GrihaBhoomi",
+  description: "Browse through trending properties at GrihaBhoomi",
+};
 
 export default async function TrendingPage(props: TrendingPageProps) {
   const searchParams = props.searchParams;
