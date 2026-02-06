@@ -28,13 +28,13 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const redirectTo = searchParams.get("redirect");
+
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      router.push("/");
+      router.push(redirectTo || "/");
     }
-  }, [loading, isAuthenticated, router]);
-
-  const redirectTo = searchParams.get("redirect");
+  }, [loading, isAuthenticated, router, redirectTo]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

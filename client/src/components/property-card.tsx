@@ -19,8 +19,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Card
       className={cn(
-        // `${property.featured ? "dark-featured-property" : null} border shadow-md size-full relative overflow-hidden rounded-md`
-        "border shadow-md size-full relative overflow-hidden rounded-md flex flex-col"
+        "border shadow-md size-full relative overflow-hidden rounded-md flex flex-col transition-all duration-300",
+        property.featured && "shadow-xl shadow-gold/20 hover:shadow-2xl hover:shadow-gold/30"
       )}
     >
       <Link aria-label="A house" href={`/property/${property.slug}`}>
@@ -48,10 +48,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               {property.status}
             </Badge>
             {property.featured ? (
-              <Badge variant="default" className="absolute top-2 left-2 p-2 flex mr-auto">
+              <Badge variant="default" className="absolute top-2 left-2 p-2 flex mr-auto border-0 shadow-sm">
                 <Icons.award className="mb-1 size-4"></Icons.award>
                 {/* <span className="ml-2 text-gold dark:text-yellow-600">Featured</span> */}
-                <span className="ml-2">Featured</span>
+                <span className="ml-2 font-semibold text-shadow-sm">Featured</span>
               </Badge>
             ) : null}
           </AspectRatio>
