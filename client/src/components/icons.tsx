@@ -16,8 +16,10 @@ import {
   ExclamationTriangleIcon,
   EyeClosedIcon,
   PersonIcon,
-  ExitIcon
+  ExitIcon,
+  ChevronDownIcon
 } from "@radix-ui/react-icons";
+import { ChevronLeft, ChevronUp, CloudUploadIcon } from "lucide-react";
 
 export const Icons = {
   logo: HomeIcon,
@@ -651,10 +653,14 @@ export const Icons = {
   eyeClose: EyeClosedIcon,
   plus: PlusIcon,
   rightArrow: ArrowRightIcon,
+  downArrow: ChevronDownIcon,
+  upArrow: ChevronUp,
+  leftArrow: ChevronLeft,
   calendar: CalendarIcon,
   alert: ExclamationTriangleIcon,
   user: PersonIcon,
   logout: ExitIcon,
+  cloudUpload: CloudUploadIcon,
   google: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/contexts/authContext';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useAuth } from "@/contexts/authContext";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Icons } from '@/components/icons';
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Icons } from "@/components/icons";
 
 export function AuthNav() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -37,16 +37,18 @@ export function AuthNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-fit rounded-md px-2 flex items-center gap-2" size="sm">
+        <Button
+          variant="ghost"
+          className="relative h-10 w-fit rounded-md px-2 flex items-center gap-2"
+          size="sm"
+        >
           <Avatar className="h-8 w-8">
             {user.profilePicUrl && (
               <AvatarImage src={user.profilePicUrl} alt={`${user.firstName} ${user.lastName}`} />
             )}
             <AvatarFallback>{getInitials(user.firstName, user.lastName)}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium hidden md:inline-block">
-            {user.firstName}
-          </span>
+          <span className="text-sm font-medium hidden md:inline-block">{user.firstName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -60,7 +62,8 @@ export function AuthNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
-          <Icons.logout className="mr-2 size-4" /><span>Log out</span>
+          <Icons.logout className="mr-2 size-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

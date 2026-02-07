@@ -193,13 +193,14 @@ export const addProperty = async (sellerId: string, body) => {
 
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    const slug = `${idOfToBeInsertedProperty.split("-")[0]}-${slugify(title, { lower: true })}`; 
 
     await preparedInsertProperty.execute({
       id: idOfToBeInsertedProperty,
       sellerId,
       propertyTypeId: propertyTypeId,
       title,
-      slug: `${idOfToBeInsertedProperty.split("-")[0]}-${slugify(title, { lower: true })}`,
+      slug,
       description,
       toRent,
       address: addressId,
@@ -240,12 +241,13 @@ export const addProperty = async (sellerId: string, body) => {
 
     //Even though the variable is named `idOfTheToBeInsertedProperty`, once we reach here
     //it is id of inserted property and still the same uuidv4 string
-    return idOfToBeInsertedProperty;
+    return {idOfToBeInsertedProperty, slug };
   } catch (error) {
     logger.error(`${error.message} - (${new Date().toISOString()})`, {
       error: error.message,
       stack: error.stack
     });
+    
   }
 };
 

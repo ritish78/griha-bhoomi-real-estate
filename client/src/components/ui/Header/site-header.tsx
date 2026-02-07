@@ -5,7 +5,8 @@ import { SearchBox } from "@/components/search-box";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
-import { AuthNav } from "./auth-nav";
+import { AuthNav } from "../auth-nav";
+import PostProperty from "./post-property";
 
 export default function SiteHeader() {
   return (
@@ -21,6 +22,7 @@ export default function SiteHeader() {
         <MobileNav items={siteConfig.mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
+            <PostProperty />
             <SearchBox />
             <AuthNav />
             <ThemeToggle />

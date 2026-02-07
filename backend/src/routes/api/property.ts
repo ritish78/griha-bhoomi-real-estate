@@ -104,12 +104,19 @@ router
          * table to the column property_type_id. It would make another database call which will lead
          * to performance issue once we start to have real users in the app
          */
-        const idOfInsertedProperty = await addProperty(
+        const newPropertyInDB = await addProperty(
           userId,
           req.body
           // expiresOn ? expiresOn : new Date()
         );
-        return res.status(201).send({ message: `New Property added of id: ${idOfInsertedProperty}!` });
+
+        if (!newPropertyInDB || !newPropertyInDB.idOfToBeInsertedProperty || !newPropertyInDB.slug) {
+          next(new BadRequestError("Could not add new property!"));
+
+          return;
+        }
+
+        return res.status(201).send({ message: `New Property added of id: ${newPropertyInDB.idOfToBeInsertedProperty}!`, slug: newPropertyInDB.slug });
       } catch (error) {
         next(error);
       }
