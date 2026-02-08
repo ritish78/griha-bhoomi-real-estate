@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -43,6 +43,9 @@ import {
 } from "@/components/ui/command";
 import { useRouter } from "next/navigation";
 import { createProperty } from "@/actions/property";
+import { uploadMultipleToCloudinary } from "@/lib/cloudinaryUpload";
+import { ImagePreview } from "@/components/image-preview";
+import { Progress } from "@/components/ui/progress";
 
 // Schema definition based on user request (combining Property, Address, Land, House)
 const propertyFormSchema = z.object({
@@ -82,7 +85,7 @@ const propertyFormSchema = z.object({
   facing: z.string().optional(),
   carParking: z.coerce.number().optional().default(0),
   bikeParking: z.coerce.number().optional().default(0),
-  builtAt: z.coerce.date().optional(), // Changed to coerce date
+  builtAt: z.coerce.date().optional(),
   sharedBathroom: z.boolean().optional().default(false),
   facilities: z.array(z.string()).optional().default([]),
   evCharging: z.boolean().optional().default(false),
@@ -102,6 +105,10 @@ type PropertyFormValues = z.infer<typeof propertyFormSchema>;
 
 export function PropertyForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
 
@@ -145,9 +152,6 @@ export function PropertyForm() {
     }
   }, [connectedToRoad, form]);
 
-  //When the user selects avaliable from to be a specific date and available date
-  //and then goes back to change the available from date to later than available till
-  //it changes the available till to be 1 day after the available from
   useEffect(() => {
     if (availableFrom && availableTill && availableFrom >= availableTill) {
       const nextDay = new Date(availableFrom);
@@ -156,12 +160,110 @@ export function PropertyForm() {
     }
   }, [availableFrom, availableTill, form]);
 
+  // Handle file selection and upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Convert FileList to Array
+    const fileArray = Array.from(files);
+
+    // Validate total images (max 10)
+    if (uploadedImages.length + fileArray.length > 10) {
+      toast.error("Too many images", {
+        description: `You can upload a maximum of 10 images. You have ${uploadedImages.length} and are trying to add ${fileArray.length} more.`
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Upload to Cloudinary
+      const results = await uploadMultipleToCloudinary(
+        fileArray,
+        "properties",
+        (completed, total) => {
+          setUploadProgress((completed / total) * 100);
+        }
+      );
+
+      // Filter successful uploads
+      const successfulUploads = results
+        .filter((result) => result.success && result.url)
+        .map((result) => result.url!);
+
+      const failedUploads = results.filter((result) => !result.success);
+
+      if (successfulUploads.length > 0) {
+        setUploadedImages((prev) => [...prev, ...successfulUploads]);
+        toast.success("Images uploaded", {
+          description: `Successfully uploaded ${successfulUploads.length} image(s).`
+        });
+      }
+
+      if (failedUploads.length > 0) {
+        toast.error("Some uploads failed", {
+          description: `${failedUploads.length} image(s) failed to upload. ${failedUploads[0] && failedUploads[0].error}`
+        });
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Upload failed", {
+        description: "An error occurred while uploading images."
+      });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Handle image removal
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+    toast.success("Image removed", {
+      description: "The image has been removed from your listing."
+    });
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+
+    // Trigger the same upload logic
+    const event = {
+      target: { files }
+    } as React.ChangeEvent<HTMLInputElement>;
+
+    await handleFileChange(event);
+  };
+
   async function onSubmit(data: PropertyFormValues) {
+    // Validate that at least one image is uploaded
+    if (uploadedImages.length === 0) {
+      toast.error("No images", {
+        description: "Please upload at least one image of the property."
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      //Making the date set from the frontend to match with what the backend wants
-      //E.g. 2026-04-01T12:00:00Z
       const adjustDate = (date: Date) => {
         if (!date) return undefined;
         const adjustedDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -170,12 +272,9 @@ export function PropertyForm() {
 
       const payload = {
         ...data,
-        imageUrl: [
-          "https://placehold.co/600x400.png",
-          "https://placehold.co/800x800.png",
-          "https://placehold.co/1200x1000.png"
-        ], // TODO: change the images to what the user uploads. These are default test images and is for test only.
+        imageUrl: uploadedImages,
         area: data.landArea || "",
+        bikeParking: data.carParking * 3,
         builtAt: data.builtAt ? adjustDate(new Date(data.builtAt)) : adjustDate(new Date()),
         availableFrom: adjustDate(new Date(data.availableFrom)),
         availableTill: adjustDate(new Date(data.availableTill))
@@ -183,7 +282,7 @@ export function PropertyForm() {
 
       const result = await createProperty(payload);
 
-      if (result.error) {
+      if (!result.success) {
         throw new Error(result.error);
       }
 
@@ -191,11 +290,11 @@ export function PropertyForm() {
         description: "Your property has been successfully listed."
       });
 
-      //Resetting the fields
+      // Reset the form and images
       form.reset();
+      setUploadedImages([]);
 
-      //Redirecting to the newly created property page
-      //property/${result.slug}
+      // Redirect to the newly created property page
       router.push(`/property/${result.slug}`);
     } catch (error: any) {
       console.error("Submission error:", error);
@@ -693,8 +792,6 @@ export function PropertyForm() {
                                       key={year}
                                       value={year}
                                       onSelect={(currentValue) => {
-                                        // Create a date for Jan 1st of the selected year
-                                        // constructing date string YYYY-01-01 to ensure coercion works as expected
                                         const date = new Date(`${currentValue}-01-01`);
                                         field.onChange(date);
                                       }}
@@ -836,18 +933,22 @@ export function PropertyForm() {
           </CardContent>
         </Card>
 
-        {/* Section 4: Images (Placeholder) */}
+        {/* Section 4: Images */}
         <Card>
           <div className="h-1 w-full bg-primary/80 rounded-t-md" />
           <CardHeader className="space-y-2 my-5 ml-6">
             <CardTitle>Property Images</CardTitle>
-            <CardDescription>Upload images of your property.</CardDescription>
+            <CardDescription>
+              Upload images of your property (max 10 images, 10MB each).
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center w-full">
               <label
                 htmlFor="dropzone-file"
-                className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900 hover:bg-gray-100 border-gray-300 dark:border-gray-600"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900 hover:bg-gray-100 border-gray-300 dark:border-gray-600 transition-colors"
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Icons.cloudUpload className="w-10 h-10 mb-3 text-gray-400" />
@@ -855,22 +956,54 @@ export function PropertyForm() {
                     <span className="font-semibold">Click to upload</span> or drag and drop
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    SVG, PNG, JPG or GIF
+                    PNG, JPG, WEBP or GIF (MAX. 10MB)
                   </p>
+                  {uploadedImages.length > 0 && (
+                    <p className="mt-2 text-sm font-medium text-primary">
+                      {uploadedImages.length} / 10 images uploaded
+                    </p>
+                  )}
                 </div>
-                <input id="dropzone-file" type="file" accept="image/jpeg, image/png, image/jpg, image/webp image/gif" className="hidden" multiple />
+                <input
+                  ref={fileInputRef}
+                  id="dropzone-file"
+                  type="file"
+                  accept="image/jpeg, image/png, image/jpg, image/webp, image/gif"
+                  className="hidden"
+                  multiple
+                  onChange={handleFileChange}
+                  disabled={isUploading || uploadedImages.length >= 10}
+                />
               </label>
             </div>
+
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Uploading images...</span>
+                  <span className="font-medium">{Math.round(uploadProgress)}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+
+            {/* Image Preview */}
+            <ImagePreview images={uploadedImages} onRemove={handleRemoveImage} />
           </CardContent>
         </Card>
 
         <div className="flex justify-end">
           <Button type="submit" size="lg" className="mx-auto flex w-fit group" disabled={isLoading}>
             {isLoading ? "Listing..." : "Create New Property Listing"}
-            {!isLoading ? (<Icons.rightArrow
-              className="ml-1 size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none"
-              aria-hidden="true"
-            />) : (<Icons.spinner className="mr-2 h-4 w-4 animate-spin" />)}
+            {!isLoading ? (
+              <Icons.rightArrow
+                className="ml-1 size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none"
+                aria-hidden="true"
+              />
+            ) : (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
           </Button>
         </div>
       </form>

@@ -67,7 +67,11 @@ export async function getFilteredListOfProperties(filters: string, limit: number
   }
 }
 
-export async function createProperty(data: any) {
+export type CreatePropertyResponse =
+  | { success: true; slug: string; error?: never }
+  | { success: false; error: string; slug?: never };
+
+export async function createProperty(data: any): Promise<CreatePropertyResponse> {
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = cookies();
@@ -85,11 +89,11 @@ export async function createProperty(data: any) {
     const result = await response.json();
 
     if (!response.ok) {
-      return { error: result.message || "Failed to list property" };
+      return { success: false, error: result.message || "Failed to list property" };
     }
 
     return { success: true, slug: result.slug };
   } catch (error: any) {
-    return { error: getErrorMessage(error) };
+    return { success: false, error: getErrorMessage(error) };
   }
 }
