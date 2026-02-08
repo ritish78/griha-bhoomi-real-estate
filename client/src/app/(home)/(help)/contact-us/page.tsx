@@ -1,4 +1,4 @@
-import ProtectedRoute from "@/components/protected-route";
+import ProtectedRoute from "@/components/auth/protected-route";
 import { Metadata } from "next";
 import Link from "next/link";
 

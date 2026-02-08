@@ -33,7 +33,6 @@ import { cn } from "@/lib/utlis";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toaster";
-import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -43,6 +42,7 @@ import {
   CommandList
 } from "@/components/ui/command";
 import { useRouter } from "next/navigation";
+import { createProperty } from "@/actions/property";
 
 // Schema definition based on user request (combining Property, Address, Land, House)
 const propertyFormSchema = z.object({
@@ -181,19 +181,10 @@ export function PropertyForm() {
         availableTill: adjustDate(new Date(data.availableTill))
       };
 
-      const response = await fetch("http://localhost:5000/api/v1/property/new", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify(payload)
-      });
+      const result = await createProperty(payload);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to list property");
+      if (result.error) {
+        throw new Error(result.error);
       }
 
       toast.success("Property Listed", {
@@ -687,7 +678,7 @@ export function PropertyForm() {
                                 {field.value
                                   ? new Date(field.value).getFullYear().toString()
                                   : "Select year"}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
@@ -708,7 +699,7 @@ export function PropertyForm() {
                                         field.onChange(date);
                                       }}
                                     >
-                                      <Check
+                                      <Icons.check
                                         className={cn(
                                           "mr-2 h-4 w-4",
                                           field.value &&
@@ -864,10 +855,10 @@ export function PropertyForm() {
                     <span className="font-semibold">Click to upload</span> or drag and drop
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    SVG, PNG, JPG or GIF (MAX. 800x400px)
+                    SVG, PNG, JPG or GIF
                   </p>
                 </div>
-                <input id="dropzone-file" type="file" className="hidden" multiple />
+                <input id="dropzone-file" type="file" accept="image/jpeg, image/png, image/jpg, image/webp image/gif" className="hidden" multiple />
               </label>
             </div>
           </CardContent>

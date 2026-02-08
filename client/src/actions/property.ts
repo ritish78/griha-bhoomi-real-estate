@@ -66,3 +66,30 @@ export async function getFilteredListOfProperties(filters: string, limit: number
     return { error: getErrorMessage(error) };
   }
 }
+
+export async function createProperty(data: any) {
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieStore = cookies();
+    const cookieHeader = cookieStore.toString();
+
+    const response = await fetch("http://localhost:5000/api/v1/property/new", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookieHeader,
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return { error: result.message || "Failed to list property" };
+    }
+
+    return { success: true, slug: result.slug };
+  } catch (error: any) {
+    return { error: getErrorMessage(error) };
+  }
+}

@@ -15,11 +15,11 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
       router.push(redirectUrl);
     }
-  }, [isAuthenticated, loading, router, pathname]);
+  }, [loading, isAuthenticated, router, pathname]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="container min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading...</div>
       </div>
     );
@@ -27,7 +27,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="container min-h-screen flex items-center justify-center">
         <div className="text-xl">Redirecting to login...</div>
       </div>
     );

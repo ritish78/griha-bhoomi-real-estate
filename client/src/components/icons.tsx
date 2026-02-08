@@ -19,7 +19,7 @@ import {
   ExitIcon,
   ChevronDownIcon
 } from "@radix-ui/react-icons";
-import { ChevronLeft, ChevronUp, CloudUploadIcon } from "lucide-react";
+import { ChevronLeft, ChevronUp, CloudUploadIcon, ChevronsUpDown } from "lucide-react";
 
 export const Icons = {
   logo: HomeIcon,
@@ -656,6 +656,7 @@ export const Icons = {
   downArrow: ChevronDownIcon,
   upArrow: ChevronUp,
   leftArrow: ChevronLeft,
+  upDown: ChevronsUpDown,
   calendar: CalendarIcon,
   alert: ExclamationTriangleIcon,
   user: PersonIcon,
