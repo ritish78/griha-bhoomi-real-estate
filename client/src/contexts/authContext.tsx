@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -55,7 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user || data);
+        const userData = data.user || data;
+        setUser(userData);
+        return userData;
       } else if (response.status === 404) {
         //If endpoint doesn't exist, skip auth check
         //
@@ -63,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
       }
+      return null;
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
@@ -89,8 +93,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       //Fetch user data after successful login
-      await checkAuth();
+      const user = await checkAuth();
       
+      if (user) {
+        toast.success(`You have successfully logged in, ${user.firstName}!`);
+      }
+
       //Redirect to the intended page or default to dashboard
       router.push(redirectTo ||'/');
     } catch (error) {
@@ -112,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
 
       if (!response.ok) {
-        const error = new Error(data.message || 'Registration failed');
+        const error = new Error(data.message || 'Registration failed!');
         if (data.errors) {
           (error as any).errors = data.errors;
         }
@@ -134,11 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       setUser(null);
+      toast.success("Logged out successfully!");
       router.push('/');
     } catch (error) {
       console.error('Logout failed:', error);
       //Still clear user locally even if request fails
       setUser(null);
+      toast.success("Logged out successfully!");
       router.push('/');
     }
   };

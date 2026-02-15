@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Icons } from "./icons";
 import { ListOfPropertiesResponse, ListOfPropertiesSuccess, Property } from "@/types/property";
 import { cn, isMacOS } from "@/lib/utlis";
@@ -101,7 +100,7 @@ export function SearchBox() {
         // onClick={() => setOpen(true)}
         onClick={() => router.push("/property/search")}
       >
-        <MagnifyingGlassIcon className="size-4 xl:mr-2" aria-hidden="true" />
+        <Icons.search className="size-4 xl:mr-2" aria-hidden="true" />
         <span className="hidden xl:inline-flex">Search property...</span>
         <span className="sr-only">Search property</span>
         <Kbd

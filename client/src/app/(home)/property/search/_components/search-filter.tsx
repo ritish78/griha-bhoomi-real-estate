@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { Icons } from "@/components/icons";
 import {
   Drawer,
   DrawerContent,
@@ -25,6 +25,7 @@ import { FilterList, type Filter } from "@/components/layout/filter-list";
 interface SearchFilterProps extends React.HTMLAttributes<HTMLElement> {
   isOnDesktop: boolean;
 }
+
 
 const propertyFilter: Filter[] = [
   {
@@ -428,6 +429,7 @@ const landTypeFilter: Filter[] = [
 
 export default function SearchFilter({ isOnDesktop }: SearchFilterProps) {
   const searchParams = useSearchParams();
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
 
   const [isPropertyTypeOpen, setIsPropertyTypeOpen] = useState(false);
@@ -912,7 +914,7 @@ useEffect(() => {
               }
             >
               {selectedPropertyType ? <>{selectedPropertyType.label}</> : <>{"\u00A0"}</>}
-              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </ChildrenShell>
           <ContentShell
@@ -944,7 +946,7 @@ useEffect(() => {
               }
             >
               {selectedRent ? <>{selectedRent.label}</> : <>{"\u00A0"}</>}
-              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </ChildrenShell>
           <ContentShell
@@ -1002,7 +1004,7 @@ useEffect(() => {
                   }
                 >
                   {selectedHouseType ? <>{selectedHouseType.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1046,7 +1048,7 @@ useEffect(() => {
                   }
                 >
                   {selectedRoomCount ? <>{selectedRoomCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1070,6 +1072,89 @@ useEffect(() => {
             </ParentShell>
           </div>
           <div className="flex flex-col gap-2">
+            <Label className="text-sm">Number of floors:</Label>
+            <ParentShell open={isFloorCountOpen} onOpenChange={setIsFloorCountOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
+                  }
+                >
+                  {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>{"\u00A0"}</>}
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Number of floors</DrawerTitle>
+                    <DrawerDescription>
+                      Select the number of floors the house needs to have
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  setIsOpen={setIsFloorCountOpen}
+                  setSelectedFilter={setSelectedFloorCount}
+                  toFilter={uptoTenCount}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm">Built Year:</Label>
+            <ParentShell open={isCalendarOptionOpen} onOpenChange={setIsCalendarOptionOpen}>
+              <ChildrenShell asChild>
+                <Button
+                  variant="outline"
+                  className={
+                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
+                  }
+                >
+                  {selectedCalendarYear ? <>{selectedCalendarYear.label}</> : <>{"\u00A0"}</>}
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </ChildrenShell>
+              <ContentShell
+                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
+                align="start"
+              >
+                {!isOnDesktop && (
+                  <DrawerHeader>
+                    <DrawerTitle>Built year</DrawerTitle>
+                    <DrawerDescription>
+                      Only the house that are built after the year that you chose will be displayed
+                    </DrawerDescription>
+                  </DrawerHeader>
+                )}
+                <FilterList
+                  withCommandInput
+                  withCommandText="Search Year"
+                  setIsOpen={setIsCalendarOptionOpen}
+                  setSelectedFilter={setSelectedCalendarYear}
+                  toFilter={yearList}
+                />
+              </ContentShell>
+            </ParentShell>
+          </div>
+           {/* Toggle Button */}
+            <div className="col-span-full flex justify-center my-2">
+              <Button
+                variant="ghost"
+                onClick={() => setShowMoreFilters(!showMoreFilters)}
+                className="flex items-center gap-2"
+              >
+                {showMoreFilters ? "Show Less Filters" : "Show More Filters"}
+                {showMoreFilters ? <Icons.upArrow /> : <Icons.downArrow />}
+              </Button>
+            </div>
+          {showMoreFilters && (
+          <>
+          <div className="flex flex-col gap-2">
             <Label className="text-sm">Minimum number of rooms:</Label>
             <ParentShell open={isMinRoomCountOpen} onOpenChange={setIsMinRoomCountOpen}>
               <ChildrenShell asChild>
@@ -1080,7 +1165,7 @@ useEffect(() => {
                   }
                 >
                   {selectedMinRoomCount ? <>{selectedMinRoomCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1112,7 +1197,7 @@ useEffect(() => {
                   }
                 >
                   {selectedMaxRoomCount ? <>{selectedMaxRoomCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1133,40 +1218,7 @@ useEffect(() => {
               </ContentShell>
             </ParentShell>
           </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm">Number of floors:</Label>
-            <ParentShell open={isFloorCountOpen} onOpenChange={setIsFloorCountOpen}>
-              <ChildrenShell asChild>
-                <Button
-                  variant="outline"
-                  className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
-                  }
-                >
-                  {selectedFloorCount ? <>{selectedFloorCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </ChildrenShell>
-              <ContentShell
-                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-                align="start"
-              >
-                {!isOnDesktop && (
-                  <DrawerHeader>
-                    <DrawerTitle>Number of floors</DrawerTitle>
-                    <DrawerDescription>
-                      Select the number of floors the house needs to have
-                    </DrawerDescription>
-                  </DrawerHeader>
-                )}
-                <FilterList
-                  setIsOpen={setIsFloorCountOpen}
-                  setSelectedFilter={setSelectedFloorCount}
-                  toFilter={uptoTenCount}
-                />
-              </ContentShell>
-            </ParentShell>
-          </div>
+
           <div className="flex flex-col gap-2">
             <Label className="text-sm">Minimum number of floors:</Label>
             <ParentShell open={isMinFloorCountOpen} onOpenChange={setIsMinFloorCountOpen}>
@@ -1178,7 +1230,7 @@ useEffect(() => {
                   }
                 >
                   {selectedMinFloorCount ? <>{selectedMinFloorCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1210,7 +1262,7 @@ useEffect(() => {
                   }
                 >
                   {selectedMaxFloorCount ? <>{selectedMaxFloorCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1242,7 +1294,7 @@ useEffect(() => {
                   }
                 >
                   {selectedKitchenCount ? <>{selectedKitchenCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1274,7 +1326,7 @@ useEffect(() => {
                   }
                 >
                   {selectedMinKitchenCount ? <>{selectedMinKitchenCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1306,7 +1358,7 @@ useEffect(() => {
                   }
                 >
                   {selectedMaxKitchenCount ? <>{selectedMaxKitchenCount.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1345,7 +1397,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1383,7 +1435,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1419,7 +1471,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1451,7 +1503,7 @@ useEffect(() => {
                   }
                 >
                   {selectedFurnishedOption ? <>{selectedFurnishedOption.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1483,7 +1535,7 @@ useEffect(() => {
                   }
                 >
                   {selectedFacingOption ? <>{selectedFacingOption.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1521,7 +1573,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1559,7 +1611,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1597,7 +1649,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1620,42 +1672,7 @@ useEffect(() => {
               </ContentShell>
             </ParentShell>
           </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm">Built Year:</Label>
-            <ParentShell open={isCalendarOptionOpen} onOpenChange={setIsCalendarOptionOpen}>
-              <ChildrenShell asChild>
-                <Button
-                  variant="outline"
-                  className={
-                    isOnDesktop ? "w-[175px] justify-between p-2" : "w-full justify-between p-2"
-                  }
-                >
-                  {selectedCalendarYear ? <>{selectedCalendarYear.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </ChildrenShell>
-              <ContentShell
-                className={isOnDesktop ? `w-[175px] p-0` : "mt-10 mb-5 border-t"}
-                align="start"
-              >
-                {!isOnDesktop && (
-                  <DrawerHeader>
-                    <DrawerTitle>Built year</DrawerTitle>
-                    <DrawerDescription>
-                      Only the house that are built after the year that you chose will be displayed
-                    </DrawerDescription>
-                  </DrawerHeader>
-                )}
-                <FilterList
-                  withCommandInput
-                  withCommandText="Search Year"
-                  setIsOpen={setIsCalendarOptionOpen}
-                  setSelectedFilter={setSelectedCalendarYear}
-                  toFilter={yearList}
-                />
-              </ContentShell>
-            </ParentShell>
-          </div>
+
           <div className="flex flex-col gap-2">
             <Label className="text-sm">Connected to road:</Label>
             <ParentShell
@@ -1674,7 +1691,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1719,7 +1736,7 @@ useEffect(() => {
                       ) : (
                         <>{"\u00A0"}</>
                       )}
-                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </ChildrenShell>
                   <ContentShell
@@ -1745,6 +1762,8 @@ useEffect(() => {
             ) : null
           ) : null}
         </>
+        )}
+        </>
       ) : selectedPropertyType?.value === "Land" ? (
         <>
           <div className="flex flex-col gap-2">
@@ -1753,7 +1772,7 @@ useEffect(() => {
               <ChildrenShell asChild>
                 <Button variant="outline" className="w-[175px] justify-between p-2 overflow-hidden">
                   {selectedLandTypeOption ? <>{selectedLandTypeOption.label}</> : <>{"\u00A0"}</>}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1792,7 +1811,7 @@ useEffect(() => {
                   ) : (
                     <>{"\u00A0"}</>
                   )}
-                  <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </ChildrenShell>
               <ContentShell
@@ -1837,7 +1856,7 @@ useEffect(() => {
                       ) : (
                         <>{"\u00A0"}</>
                       )}
-                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </ChildrenShell>
                   <ContentShell

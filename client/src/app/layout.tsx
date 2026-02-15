@@ -3,7 +3,7 @@ import "./globals.css";
 import { cn } from "@/lib/utlis";
 import { ThemeProvider } from "@/components/providers";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";

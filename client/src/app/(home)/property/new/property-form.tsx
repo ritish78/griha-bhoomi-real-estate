@@ -892,10 +892,10 @@ export function PropertyForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Residential">Residential</SelectItem>
-                          <SelectItem value="Agricultural">Agricultural</SelectItem>
-                          <SelectItem value="Industrial">Industrial</SelectItem>
-                          <SelectItem value="Commercial">Commercial</SelectItem>
+                          <SelectItem value="residential">Residential</SelectItem>
+                          <SelectItem value="agricultural">Agricultural</SelectItem>
+                          <SelectItem value="industrial">Industrial</SelectItem>
+                          <SelectItem value="commercial">Commercial</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

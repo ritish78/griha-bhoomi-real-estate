@@ -8,6 +8,7 @@ import PropertyListPage from "../_components/properties-list-page";
 import PaginationButton from "@/components/pagination-button";
 import { Shell } from "@/components/shell";
 import SearchSheet from "./_components/search-sheet";
+import KeywordSearch from "./_components/keyword-search";
 import { Metadata } from "next";
 
 export interface SearchPropertyPageProps {
@@ -16,7 +17,7 @@ export interface SearchPropertyPageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Search Properties- GrihaBhoomi",
+  title: "Search Properties - GrihaBhoomi",
   description: "Search your perfect properties at GrihaBhoomi",
 };
 
@@ -79,6 +80,7 @@ export default async function SearchPropertyPage(props: SearchPropertyPageProps)
             </p>
           </div>
           <div className="border rounded-lg bg-card p-4 md:p-6 shadow-sm">
+            <KeywordSearch />
             <SearchSheet />
           </div>
         </div>
