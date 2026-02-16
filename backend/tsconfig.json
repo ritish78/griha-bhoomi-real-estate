@@ -12,7 +12,11 @@
     "useUnknownInCatchVariables": false,
     "noImplicitAny": false,
     "target": "es2016",
-    "typeRoots": ["node_modules/@types", "src/types"]
+    "typeRoots": ["node_modules/@types", "src/types"],
+    "paths": {
+      "src/*": ["./src/*"]
+    },
+    "types": ["jest"]
   },
   "include": ["**/*.ts"]
 }
