@@ -24,6 +24,7 @@ import {
   getTotalNumberOfProperties
 } from "src/db/preparedStatement";
 import { toggleBookmark } from "src/controller/bookmark/bookmarkController";
+import { cache, invalidateCache } from "src/middleware/cache";
 
 const router = Router();
 
@@ -116,7 +117,10 @@ router
           return;
         }
 
-        return res.status(201).send({ message: `New Property added of id: ${newPropertyInDB.idOfToBeInsertedProperty}!`, slug: newPropertyInDB.slug });
+        return res.status(201).send({
+          message: `New Property added of id: ${newPropertyInDB.idOfToBeInsertedProperty}!`,
+          slug: newPropertyInDB.slug
+        });
       } catch (error) {
         next(error);
       }
@@ -130,7 +134,7 @@ router
  * @desc        Get properties for homepage and retrieving can be offset as well.
  * @access      Public
  */
-router.route("/").get(async (req: Request, res: Response) => {
+router.route("/").get(cache(300), async (req: Request, res: Response) => {
   //First we get the number of page that we are in
   //If the user is in `localhost:5000/api/v1/property` we say that they are in first page
   //and limit the first 10 results. To get to the next page `?page=2` needs to be supplied
@@ -182,7 +186,7 @@ router.route("/").get(async (req: Request, res: Response) => {
  * @desc              Retrieve list of properties if featured is set as true
  * @access            Public
  */
-router.route("/featured").get(async (req: Request, res: Response) => {
+router.route("/featured").get(cache(300), async (req: Request, res: Response) => {
   //First we get the current page that the user is currently in.
   //If the user does not supply the page number then we provide the default
   //value of the page number to be 1
@@ -277,7 +281,7 @@ router.route("/filter").get(async (req: Request, res: Response) => {
  * @reqParams           string - propertyId
  * @access              Public
  */
-router.route("/id/:propertyId").get(async (req: Request, res: Response, next: NextFunction) => {
+router.route("/id/:propertyId").get(cache(600), async (req: Request, res: Response, next: NextFunction) => {
   console.log("Property search by id", req.params.propertyId);
   const propertyById = await getPropertyById(req.params.propertyId, req.session.userId);
 
@@ -304,7 +308,7 @@ router.route("/id/:propertyId").get(async (req: Request, res: Response, next: Ne
  * @reqParams           string - slug
  * @access              Public
  */
-router.route("/:slug").get(async (req: Request, res: Response, next: NextFunction) => {
+router.route("/:slug").get(cache(600), async (req: Request, res: Response, next: NextFunction) => {
   console.log("Property search by id", req.params.slug);
   const propertyBySlug = await getPropertyBySlug(req.params.slug, req.session.userId);
 
@@ -353,6 +357,7 @@ router
     const deletedProperty = await deletePropertyById(currentUserId, propertyIdToBeDeleted);
 
     if (deletedProperty === 1) {
+      await invalidateCache(`/api/v1/property/id/${propertyIdToBeDeleted}`);
       return res.status(200).send({ message: "Property deleted successfully!" });
     } else if (deletedProperty === -1) {
       throw new ForbiddenError("User is not authorized to perform this action!");
@@ -393,6 +398,7 @@ router
       const updatedProperty = await updatePropertyById(idOfPropertyToUpdate, currentUserId, req.body);
 
       if (updatedProperty === 1) {
+        await invalidateCache(`/api/v1/property/id/${idOfPropertyToUpdate}`);
         logger.info(
           `Updated property of id ${idOfPropertyToUpdate} by user of id ${currentUserId}`,
           { idOfPropertyToUpdate, currentUserId, email: req.session.email, body: req.body },
@@ -429,6 +435,7 @@ router
     const privatePropertyToggled = await togglePropertyPrivate(idOfPropertyToTogglePrivate, currentUserId);
 
     if (privatePropertyToggled) {
+      await invalidateCache(`/api/v1/property/id/${idOfPropertyToTogglePrivate}`);
       return res
         .status(200)
         .send({ message: `Updated private status of property of id ${idOfPropertyToTogglePrivate}` });
