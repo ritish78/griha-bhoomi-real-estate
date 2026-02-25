@@ -2,6 +2,7 @@
 https://www.youtube.com/watch?v=8gaOB9GFrKQ
 
 # Screenshots:
+
 * Redis showing session of signed in user
 <img width="987" height="737" alt="Redis showing session of signed in user" src="https://github.com/user-attachments/assets/92e6420e-7379-4f76-ad23-b336bfab991a" />
 * Logging in using email and password:
@@ -10,10 +11,6 @@ https://www.youtube.com/watch?v=8gaOB9GFrKQ
 <img width="1280" height="836" alt="Registering using email and password" src="https://github.com/user-attachments/assets/5ce0fe6c-8d82-45fd-9098-1737f5bc3dd3" />
 * SessionID in cookie:
 <img width="1167" height="381" alt="SessionID in cookie" src="https://github.com/user-attachments/assets/ccb5fd2f-9edd-48f6-8b11-181a8bb2e09c" />
-* Node Benchmark with body:
-<img width="1210" height="581" alt="node benchmark login with body" src="https://github.com/user-attachments/assets/ea4fdee8-203f-44be-b21f-2a2dc66de0ab" />
-* Bun Benchmark with body:
-<img width="1207" height="562" alt="bun benchmark login with body 2" src="https://github.com/user-attachments/assets/07c7b96e-f544-47ee-895a-7bb9aa7ddb1e" />
 * Home Screen
 <img width="1870" height="908" alt="GrihaBhoomi Home Screen" src="https://github.com/user-attachments/assets/ffb26cb3-56f6-4052-8613-578eb99b4247" />
 * Scrolling down in Home Screen
@@ -36,5 +33,9 @@ https://www.youtube.com/watch?v=8gaOB9GFrKQ
 <img width="968" height="373" alt="View count of Previously clicked House listing increased by 1" src="https://github.com/user-attachments/assets/9f854f3c-2c1f-433c-b8d7-d8d3bafd1e19" />
 * New Property Listing Page
 <img width="1742" height="907" alt="New Property Listing Page at default" src="https://github.com/user-attachments/assets/59c8003b-ce81-4f55-bd45-1ae9e1ab2675" />
+* Stress testing backend on `/api/v1/property/[slug]` using `GET` method:
+<img width="1272" height="493" alt="Get property by slug without cache" src="https://github.com/user-attachments/assets/f6f530d2-76dc-4ea5-8577-396a38a143d6" />
+* Stress testing backend, now with Cache. The backend now can handle 5 times requests while being 5 times faster than previous implementation.
+<img width="1272" height="496" alt="Get property by slug WITH cache" src="https://github.com/user-attachments/assets/52b992c7-9421-4523-a508-6b16663910f5" />
 
 There are many more functionalities. Please visit the above youtube link or clone the repository to test it for yourself. Thank you.
