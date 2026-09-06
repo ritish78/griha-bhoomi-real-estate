@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import { preparedGetUserByEmail, preparedGetUserById, preparedInsertUser } from "src/db/preparedStatement";
 

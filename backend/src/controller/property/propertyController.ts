@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, gte, ilike, lte, sql } from "drizzle-orm";
 import slugify from "slugify";
-import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import { v4 as uuidv4 } from "uuid";
+import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import db from "src/db";
 
 import {
@@ -31,38 +31,38 @@ import { address } from "src/model/address";
 /**
  * @param dummyPropertyData array of property
  */
-// export const seedProperty = async (dummyPropertyData) => {
-//   await db.transaction(async (tx) => {
-//     for (const row of dummyPropertyData) {
-//       try {
-//         await tx.insert(property).values([
-//           {
-//             id: uuidv4(),
-//             sellerId: row.sellerId,
-//             title: row.title,
-//             slug: row.title,
-//             description: row.description,
-//             toRent: row.toRent,
-//             address: row.address,
-//             closeLandmark: row.closeLandmark,
-//             propertyType: row.propertyType,
-//             availableFrom: row.availableFrom,
-//             availableTill: row.availableTill,
-//             price: row.price,
-//             negotiable: row.negotiable,
-//             imageUrl: row.imageUrl,
-//             status: row.status,
-//             expiresOn: row.expiresOn,
-//             views: 1
-//           }
-//         ]);
-//       } catch (error) {
-//         console.log(`Error inserting row: ${JSON.stringify(row)}`);
-//         console.log(error);
-//       }
-//     }
-//   });
-// };
+export const seedProperty = async (dummyPropertyData) => {
+  await db.transaction(async (tx) => {
+    for (const row of dummyPropertyData) {
+      try {
+        await tx.insert(property).values([
+          {
+            id: uuidv4(),
+            sellerId: row.sellerId,
+            title: row.title,
+            slug: row.title,
+            description: row.description,
+            toRent: row.toRent,
+            address: row.address,
+            closeLandmark: row.closeLandmark,
+            propertyType: row.propertyType,
+            availableFrom: row.availableFrom,
+            availableTill: row.availableTill,
+            price: row.price,
+            negotiable: row.negotiable,
+            imageUrl: row.imageUrl,
+            status: row.status,
+            expiresOn: row.expiresOn,
+            views: 1
+          }
+        ]);
+      } catch (error) {
+        console.log(`Error inserting row: ${JSON.stringify(row)}`);
+        console.log(error);
+      }
+    }
+  });
+};
 
 /**
  * @route                   /api/v1/auth/property/new
@@ -353,7 +353,7 @@ export const addLand = async (
  */
 export const getPropertyById = async (propertyId: string, userId) => {
   console.log("Searching for property of id:", propertyId);
-  const [propertyById] = await preparedGetPropertyById.execute({ propertyId });
+  const [propertyById] = (await preparedGetPropertyById.execute({ propertyId })) as Property[];
 
   ///if property does not exists, we immediately return null back from the function
   if (!propertyById) {

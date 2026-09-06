@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   griha-bhoomi-backend:
     container_name: dev-griha-bhoomi-backend
@@ -37,8 +35,8 @@ services:
     networks:
       - griha-bhoomi
 
-  adminer:
-    container_name: adminer
+  adminer-griha-bhoomi:
+    container_name: adminer-griha-bhoomi
     image: adminer:4.8.1
     restart: unless-stopped
     environment:

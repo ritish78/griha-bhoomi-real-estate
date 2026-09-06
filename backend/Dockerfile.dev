@@ -1,5 +1,7 @@
 # Selecting base image
-FROM node:21-alpine
+FROM node:26-alpine
+
+RUN npm install -g pnpm@10.33.2
 
 # Selecting Work directory
 WORKDIR /usr/src/app
@@ -8,12 +10,7 @@ WORKDIR /usr/src/app
 ENV NODE_ENV=development
 
 # Copying the dependency file
-COPY pnpm-lock.yaml .
-COPY package.json .
-
-# Installing pnpm
-RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.shrc" SHELL="$(which sh)" sh
-RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml ./
 
 # Installing the dependencies
 RUN pnpm install

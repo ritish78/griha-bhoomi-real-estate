@@ -8,7 +8,7 @@ import {
   getPropertyById,
   getPropertyBySlug,
   togglePropertyPrivate,
-  // seedProperty,
+  seedProperty,
   updatePropertyById
 } from "src/controller/property/propertyController";
 import { newPropertySchema, updatePropertySchema } from "src/controller/property/propertySchema";
@@ -17,7 +17,7 @@ import { validatePropertySchema, validateRequest } from "src/middleware/validate
 // import { Property } from "src/model/property";
 import { AuthError, BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
-// import { dummyPropertyData } from "seed";
+import { dummyPropertyData } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import {
   preparedGetTotalNumberOfFeaturedProperties,
@@ -33,15 +33,15 @@ const router = Router();
  * @desc        Seed dummy property into postgresql db
  * @access      Auth User
  */
-// router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
-//   try {
-//     await seedProperty(dummyPropertyData);
-//     res.status(201).send({ message: "Property info seeded successfully!" });
-//   } catch (error) {
-//     console.log("Error while seeding the property to database!");
-//     res.status(500).send({ message: "Could not seed property info to database!" });
-//   }
-// });
+router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
+  try {
+    await seedProperty(dummyPropertyData);
+    res.status(201).send({ message: "Property info seeded successfully!" });
+  } catch (error) {
+    console.log("Error while seeding the property to database!");
+    res.status(500).send({ message: "Could not seed property info to database!" });
+  }
+});
 
 /**
  * @route               /api/v1/property/new
@@ -311,7 +311,7 @@ router.route("/:slug").get(async (req: Request, res: Response, next: NextFunctio
       },
       true
     );
-    next(new NotFoundError(`Property of slug ${req.params.slug} not found!`));
+    return next(new NotFoundError(`Property of slug ${req.params.slug} not found!`));
   }
 
   return res.status(200).send(propertyBySlug);
