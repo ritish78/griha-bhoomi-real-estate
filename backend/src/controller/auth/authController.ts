@@ -7,6 +7,7 @@ import { AuthError, BadRequestError } from "src/utils/error";
 import logger from "src/utils/logger";
 
 import { NUMBER_OF_SALT_ROUNDS } from "src/config";
+import { SessionData } from "express-session";
 
 /**
  * First, we make a function that retrieves user from the database.
@@ -24,8 +25,8 @@ export const getUserByEmail = async (email: string) => {
   return userFromDatabase;
 };
 
-export const getUserById = async (id: string) => {
-  const [userFromDatabase] = await preparedGetUserById.execute({ id });
+export const getUserById = async (userId: string) => {
+  const [userFromDatabase] = await preparedGetUserById.execute({ userId });
 
   return userFromDatabase;
 };
@@ -120,3 +121,4 @@ export const authUser = async (email: string, password: string) => {
   //If the checks of email and password is satisfied, we return the user that we selected from database
   return userFromDatabase;
 };
+

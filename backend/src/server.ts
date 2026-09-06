@@ -35,7 +35,13 @@ app.disable("X-Powered-By");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookies());
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["X-RateLimit-TTL", "X-RateLimit-Remaining"]
+}));
 app.use(
   session({
     store: new RedisStore({ client: redisClient }),

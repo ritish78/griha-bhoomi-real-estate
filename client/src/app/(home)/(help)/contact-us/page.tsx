@@ -1,7 +1,15 @@
+import ProtectedRoute from "@/components/auth/protected-route";
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Contact Us - GrihaBhoomi",
+  description: "Contact us at GrihaBhoomi",
+};
 
 export default function ContactUsPage() {
   return (
+    <ProtectedRoute>
     <section
       id="features"
       className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
@@ -29,5 +37,6 @@ export default function ContactUsPage() {
         </div>
       </div>
     </section>
+    </ProtectedRoute>
   );
 }

@@ -3,10 +3,14 @@ import "./globals.css";
 import { cn } from "@/lib/utlis";
 import { ThemeProvider } from "@/components/providers";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+
+import { NextUIProvider } from "@nextui-org/react";
+
+import { AuthProvider } from "@/contexts/authContext";
 
 export const metadata: Metadata = {
   title: "GrihaBhoomi",
@@ -35,8 +39,17 @@ export default function RootLayout({
           GeistMono.variable
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+            <NextUIProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </NextUIProvider>
           <TailwindIndicator />
         </ThemeProvider>
         <Toaster />

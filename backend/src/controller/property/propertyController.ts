@@ -193,13 +193,14 @@ export const addProperty = async (sellerId: string, body) => {
 
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    const slug = `${idOfToBeInsertedProperty.split("-")[0]}-${slugify(title, { lower: true })}`; 
 
     await preparedInsertProperty.execute({
       id: idOfToBeInsertedProperty,
       sellerId,
       propertyTypeId: propertyTypeId,
       title,
-      slug: `${idOfToBeInsertedProperty.split("-")[0]}-${slugify(title, { lower: true })}`,
+      slug,
       description,
       toRent,
       address: addressId,
@@ -240,12 +241,13 @@ export const addProperty = async (sellerId: string, body) => {
 
     //Even though the variable is named `idOfTheToBeInsertedProperty`, once we reach here
     //it is id of inserted property and still the same uuidv4 string
-    return idOfToBeInsertedProperty;
+    return {idOfToBeInsertedProperty, slug };
   } catch (error) {
     logger.error(`${error.message} - (${new Date().toISOString()})`, {
       error: error.message,
       stack: error.stack
     });
+    
   }
 };
 
@@ -471,7 +473,8 @@ export const filterProperties = async (filters) => {
       "listedat",
       "updatedat",
       "sortby",
-      "order"
+      "order",
+      "page"
     ];
 
     const validHouseFilterOptions: string[] = [
@@ -498,8 +501,8 @@ export const filterProperties = async (filters) => {
       "bikeparking",
       "evcharging",
       "builtat",
-      "connectedtoroad",
-      "distancetoroad"
+      "houseconnectedtoroad",
+      "housedistancetoroad"
     ];
 
     const validLandFilterOptions: string[] = [
@@ -507,8 +510,8 @@ export const filterProperties = async (filters) => {
       "area",
       "length",
       "breadth",
-      "connectedtoroad",
-      "distancetoroad"
+      "landconnectedtoroad",
+      "landdistancetoroad"
     ];
 
     const validAddressFilterOptions: string[] = [
@@ -559,9 +562,9 @@ export const filterProperties = async (filters) => {
         //If `connectedtoroad` and `distancetoroad` fields are provided in the context
         //of land, we add to it. We could simplify it by storing those two fields in
         //property table itself instead of having both fields on both House and Land table
-        if (key === "connectedtoroad" || key === "distancetoroad") {
-          mapLandFilterOptions.set(key, filters[key]);
-        }
+        // if (key === "connectedtoroad" || key === "distancetoroad") {
+        //   mapLandFilterOptions.set(key, filters[key]);
+        // }
       } else if (validLandFilterOptions.includes(key) && !mapLandFilterOptions.has(key)) {
         mapLandFilterOptions.set(key, filters[key]);
       } else if (validAddressFilterOptions.includes(key) && !mapAddressFilterOptions.has(key)) {
@@ -607,7 +610,27 @@ export const filterProperties = async (filters) => {
     //get the count and also the list of properties from where() clause.
     const filteredProperties = await db
       .select({
-        listOfProperties: property,
+        id: property.id,
+        title: property.title,
+        slug: property.slug,
+        description: property.description,
+        toRent: property.toRent,
+        propertyType: property.propertyType,
+        price: property.price,
+        imageUrl: property.imageUrl,
+        status: property.status,
+        featured: property.featured,
+        views: property.views,
+        street: address.street,
+        municipality: address.municipality,
+        city: address.municipality,
+        district: address.district,
+        roomCount: house.roomCount,
+        bathroomCount: house.bathroomCount,
+        houseArea: house.area,
+        length: land.length,
+        breadth: land.breadth,
+        landArea: land.area,
         numberOfFilteredProperties: sql<number>`count(*) over()`
         // tsrank: sql`ts_rank(search_vector, to_tsquery('english', '${mapPropertyFilterOptions.get("keyword").replace(" ", " | ")}')) as rank`
       })
@@ -739,7 +762,7 @@ export const filterProperties = async (filters) => {
             ? eq(house.evCharging, mapHouseFilterOptions.get("evcharging"))
             : undefined,
           //To get the built at, if user only provides the year; we create
-          //date object where it specifies the first day othe year and if
+          //date object where it specifies the first day of the year and if
           //the user supplies date like; 2004-05-01, then we use it instead
           //of having to create a date object
           mapHouseFilterOptions.get("builtat")
@@ -750,11 +773,11 @@ export const filterProperties = async (filters) => {
                   : new Date(mapHouseFilterOptions.get("builtat"), 0, 1)
               )
             : undefined,
-          mapHouseFilterOptions.get("connectedtoroad")
-            ? eq(house.connectedToRoad, mapHouseFilterOptions.get("connectedtoroad"))
+          mapHouseFilterOptions.get("houseconnectedtoroad")
+            ? eq(house.connectedToRoad, mapHouseFilterOptions.get("houseconnectedtoroad"))
             : undefined,
-          mapHouseFilterOptions.get("distancetoroad")
-            ? lte(house.distanceToRoad, mapHouseFilterOptions.get("distancetoroad"))
+          mapHouseFilterOptions.get("housedistancetoroad")
+            ? lte(house.distanceToRoad, mapHouseFilterOptions.get("housedistancetoroad"))
             : undefined,
           //Now, filtering options for Land
           mapLandFilterOptions.get("landtype")
@@ -762,11 +785,14 @@ export const filterProperties = async (filters) => {
             : undefined,
           // mapLandFilterOptions.get("length")
           //TODO: Area, length and breadth are of type string
-          mapLandFilterOptions.get("connectedtoroad")
-            ? eq(land.connectedToRoad, mapLandFilterOptions.get("connectedToRoad"))
+          mapLandFilterOptions.get("landconnectedtoroad")
+            ? eq(land.connectedToRoad, mapLandFilterOptions.get("landconnectedtoroad"))
             : undefined,
-          mapLandFilterOptions.get("distancetoroad")
-            ? lte(land.distanceToRoad, mapLandFilterOptions.get("distancetoroad"))
+          mapLandFilterOptions.get("landdistancetoroad")
+            ? and(
+                eq(land.connectedToRoad, false),
+                lte(land.distanceToRoad, mapLandFilterOptions.get("landdistancetoroad"))
+              )
             : undefined,
 
           //Now filtering options for Address
@@ -794,7 +820,7 @@ export const filterProperties = async (filters) => {
       .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
       .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
 
-    console.log("Filtered properties", filteredProperties);
+    // console.log("Filtered properties", filteredProperties);
 
     //We are returning in the shape of:
     /**
@@ -827,13 +853,12 @@ export const filterProperties = async (filters) => {
      */
 
     return {
-      currentPage: filters.page ? Number(filters.page) : 1,
+      currentPageNumber: filters.page ? Number(filters.page) : 1,
       numberOfPages:
         filteredProperties.length > 0
           ? Math.ceil(filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE)
-          : 0,
-      listOfFilteredProperties:
-        filteredProperties.length > 0 ? filteredProperties.map((result) => result.listOfProperties) : {}
+          : 1,
+      properties: filteredProperties.length > 0 ? filteredProperties : []
     };
   } catch (error) {
     console.log("Error occurred while filtering results!");
@@ -865,6 +890,7 @@ export const searchPropertyByKeyword = async (keyword: string, offset: number) =
   //to get the property by keyword, however it did not work as intended as I was not able to pass
   //value of `keyword` into the `sql.placeholder("keyword")`
   try {
+    //TODO:
     //Here there are two database query which is inefficient. Will merge the `filterProperties` and this function
     //once searching by ts_vector gets implemented.
     const propertyByKeyword = await db.execute(

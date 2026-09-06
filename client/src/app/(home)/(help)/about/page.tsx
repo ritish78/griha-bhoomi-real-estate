@@ -1,4 +1,11 @@
 import { Icons } from "@/components/icons";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About - GrihaBhoomi",
+  description: "About us at GrihaBhoomi",
+};
+
 
 export default function AboutPage() {
   return (
