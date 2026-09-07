@@ -19,9 +19,25 @@ services:
     depends_on:
       - postgres
 
+  nominatim:
+    container_name: griha_bhoomi_nominatim
+    image: mediagis/nominatim:5.3.2
+    restart: unless-stopped
+    environment:
+      PBF_URL: https://download.geofabrik.de/asia/nepal-latest.osm.pbf
+      REPLICATION_URL: https://download.geofabrik.de/asia/nepal-updates/
+      NOMINATIM_PASSWORD: password123
+    ports:
+      - 8080:8080
+    volumes:
+      - nominatimdata:/var/lib/postgresql/16/main
+    shm_size: 1gb
+    networks:
+      - griha-bhoomi
+
   postgres:
     container_name: db_postgres
-    image: postgres:16.2-alpine
+    image: postgis/postgis:16-3.5-alpine
     restart: unless-stopped
     ports:
       - 5432:5432
@@ -70,3 +86,4 @@ volumes:
       type: none
       o: bind
       device: E:\databases\griha-bhoomi
+  nominatimdata:

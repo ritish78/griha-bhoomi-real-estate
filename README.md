@@ -39,3 +39,17 @@ https://www.youtube.com/watch?v=8gaOB9GFrKQ
 <img width="1272" height="496" alt="Get property by slug WITH cache" src="https://github.com/user-attachments/assets/52b992c7-9421-4523-a508-6b16663910f5" />
 
 There are many more functionalities. Please visit the above youtube link or clone the repository to test it for yourself. Thank you.
+
+# Usage:
+1. First start the docker container:
+```
+cd griha-bhoomi
+docker compose -f docker-compose-dev.yml up --build
+```
+2. Then, we need to create `postgis` extension.
+```
+docker exec -it db_postgres psql -U postgres -d postgres
+
+CREATE EXTENSION IF NOT EXISTS postgis;
+```
+

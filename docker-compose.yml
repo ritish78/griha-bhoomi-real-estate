@@ -3,7 +3,7 @@ version: "3.8"
 services:
   postgres:
     container_name: db_postgres
-    image: postgres:16.2-alpine
+    image: postgis/postgis:16-3.5-alpine
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: password123
@@ -14,6 +14,20 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  
+  nominatim:
+    container_name: griha_bhoomi_nominatim
+    image: mediagis/nominatim:5.3.2
+    restart: unless-stopped
+    environment:
+      PBF_URL: https://download.geofabrik.de/asia/nepal-latest.osm.pbf
+      REPLICATION_URL: https://download.geofabrik.de/asia/nepal-updates/
+      NOMINATIM_PASSWORD: password123
+    ports:
+      - 8080:8080
+    volumes:
+      - nominatim-data:/var/lib/postgresql/16/main
+    shm_size: 1gb
 
   adminer:
     container_name: adminer

@@ -1,4 +1,3 @@
-import { toZonedTime } from "date-fns-tz";
 import { formatDistanceToNow } from "date-fns";
 
 export function formatBuiltDate(dateToFormat: string): string {
@@ -19,9 +18,5 @@ export function formatBuiltDate(dateToFormat: string): string {
 }
 
 export function formatListedAtDate(dateToFormat: string): string {
-  //Date is in format YYYY-MM-DD HH:MM:SS
-  const dateInUTC = toZonedTime(dateToFormat, "UTC");
-
-  const formattedDate = formatDistanceToNow(dateInUTC);
-  return formattedDate;
+  return formatDistanceToNow(new Date(dateToFormat));
 }

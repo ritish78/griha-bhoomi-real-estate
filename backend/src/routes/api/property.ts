@@ -17,7 +17,7 @@ import { validatePropertySchema, validateRequest } from "src/middleware/validate
 // import { Property } from "src/model/property";
 import { AuthError, BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
-import { dummyPropertyData } from "seed";
+import { seedProperties } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import {
   preparedGetTotalNumberOfFeaturedProperties,
@@ -36,7 +36,9 @@ const router = Router();
  */
 router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
   try {
-    await seedProperty(dummyPropertyData);
+    for (const property of seedProperties) {
+      await seedProperty(property);
+    }
     res.status(201).send({ message: "Property info seeded successfully!" });
   } catch (error) {
     console.log("Error while seeding the property to database!");

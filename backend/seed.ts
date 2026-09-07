@@ -77,7 +77,7 @@ const seedUsers = [
   }
 ];
 
-const seedProperties: PropertySeed[] = [
+export const seedProperties: PropertySeed[] = [
   {
     sellerEmail: "johndoe@email.com",
     title: "Luxury Villa in Kathmandu",
