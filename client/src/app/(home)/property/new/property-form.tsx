@@ -90,9 +90,19 @@ const propertyFormSchema = z.object({
   facilities: z.array(z.string()).optional().default([]),
   evCharging: z.boolean().optional().default(false),
 
+  //For House and Land
+  area: z
+    .string()
+    .trim()
+    .min(1, "Please enter the property area")
+    .refine(
+      (value) => Number.isFinite(Number(value)) && Number(value) > 0,
+      "Area must be greater than 0"
+    ),
+  areaUnit: z.enum(["sq-ft", "sq-m", "aana", "dhur", "kattha", "bigha"]),
+
   //For Land
   landType: z.string().optional(),
-  landArea: z.string().optional(),
   length: z.string().optional(),
   breadth: z.string().optional(),
 
@@ -131,7 +141,8 @@ export function PropertyForm() {
     facilities: ["24 hour Water", "24 hour Electricity"],
     evCharging: false,
     furnished: false,
-    bikeParking: 0
+    bikeParking: 0,
+    areaUnit: "sq-ft"
   };
 
   const form = useForm<PropertyFormValues>({
@@ -273,7 +284,7 @@ export function PropertyForm() {
       const payload = {
         ...data,
         imageUrl: uploadedImages,
-        area: data.landArea || "",
+        area: data.area ? `${data.area} ${data.areaUnit.replace("-", " ")}` : "",
         bikeParking: data.carParking * 3,
         builtAt: data.builtAt ? adjustDate(new Date(data.builtAt)) : adjustDate(new Date()),
         availableFrom: adjustDate(new Date(data.availableFrom)),
@@ -683,6 +694,47 @@ export function PropertyForm() {
 
             <Separator className="my-4" />
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="area"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{isHouse ? "House Area" : "Land Area"}</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" step="any" placeholder="e.g. 1200" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="areaUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Area Unit</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select area unit" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="sq-ft">Square feet (sq ft)</SelectItem>
+                        <SelectItem value="sq-m">Square meters (sq m)</SelectItem>
+                        <SelectItem value="aana">Aana</SelectItem>
+                        <SelectItem value="dhur">Dhur</SelectItem>
+                        <SelectItem value="kattha">Kattha</SelectItem>
+                        <SelectItem value="bigha">Bigha</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             {/* HOUSE SPECIFIC */}
             {isHouse && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -866,19 +918,6 @@ export function PropertyForm() {
             {/* LAND SPECIFIC */}
             {!isHouse && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="landArea"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Land Area (sq ft/aana)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. 4 Aana" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="landType"

@@ -485,3 +485,80 @@ export const preparedDeleteAddress = db
   .delete(address)
   .where(eq(address.id, sql.placeholder("addressId")))
   .prepare("delete-address");
+
+/**
+ * Making a function here
+ * @param latitude
+ * @param longitude
+ * @param radiusInMeters
+ * @returns
+ */
+export async function getPropertiesByLocationRadius(
+  latitude: number,
+  longitude: number,
+  radiusInMeters: number
+) {
+  const result = await db.execute(sql`
+    SELECT
+      p.id,
+      p.slug,
+      p.title,
+      p.price,
+      p.status,
+      p.property_type AS "propertyType",
+      p.to_rent AS "toRent",
+      p.negotiable,
+      p.close_landmark AS "closeLandmark",
+      p.image_url AS "imageUrl",
+      p.featured,
+
+      a.house_number AS "houseNumber",
+      a.street,
+      a.ward_number AS "wardNumber",
+      a.municipality,
+      a.city,
+      a.district,
+      a.province,
+      a.latitude,
+      a.longitude,
+
+      ROUND(
+        (
+          ST_Distance(
+            a.location::geography,
+            ST_SetSRID(
+              ST_MakePoint(${longitude}, ${latitude}),
+              4326
+            )::geography
+          ) / 1000
+        )::numeric,
+        2
+      )::double precision AS "distanceKm"
+
+    FROM property p
+
+    INNER JOIN address a
+      ON p.address = a.id
+
+    WHERE
+      a.location IS NOT NULL
+
+      AND p.private = false
+      AND p.expires_on >= NOW()
+
+      AND ST_DWithin(
+        a.location::geography,
+        ST_SetSRID(
+          ST_MakePoint(${longitude}, ${latitude}),
+          4326
+        )::geography,
+        ${radiusInMeters}
+      )
+
+    ORDER BY "distanceKm" ASC
+
+    LIMIT 200
+  `);
+
+  return result.rows;
+}
