@@ -74,7 +74,7 @@ export type CreatePropertyResponse =
 export async function createProperty(data: any): Promise<CreatePropertyResponse> {
   try {
     const { cookies } = await import("next/headers");
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
     const response = await fetch("http://localhost:5000/api/v1/property/new", {

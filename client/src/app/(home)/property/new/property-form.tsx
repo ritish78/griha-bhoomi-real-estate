@@ -134,14 +134,28 @@ export function PropertyForm() {
     city: "",
     district: "",
     province: "",
+    municipality: "",
+    wardNumber: 0,
+    houseNumber: "",
+    closeLandmark: "",
     connectedToRoad: true,
+    distanceToRoad: 0,
     houseType: "House",
+    roomCount: 0,
+    floorCount: 0,
+    bathroomCount: 0,
+    kitchenCount: 0,
+    carParking: 0,
     sharedBathroom: false,
     facilities: ["24 hour Water", "24 hour Electricity"],
     evCharging: false,
     furnished: false,
     bikeParking: 0,
-    areaUnit: "sq-ft"
+    area: "",
+    areaUnit: "sq-ft",
+    landType: "",
+    length: "",
+    breadth: ""
   };
 
   const form = useForm<PropertyFormValues>({
