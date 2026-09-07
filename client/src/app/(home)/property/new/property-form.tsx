@@ -47,7 +47,6 @@ import { uploadMultipleToCloudinary } from "@/lib/cloudinaryUpload";
 import { ImagePreview } from "@/components/image-preview";
 import { Progress } from "@/components/ui/progress";
 
-// Schema definition based on user request (combining Property, Address, Land, House)
 const propertyFormSchema = z.object({
   // Basic Property Details
   title: z.string().min(5, "Title must be at least 5 characters"),

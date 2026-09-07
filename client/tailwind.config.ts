@@ -1,13 +1,12 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
 import { type Config } from "tailwindcss/types/config";
-import { nextui } from "@nextui-org/react";
 
 export default {
   darkMode: ["class"],
   content: [
     "./src/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
+    "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
     /* tremor */
@@ -254,5 +253,5 @@ export default {
     }
   ],
   /* */
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography"), nextui()]
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")]
 } satisfies Config;

@@ -8,8 +8,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
-import { NextUIProvider } from "@nextui-org/react";
-
 import { AuthProvider } from "@/contexts/authContext";
 
 export const metadata: Metadata = {
@@ -45,11 +43,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-            <NextUIProvider>
-              <AuthProvider>
-                {children}
-              </AuthProvider>
-            </NextUIProvider>
+          <AuthProvider>{children}</AuthProvider>
           <TailwindIndicator />
         </ThemeProvider>
         <Toaster />

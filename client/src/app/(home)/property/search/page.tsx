@@ -12,16 +12,19 @@ import KeywordSearch from "./_components/keyword-search";
 import { Metadata } from "next";
 
 export interface SearchPropertyPageProps {
-  params: { [key: string]: string | string[] | undefined };
-  searchParams: Record<string, string | number | null>;
+  params: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | number | null>>;
 }
 
 export const metadata: Metadata = {
   title: "Search Properties - GrihaBhoomi",
-  description: "Search your perfect properties at GrihaBhoomi",
+  description: "Search your perfect properties at GrihaBhoomi"
 };
 
-function createQueryString(params: Record<string, string | number | null>, newPage: number): string {
+function createQueryString(
+  params: Record<string, string | number | null>,
+  newPage: number
+): string {
   const newSearchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && key !== "page") {
@@ -33,8 +36,8 @@ function createQueryString(params: Record<string, string | number | null>, newPa
 }
 
 export default async function SearchPropertyPage(props: SearchPropertyPageProps) {
-  const searchParams = props.searchParams;
-  const pageNumber = Number(props?.searchParams?.page) || 1;
+  const searchParams = await props.searchParams;
+  const pageNumber = Number(searchParams.page) || 1;
 
   // Validate page number
   if (pageNumber <= 0 || isNaN(pageNumber)) {
@@ -60,8 +63,13 @@ export default async function SearchPropertyPage(props: SearchPropertyPageProps)
   }
 
   // Redirect if page number exceeds total pages
-  if (listOfFilteredProperty.currentPageNumber > listOfFilteredProperty.numberOfPages && listOfFilteredProperty.numberOfPages > 0) {
-    redirect(`/property/search?${createQueryString(searchParams, listOfFilteredProperty.numberOfPages || 1)}`);
+  if (
+    listOfFilteredProperty.currentPageNumber > listOfFilteredProperty.numberOfPages &&
+    listOfFilteredProperty.numberOfPages > 0
+  ) {
+    redirect(
+      `/property/search?${createQueryString(searchParams, listOfFilteredProperty.numberOfPages || 1)}`
+    );
   }
 
   const hasResults = listOfFilteredProperty.properties.length > 0;
@@ -89,23 +97,20 @@ export default async function SearchPropertyPage(props: SearchPropertyPageProps)
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl md:text-2xl font-bold">
-                    Search Results
-                  </h2>
+                  <h2 className="text-xl md:text-2xl font-bold">Search Results</h2>
                   <p className="text-sm text-muted-foreground mt-1">
                     Showing {totalResults} {totalResults === 1 ? "property" : "properties"}
                     {listOfFilteredProperty.numberOfPages > 1 && (
-                      <span> • Page {pageNumber} of {listOfFilteredProperty.numberOfPages}</span>
+                      <span>
+                        {" "}
+                        • Page {pageNumber} of {listOfFilteredProperty.numberOfPages}
+                      </span>
                     )}
                   </p>
                 </div>
               </div>
 
-              <PropertyPageContent
-                title=""
-                description=""
-                className="pt-0"
-              >
+              <PropertyPageContent title="" description="" className="pt-0">
                 <Suspense fallback={<PropertyCardSkeletonList numberOfSkeletons={6} />}>
                   <PropertyListPage propertyList={listOfFilteredProperty} />
                 </Suspense>
@@ -127,7 +132,8 @@ export default async function SearchPropertyPage(props: SearchPropertyPageProps)
             <div className="text-center space-y-3 max-w-md">
               <h2 className="text-2xl md:text-3xl font-bold">No properties found</h2>
               <p className="text-muted-foreground text-base">
-                Try adjusting your filters to see more results. You can modify your search criteria using the filters above.
+                Try adjusting your filters to see more results. You can modify your search criteria
+                using the filters above.
               </p>
             </div>
           </div>

@@ -22,9 +22,9 @@ import { dummyPropertyData } from "@/dummy-data";
 import { Property } from "@/types/property";
 
 interface PropertyPageProps {
-  params: {
+  params: Promise<{
     propertySlug: string;
-  };
+  }>;
 }
 
 //This is just for demonstration purpose. We have dummy data that we can use
@@ -37,7 +37,7 @@ const dummyDataSlug = [
 //TODO: Generate Metada for individual property page
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
-  const propertySlug = params.propertySlug;
+  const { propertySlug } = await params;
 
   let property;
   if (dummyDataSlug.includes(propertySlug)) {

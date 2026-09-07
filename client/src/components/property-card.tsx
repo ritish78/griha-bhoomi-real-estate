@@ -32,7 +32,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               className="object-cover h-full"
               sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
               fill
-              loading="lazy"
+              loading="eager"
             />
             <Badge
               variant="default"
@@ -48,7 +48,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               {property.status}
             </Badge>
             {property.featured ? (
-              <Badge variant="default" className="absolute top-2 left-2 p-2 flex mr-auto border-0 shadow-sm">
+              <Badge
+                variant="default"
+                className="absolute top-2 left-2 p-2 flex mr-auto border-0 shadow-sm"
+              >
                 <Icons.award className="mb-1 size-4"></Icons.award>
                 {/* <span className="ml-2 text-gold dark:text-yellow-600">Featured</span> */}
                 <span className="ml-2 font-semibold text-shadow-sm">Featured</span>

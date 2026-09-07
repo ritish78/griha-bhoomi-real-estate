@@ -9,18 +9,18 @@ import PaginationButton from "@/components/pagination-button";
 import { Metadata } from "next";
 
 export interface FeaturedPageProps {
-  params: { [key: string]: string | string[] | undefined };
-  searchParams: Record<string, string | number | null>;
+  params: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | number | null>>;
 }
 
 export const metadata: Metadata = {
   title: "Featured Properties - GrihaBhoomi",
-  description: "Browse through featured properties at GrihaBhoomi",
+  description: "Browse through featured properties at GrihaBhoomi"
 };
 
 export default async function FeaturedPage(props: FeaturedPageProps) {
-  const searchParams = props.searchParams;
-  const pageNumber = Number(props?.searchParams?.page) || 1;
+  const searchParams = await props.searchParams;
+  const pageNumber = Number(searchParams.page) || 1;
 
   // if (pageNumber < 1 || pageNumber === 0 || isNaN(Number(props?.searchParams?.page))) {
   //   redirect("/property/featured?page=1");

@@ -9,24 +9,20 @@ import PaginationButton from "@/components/pagination-button";
 import { Metadata } from "next";
 
 export interface TrendingPageProps {
-  params: { [key: string]: string | string[] | undefined };
-  searchParams: Record<string, string | number | null>;
+  params: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | number | null>>;
 }
 
 export const metadata: Metadata = {
   title: "Trending Properties - GrihaBhoomi",
-  description: "Browse through trending properties at GrihaBhoomi",
+  description: "Browse through trending properties at GrihaBhoomi"
 };
 
 export default async function TrendingPage(props: TrendingPageProps) {
-  const searchParams = props.searchParams;
-  const pageNumber = Number(props?.searchParams?.page) || 1;
+  const searchParams = await props.searchParams;
+  const pageNumber = Number(searchParams.page) || 1;
 
-  if (
-    pageNumber < 1 ||
-    Number(props?.searchParams?.page) === 0 ||
-    isNaN(Number(props?.searchParams?.page))
-  ) {
+  if (pageNumber < 1 || Number(searchParams.page) === 0 || isNaN(Number(searchParams.page))) {
     redirect("/property/trending?page=1");
   }
 
