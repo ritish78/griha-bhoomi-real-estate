@@ -52,4 +52,12 @@ docker exec -it db_postgres psql -U postgres -d postgres
 
 CREATE EXTENSION IF NOT EXISTS postgis;
 ```
+3. Add `postgis` column:
+```
+ALTER TABLE "address" ADD COLUMN IF NOT EXISTS "location" geometry(Point, 4326);
+```
+4. Now, we fill location for addresses that exists already
+```
+UPDATE "address" SET "location" = ST_SetSRID( ST_MakePoint( "longitude", "latitude" ), 4326) WHERE "latitude" IS NOT NULL AND "longitude" IS NOT NULL AND "location" IS NULL;
+```
 

@@ -562,3 +562,64 @@ export async function getPropertiesByLocationRadius(
 
   return result.rows;
 }
+
+/** same from my maps-postgis-nodejs repo
+ * @param minLatitude
+ * @param maxLatitude
+ * @param minLongitude
+ * @param maxLongitude
+ * @returns
+ */
+export async function getPropertiesByViewport(
+  minLatitude: number,
+  maxLatitude: number,
+  minLongitude: number,
+  maxLongitude: number
+) {
+  const result = await db.execute(sql`
+    SELECT
+      p.id,
+      p.slug,
+      p.title,
+      p.price,
+      p.status,
+      p.property_type AS "propertyType",
+      p.to_rent AS "toRent",
+      p.negotiable,
+      p.close_landmark AS "closeLandmark",
+      p.image_url AS "imageUrl",
+      p.featured,
+
+      a.house_number AS "houseNumber",
+      a.street,
+      a.ward_number AS "wardNumber",
+      a.municipality,
+      a.city,
+      a.district,
+      a.province,
+      a.latitude,
+      a.longitude
+
+    FROM property p
+
+    INNER JOIN address a
+      ON p.address = a.id
+
+    WHERE
+      a.location IS NOT NULL
+      AND p.private = false
+      AND p.expires_on >= NOW()
+
+      AND a.location && ST_MakeEnvelope(
+        ${minLongitude},
+        ${minLatitude},
+        ${maxLongitude},
+        ${maxLatitude},
+        4326
+      )
+
+    LIMIT 200
+  `);
+
+  return result.rows;
+}

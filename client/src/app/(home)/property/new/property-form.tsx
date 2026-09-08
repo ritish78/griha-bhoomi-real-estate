@@ -925,6 +925,21 @@ export function PropertyForm() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="evCharging"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm col-span-1">
+                      <div className="space-y-0.5">
+                        <FormLabel>EV Charging</FormLabel>
+                        <FormDescription>Is EV charging available?</FormDescription>
+                      </div>
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             )}
 

@@ -36,6 +36,7 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^11.18.2",
     "geist": "^1.7.2",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.563.0",
     "next": "16.3.4",
     "next-themes": "^0.4.6",
@@ -44,6 +45,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.87.0",
+    "react-leaflet": "^5.0.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.1",
     "tailwindcss-animate": "^1.0.7",
@@ -52,6 +54,7 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.20",
+    "@types/leaflet": "^1.9.22",
     "@types/node": "^20.19.32",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

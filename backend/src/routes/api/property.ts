@@ -21,7 +21,9 @@ import { seedProperties } from "seed";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
 import {
   preparedGetTotalNumberOfFeaturedProperties,
-  getTotalNumberOfProperties
+  getTotalNumberOfProperties,
+  getPropertiesByLocationRadius,
+  getPropertiesByViewport
 } from "src/db/preparedStatement";
 import { toggleBookmark } from "src/controller/bookmark/bookmarkController";
 import { cache, invalidateCache } from "src/middleware/cache";
@@ -300,6 +302,74 @@ router.route("/id/:propertyId").get(cache(600), async (req: Request, res: Respon
     next(new NotFoundError(`Property of id ${req.params.propertyId} not found!`));
   } else {
     return res.status(200).send(propertyById);
+  }
+});
+
+/**
+ * @route               /api/v1/property/map/nearby
+ * @method              GET
+ * @desc                Get properties within the specified radius of a location
+ * @reqParams           latitude, longitude, radius
+ * @access              Public
+ */
+router.get("/map/nearby", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const latitude = Number(req.query.latitude);
+    const longitude = Number(req.query.longitude);
+    const radius = Number(req.query.radius ?? 5);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(radius)) {
+      return next(new BadRequestError("latitude, longitude and radius must be valid numbers"));
+    }
+
+    if (
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180 ||
+      radius <= 0 ||
+      radius > 50
+    ) {
+      return next(new BadRequestError("Invalid map search parameters"));
+    }
+
+    const properties = await getPropertiesByLocationRadius(latitude, longitude, radius * 1000);
+
+    return res.status(200).send(properties);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route               /api/v1/property/map/viewport
+ * @method              GET
+ * @desc                Get properties within the specified viewport bounds
+ * @reqParams           minLatitude, maxLatitude, minLongitude, maxLongitude
+ * @access              Public
+ */
+router.get("/map/viewport", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const minLatitude = Number(req.query.minLatitude);
+    const maxLatitude = Number(req.query.maxLatitude);
+    const minLongitude = Number(req.query.minLongitude);
+    const maxLongitude = Number(req.query.maxLongitude);
+
+    const values = [minLatitude, maxLatitude, minLongitude, maxLongitude];
+
+    if (!values.every(Number.isFinite)) {
+      return next(new BadRequestError("Invalid map bounds"));
+    }
+
+    if (minLatitude >= maxLatitude || minLongitude >= maxLongitude) {
+      return next(new BadRequestError("Invalid map bounds"));
+    }
+
+    const properties = await getPropertiesByViewport(minLatitude, maxLatitude, minLongitude, maxLongitude);
+
+    return res.status(200).send(properties);
+  } catch (error) {
+    next(error);
   }
 });
 

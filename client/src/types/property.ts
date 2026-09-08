@@ -12,8 +12,8 @@ export interface Address {
   city?: string | null;
   district?: string | null;
   province?: string | null;
-  latitude?: string | null;
-  longitude?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface Land {
@@ -82,3 +82,35 @@ export interface ListOfPropertiesError {
 }
 
 export type ListOfPropertiesResponse = ListOfPropertiesSuccess | ListOfPropertiesError;
+
+export interface MapProperty
+  extends Pick<
+    Property,
+    | "id"
+    | "slug"
+    | "title"
+    | "price"
+    | "status"
+    | "propertyType"
+    | "toRent"
+    | "negotiable"
+    | "closeLandmark"
+    | "imageUrl"
+    | "featured"
+    | "street"
+    | "municipality"
+    | "city"
+    | "district"
+    | "province"
+  > {
+  latitude: number;
+  longitude: number;
+  distanceKm?: number;
+}
+
+export interface MapBounds {
+  minLatitude: number;
+  maxLatitude: number;
+  minLongitude: number;
+  maxLongitude: number;
+}

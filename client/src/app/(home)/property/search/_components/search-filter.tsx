@@ -138,10 +138,6 @@ const roomCountFilter: Filter[] = [
     label: "12"
   },
   {
-    value: "12",
-    label: "12"
-  },
-  {
     value: "13",
     label: "13"
   },
