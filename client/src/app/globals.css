@@ -93,3 +93,30 @@
     @apply px-4;
   }
 }
+
+.property-card-popup .leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 12px !important;
+}
+
+.property-card-popup .leaflet-popup-content {
+  margin: 0 !important;
+  width: 330px !important;
+}
+
+.property-card-popup .leaflet-popup-close-button {
+  color: white !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-radius: 50% !important;
+  width: 20px !important;
+  height: 20px !important;
+  line-height: 20px !important;
+  top: 8px !important;
+  right: 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+

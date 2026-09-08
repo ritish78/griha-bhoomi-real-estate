@@ -60,4 +60,19 @@ ALTER TABLE "address" ADD COLUMN IF NOT EXISTS "location" geometry(Point, 4326);
 ```
 UPDATE "address" SET "location" = ST_SetSRID( ST_MakePoint( "longitude", "latitude" ), 4326) WHERE "latitude" IS NOT NULL AND "longitude" IS NOT NULL AND "location" IS NULL;
 ```
-
+5. Then, we need to create a function that keeps location synchronized
+```
+CREATE OR REPLACE FUNCTION sync_address_location() RETURNS TRIGGER AS $$ BEGIN IF NEW.latitude IS NOT NULL AND NEW.longitude IS NOT NULL THEN NEW.location = ST_SetSRID( ST_MakePoint( NEW.longitude, NEW.latitude ), 4326 ); ELSE NEW.location = NULL; END IF; RETURN NEW; END; $$ LANGUAGE plpgsql;
+```
+6. Then, we need to create a trigger
+```
+DROP TRIGGER IF EXISTS trg_sync_address_location ON "address"; CREATE TRIGGER trg_sync_address_location BEFORE INSERT OR UPDATE OF latitude, longitude ON "address" FOR EACH ROW EXECUTE FUNCTION sync_address_location();
+```
+7. We need to create spatial index for viewport searches
+```
+CREATE INDEX IF NOT EXISTS address_location_gix ON "address" USING GIST ("location");
+```
+8. Now, we need to create index for radius/distance searches
+```
+CREATE INDEX IF NOT EXISTS address_location_geography_gix ON "address" USING GIST (("location"::geography));
+```

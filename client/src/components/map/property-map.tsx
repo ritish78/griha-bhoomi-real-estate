@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import createPinIcon from "@/lib/pinIcon";
@@ -8,6 +8,9 @@ import { formatPrice } from "@/lib/formatPrice";
 import BoundsTracker from "./bounds-tracker";
 import { MapBounds, MapProperty } from "@/types/property";
 import Link from "next/link";
+import Image from "next/image";
+import createMultiplePropertiesIcon from "./multiple-poperties-icon";
+import PropertyPopup from "./property-popup";
 
 const defaultIcon = createPinIcon("#18181b"); //properties
 const searchIcon = createPinIcon("white", "#18181b"); //white with dark border for search
@@ -89,20 +92,25 @@ export default function PropertyMap() {
     if (!searchCenter) return;
 
     async function fetchNearby() {
-      setIsSearching(true);
-      const res = await fetch(
-        `${API_URL}/api/v1/property/map/nearby?latitude=${searchCenter!.latitude}&longitude=${searchCenter!.longitude}&radius=${radius}`
-      );
+      try {
+        setIsSearching(true);
+        const res = await fetch(
+          `${API_URL}/api/v1/property/map/nearby?latitude=${searchCenter!.latitude}&longitude=${searchCenter!.longitude}&radius=${radius}`
+        );
 
-      //the server sends 429 Too Many Requests if the user is moving the map too fast. So we need to handle that.
-      if (res.status === 429) {
-        console.warn("Too many requests. Please slow down.");
-        return;
+        //the server sends 429 Too Many Requests if the user is moving the map too fast. So we need to handle that.
+        if (res.status === 429) {
+          console.warn("Too many requests. Please slow down.");
+          return;
+        }
+
+        const data = await res.json();
+        setNearbyProperties(data);
+      } catch (error) {
+        console.error("Error fetching nearby properties:", error);
+      } finally {
+        setIsSearching(false);
       }
-
-      const data = await res.json();
-      setNearbyProperties(data);
-      setIsSearching(false);
     }
 
     fetchNearby();
@@ -114,6 +122,25 @@ export default function PropertyMap() {
 
   //Properties to display as markers
   const displayProperties = searchCenter ? nearbyProperties : allProperties;
+
+  const groupedProperties = useMemo(() => {
+    const groups = new Map<string, MapProperty[]>();
+
+    for (const property of displayProperties) {
+      //6 decimal places is precise enough to identify effectivel identical property coordinates.
+      const key = `${property.latitude.toFixed(6)}:${property.longitude.toFixed(6)}`;
+
+      const existing = groups.get(key);
+
+      if (existing) {
+        existing.push(property);
+      } else {
+        groups.set(key, [property]);
+      }
+    }
+
+    return Array.from(groups.values());
+  }, [displayProperties]);
 
   return (
     <div className="flex flex-col gap-4 p-4 h-screen bg-background text-foreground">
@@ -186,70 +213,103 @@ export default function PropertyMap() {
             />
           </>
         )}
+        {groupedProperties.map((properties) => {
+          const firstProperty = properties[0];
 
-        {displayProperties.map((p) => (
-          <Marker key={p.id} position={[p.latitude, p.longitude]} icon={defaultIcon}>
-            <Popup minWidth={260} className="property-card-popup">
-              <div>
-                <div className="w-full h-40 bg-zinc-100 relative overflow-hidden">
-                  {p.imageUrl && p.imageUrl.length > 0 ? (
-                    //We could also use Nextjs Image component here. But we then would need to config
-                    ///nextjs to use different remote patterns for images. For this test purpose
-                    //I am currently using unsplash for images, and I could use another link and
-                    //i don't want it to keep on breaking and having to change.
-                    //In Grihabhoomi, I have used cloudinary so will be smoother there.
-                    <img src={p.imageUrl[0]} alt={p.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-xs text-zinc-500">No image available</span>
+          if (!firstProperty) {
+            return null;
+          }
+
+          const hasMultipleProperties = properties.length > 1;
+
+          return (
+            <Marker
+              key={`${firstProperty.latitude}-${firstProperty.longitude}`}
+              position={[firstProperty.latitude, firstProperty.longitude]}
+              icon={
+                hasMultipleProperties
+                  ? createMultiplePropertiesIcon(properties.length)
+                  : defaultIcon
+              }
+            >
+              <Popup
+                minWidth={hasMultipleProperties ? 400 : 330}
+                maxWidth={hasMultipleProperties ? 460 : 360}
+                className="property-card-popup"
+              >
+                {hasMultipleProperties ? (
+                  <div className="flex flex-col">
+                    <div className="px-3 py-2 border-b">
+                      <p className="text-sm font-semibold" style={{ margin: 0 }}>
+                        {properties.length} properties at this location
+                      </p>
+
+                      <p className="text-xs text-zinc-500" style={{ margin: 0 }}>
+                        {firstProperty.municipality}, {firstProperty.province}
+                      </p>
                     </div>
-                  )}
-                  <span className="absolute top-2.5 left-2.5 bg-zinc-900 text-white text-[11px] font-medium px-2.5 py-0.5 rounded-full">
-                    {p.status}
-                  </span>
-                </div>
 
-                <div className="px-3.5 py-3 flex flex-col gap-0.5">
-                  <Link
-                    href={`/property/${p.slug}`}
-                    className="text-sm font-medium leading-snug"
-                    style={{ margin: 0 }}
-                  >
-                    {p.title}
-                  </Link>
-                  <p className="text-xs text-zinc-500" style={{ margin: 0 }}>
-                    {" "}
-                    {p.propertyType}
-                    {p.closeLandmark ? ` · Near ${p.closeLandmark}` : ""}
-                  </p>
-                  <p className="text-xs text-zinc-500" style={{ margin: 0 }}>
-                    {" "}
-                    {p.municipality}, {p.province}
-                  </p>
+                    <div className="max-h-[350px] overflow-y-auto">
+                      {properties.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/property/${p.slug}`}
+                          className="flex gap-3 p-3 border-b last:border-b-0 hover:bg-zinc-50 transition-colors"
+                        >
+                          <div className="relative w-24 h-[72px] shrink-0 overflow-hidden rounded-md bg-zinc-100">
+                            {p.imageUrl?.[0] ? (
+                              <Image
+                                src={p.imageUrl[0]}
+                                alt={p.title}
+                                fill
+                                sizes="80px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-[10px] text-zinc-500">No image</span>
+                              </div>
+                            )}
+                          </div>
 
-                  <div className="flex justify-between items-center mt-1">
-                    <p className="text-sm font-medium" style={{ margin: 0 }}>
-                      {" "}
-                      Rs. {formatPrice(p.price)}
-                      {p.toRent && (
-                        <span className="text-[11px] font-normal text-zinc-500 ml-1">/month</span>
-                      )}
-                      {p.negotiable && (
-                        <span className="text-[11px] font-normal text-zinc-500 ml-1">
-                          {" "}
-                          · Negotiable
-                        </span>
-                      )}
-                    </p>
-                    {p.distanceKm && (
-                      <span className="text-[11px] text-zinc-500">{p.distanceKm}km away</span>
-                    )}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold truncate text-zinc-800" style={{ margin: 0 }}>
+                              {p.title}
+                            </p>
+
+                            <p className="text-xs text-zinc-500" style={{ margin: 0 }}>
+                              {p.propertyType} · {p.status}
+                            </p>
+
+                            <p
+                              className="text-sm font-semibold mt-1 text-zinc-600"
+                              style={{ margin: 0 }}
+                            >
+                              Rs. {formatPrice(p.price)}
+                              {p.status === "Rent" && (
+                                <span className="text-[11px] font-normal text-zinc-500 ml-1">
+                                  /month
+                                </span>
+                              )}
+                            </p>
+
+                            {p.distanceKm != null && (
+                              <p className="text-[11px] text-zinc-500" style={{ margin: 0 }}>
+                                {p.distanceKm} km away
+                              </p>
+                            )}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+                ) : (
+                  <PropertyPopup property={firstProperty} />
+                )}
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
