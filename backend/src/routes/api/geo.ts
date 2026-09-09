@@ -5,6 +5,11 @@ import { extractWardNumber } from "src/utils/extractWardNumber";
 
 const router = Router();
 
+/**
+ * @route         GET /api/v1/geo/reverse
+ * @desc          Reverse geocode latitude and longitude to address
+ * @access        Public
+ */
 router.get("/reverse", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const latitude = Number(req.query.latitude);
@@ -28,6 +33,9 @@ router.get("/reverse", async (req: Request, res: Response, next: NextFunction) =
       zoom: "18"
     });
 
+    console.log("Fetching from Nominatim:", `${nominatimUrl}/reverse?${params.toString()}`);
+    console.log("Fetching from Nominatim:", `${nominatimUrl}/reverse?${params.toString()}`);
+    console.log("Fetching from Nominatim:", `${nominatimUrl}/reverse?${params.toString()}`);
     const response = await fetch(`${nominatimUrl}/reverse?${params.toString()}`);
 
     if (!response.ok) {

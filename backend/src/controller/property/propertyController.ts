@@ -373,6 +373,7 @@ export const getPropertyById = async (propertyId: string, userId) => {
     //Might reference it later to make it better.
     if (!userId || propertyById.sellerId !== userId) {
       await increaseViewOfProperty(propertyById);
+      propertyById.views += 1;
     }
 
     return propertyById;
@@ -418,6 +419,7 @@ export const getPropertyBySlug = async (slug: string, userId) => {
     //If the property listing hasn't expired and the property is not set to private
     //finally, we increase the view count of the property by one before returning property
     await increaseViewOfProperty(propertyBySlug);
+    propertyBySlug.views += 1;
 
     return propertyBySlug;
   }

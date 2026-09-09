@@ -133,7 +133,7 @@ export function PropertyForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [locationMode, setLocationMode] = useState<"map" | "manual">("map");
+  const [locationMode, setLocationMode] = useState<"map" | "manual">("manual");
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
 
@@ -372,7 +372,7 @@ export function PropertyForm() {
         longitude: longitude.toString()
       });
 
-      const response = await fetch(`${API_URL}/api/v1/geocode/reverse?${params.toString()}`);
+      const response = await fetch(`${API_URL}/api/v1/geo/reverse?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error(`Reverse geocoding failed with status ${response.status}`);

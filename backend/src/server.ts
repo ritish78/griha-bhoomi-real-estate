@@ -13,6 +13,7 @@ import { REDIS_SECRET } from "./config";
 import authRoute from "./routes/api/auth";
 import propertyRoute from "./routes/api/property";
 import userRoute from "./routes/api/user";
+import geoRoute from "./routes/api/geo";
 
 const app = express();
 
@@ -35,13 +36,15 @@ app.disable("X-Powered-By");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookies());
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true,
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["X-RateLimit-TTL", "X-RateLimit-Remaining"]
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["X-RateLimit-TTL", "X-RateLimit-Remaining"]
+  })
+);
 app.use(
   session({
     store: new RedisStore({ client: redisClient }),
@@ -65,6 +68,7 @@ app.get("/api/v1/ping", (req, res) => {
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/property", propertyRoute);
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/geo", geoRoute);
 
 app.use(errorHandler);
 

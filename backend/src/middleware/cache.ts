@@ -10,14 +10,22 @@ export const cache = (ttlSeconds: number) => async (req: Request, res: Response,
   const cached = await redisClient.get(key);
 
   if (cached) {
-    return res.json(JSON.parse(cached));
+    return res.send(JSON.parse(cached));
   }
 
   const originalJson = res.json.bind(res);
+  const originalSend = res.send.bind(res);
 
   res.json = (body) => {
-    redisClient.setEx(key, ttlSeconds, JSON.stringify(body));
+    void redisClient.setEx(key, ttlSeconds, JSON.stringify(body));
     return originalJson(body);
+  };
+
+  res.send = (body) => {
+    if (body && typeof body === "object" && !Buffer.isBuffer(body)) {
+      void redisClient.setEx(key, ttlSeconds, JSON.stringify(body));
+    }
+    return originalSend(body);
   };
 
   next();
