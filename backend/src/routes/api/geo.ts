@@ -30,7 +30,8 @@ router.get("/reverse", async (req: Request, res: Response, next: NextFunction) =
       lon: longitude.toString(),
       format: "jsonv2",
       addressdetails: "1",
-      zoom: "18"
+      zoom: "18",
+      "accept-language": "en"
     });
 
     console.log("Fetching from Nominatim:", `${nominatimUrl}/reverse?${params.toString()}`);
