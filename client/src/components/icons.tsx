@@ -19,7 +19,8 @@ import {
   ExitIcon,
   ChevronDownIcon,
   TrashIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  KeyboardIcon
 } from "@radix-ui/react-icons";
 import { ChevronLeft, ChevronUp, CloudUploadIcon, ChevronsUpDown } from "lucide-react";
 
@@ -666,6 +667,7 @@ export const Icons = {
   cloudUpload: CloudUploadIcon,
   bin: TrashIcon,
   search: MagnifyingGlassIcon,
+  keyboard: KeyboardIcon,
   google: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

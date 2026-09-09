@@ -46,6 +46,8 @@ import { createProperty } from "@/actions/property";
 import { uploadMultipleToCloudinary } from "@/lib/cloudinaryUpload";
 import { ImagePreview } from "@/components/image-preview";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LocationPickerMap from "../_components/location-picker-map";
 
 const propertyFormSchema = z.object({
   // Basic Property Details
@@ -72,6 +74,18 @@ const propertyFormSchema = z.object({
   province: z.string().min(2, "Province is required"),
   houseNumber: z.string().optional(),
   closeLandmark: z.string().optional(),
+  latitude: z
+    .number()
+    .min(-90, "Invalid latitude")
+    .max(90, "Invalid latitude")
+    .nullable()
+    .optional(),
+  longitude: z
+    .number()
+    .min(-180, "Invalid longitude")
+    .max(180, "Invalid longitude")
+    .nullable()
+    .optional(),
   imageUrl: z.array(z.string()).optional().default([]),
 
   //For House
@@ -113,11 +127,15 @@ const propertyFormSchema = z.object({
 type PropertyFormValues = z.infer<typeof propertyFormSchema>;
 
 export function PropertyForm() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [locationMode, setLocationMode] = useState<"map" | "manual">("map");
+  const [isResolvingAddress, setIsResolvingAddress] = useState(false);
+  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -137,6 +155,8 @@ export function PropertyForm() {
     municipality: "",
     wardNumber: 0,
     houseNumber: "",
+    latitude: null,
+    longitude: null,
     closeLandmark: "",
     connectedToRoad: true,
     distanceToRoad: 0,
@@ -327,6 +347,86 @@ export function PropertyForm() {
       });
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleLocationSelect(latitude: number, longitude: number) {
+    // Always preserve the exact user-selected location.
+    form.setValue("latitude", latitude, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
+
+    form.setValue("longitude", longitude, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
+
+    setResolvedAddress(null);
+
+    try {
+      setIsResolvingAddress(true);
+
+      const params = new URLSearchParams({
+        latitude: latitude.toString(),
+        longitude: longitude.toString()
+      });
+
+      const response = await fetch(`${API_URL}/api/v1/geocode/reverse?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Reverse geocoding failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setResolvedAddress(data.displayName ?? null);
+
+      if (data.houseNumber) {
+        form.setValue("houseNumber", data.houseNumber, {
+          shouldDirty: true
+        });
+      }
+
+      if (data.street) {
+        form.setValue("street", data.street, {
+          shouldDirty: true
+        });
+      }
+
+      if (data.wardNumber != null) {
+        form.setValue("wardNumber", Number(data.wardNumber), {
+          shouldDirty: true
+        });
+      }
+
+      if (data.municipality) {
+        form.setValue("municipality", data.municipality, {
+          shouldDirty: true
+        });
+      }
+
+      if (data.city) {
+        form.setValue("city", data.city, {
+          shouldDirty: true
+        });
+      }
+
+      if (data.district) {
+        form.setValue("district", data.district, {
+          shouldDirty: true
+        });
+      }
+
+      if (data.province) {
+        form.setValue("province", data.province, {
+          shouldDirty: true
+        });
+      }
+    } catch (error) {
+      console.error("Reverse geocoding failed:", error);
+    } finally {
+      setIsResolvingAddress(false);
     }
   }
 
@@ -528,134 +628,240 @@ export function PropertyForm() {
           </CardContent>
         </Card>
 
-        {/* Section 2: Address */}
         <Card>
-          <div className="h-1 w-full bg-primary/80 rounded-t-md" />
+          <div className="h-1 w-full rounded-t-md bg-primary/80" />
+
           <CardHeader className="space-y-2 my-5 ml-6">
             <CardTitle>Location Details</CardTitle>
             <CardDescription>Where is the property located?</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="district"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>District</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Kathmandu" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+
+          <CardContent>
+            <Tabs
+              value={locationMode}
+              onValueChange={(value) => setLocationMode(value as "map" | "manual")}
+              className="w-full"
+            >
+              {/* Tabs at the top */}
+              <TabsList className="mb-6 gap-5">
+                <TabsTrigger value="manual" className="gap-2">
+                  <Icons.keyboard className="size-4" />
+                  Enter manually
+                </TabsTrigger>
+
+                <TabsTrigger value="map" className="gap-2">
+                  <Icons.mapPin className="size-4" />
+                  Select on map
+                </TabsTrigger>
+              </TabsList>
+
+              {/* MAP */}
+              <TabsContent value="map" className="mt-0 space-y-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">
+                    Click on the map to mark the exact location of the property.
+                  </p>
+                </div>
+
+                <LocationPickerMap
+                  latitude={form.watch("latitude")}
+                  longitude={form.watch("longitude")}
+                  onSelect={handleLocationSelect}
+                />
+
+                {isResolvingAddress && (
+                  <div className="rounded-md border bg-muted/40 px-4 py-3">
+                    <p className="text-sm text-muted-foreground">Finding address...</p>
+                  </div>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City/VDC</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Balaju" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="province"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Province</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Province" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Koshi">Koshi</SelectItem>
-                        <SelectItem value="Madhesh">Madhesh</SelectItem>
-                        <SelectItem value="Bagmati">Bagmati</SelectItem>
-                        <SelectItem value="Gandaki">Gandaki</SelectItem>
-                        <SelectItem value="Lumbini">Lumbini</SelectItem>
-                        <SelectItem value="Karnali">Karnali</SelectItem>
-                        <SelectItem value="Sudurpaschim">Sudurpaschim</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="municipality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Municipality</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Kathmandu Metro" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="street"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Street / Tole</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Sano Bharyang Marg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="wardNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ward Number</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g. 4" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="houseNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>House Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. 1-2-3" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
+                {!isResolvingAddress &&
+                  form.watch("latitude") != null &&
+                  form.watch("longitude") != null && (
+                    <div className="rounded-lg border bg-muted/30 p-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Selected location</p>
+
+                          {resolvedAddress && (
+                            <p className="text-sm text-muted-foreground">{resolvedAddress}</p>
+                          )}
+
+                          <p className="text-xs text-muted-foreground">
+                            {Number(form.watch("latitude")).toFixed(6)},{" "}
+                            {Number(form.watch("longitude")).toFixed(6)}
+                          </p>
+                        </div>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLocationMode("manual")}
+                        >
+                          <Icons.keyboard className="mr-2 size-4" />
+                          Edit address
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+              </TabsContent>
+
+              {/* MANUAL */}
+              <TabsContent value="manual" className="mt-0 space-y-6">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">
+                    Enter the property address details below.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="district"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>District</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Kathmandu" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City/VDC</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Balaju" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="province"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Province</FormLabel>
+
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Province" />
+                            </SelectTrigger>
+                          </FormControl>
+
+                          <SelectContent>
+                            <SelectItem value="Koshi">Koshi</SelectItem>
+
+                            <SelectItem value="Madhesh">Madhesh</SelectItem>
+
+                            <SelectItem value="Bagmati">Bagmati</SelectItem>
+
+                            <SelectItem value="Gandaki">Gandaki</SelectItem>
+
+                            <SelectItem value="Lumbini">Lumbini</SelectItem>
+
+                            <SelectItem value="Karnali">Karnali</SelectItem>
+
+                            <SelectItem value="Sudurpaschim">Sudurpaschim</SelectItem>
+                          </SelectContent>
+                        </Select>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="municipality"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Municipality</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Kathmandu Metro" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="street"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Street / Tole</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Sano Bharyang Marg" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="wardNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ward Number</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="e.g. 4" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="houseNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>House Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. 1-2-3" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Shared field */}
+            <div className="mt-6 border-t pt-6">
               <FormField
                 control={form.control}
                 name="closeLandmark"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nearby Landmark</FormLabel>
+
                     <FormControl>
                       <Input placeholder="e.g. Near Big Mart" {...field} />
                     </FormControl>
+
+                    <FormDescription>
+                      Optional landmark that makes the property easier to find.
+                    </FormDescription>
+
                     <FormMessage />
                   </FormItem>
                 )}
