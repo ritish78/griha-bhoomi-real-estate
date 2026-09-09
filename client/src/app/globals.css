@@ -102,7 +102,16 @@
 
 .property-card-popup .leaflet-popup-content {
   margin: 0 !important;
-  width: 330px !important;
+  width: 300px !important;
+}
+
+.property-card-popup .leaflet-popup-content a {
+  color: var(--foreground) !important;
+  text-decoration: none;
+}
+
+.property-card-popup .leaflet-popup-content a:hover {
+  color: var(--muted-foreground) !important;
 }
 
 .property-card-popup .leaflet-popup-close-button {

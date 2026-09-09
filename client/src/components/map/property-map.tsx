@@ -273,7 +273,7 @@ export default function PropertyMap() {
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <p className="font-bold truncate text-zinc-800" style={{ margin: 0 }}>
+                            <p className="font-bold line-clamp-2" style={{ margin: 0 }}>
                               {p.title}
                             </p>
 

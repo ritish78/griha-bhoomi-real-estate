@@ -35,7 +35,7 @@ export default function PropertyPopup({ property: p }: { property: MapProperty }
       <div className="px-3.5 py-3 flex flex-col gap-0.5">
         <Link
           href={`/property/${p.slug}`}
-          className="text-sm font-medium leading-snug"
+          className="font-bold leading-snug line-clamp-2 text-zinc-800"
           style={{ margin: 0 }}
         >
           {p.title}
