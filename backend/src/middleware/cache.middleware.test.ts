@@ -1,6 +1,6 @@
 import { cache } from "./cache";
 
-jest.mock("src/db/redis", () => ({
+jest.mock("../db/redis.js", () => ({
   __esModule: true,
   default: {
     get: jest.fn(),
@@ -11,7 +11,7 @@ jest.mock("src/db/redis", () => ({
 
 describe("cache middleware", () => {
   it("stores the response body when the route responds with res.send(object)", async () => {
-    const redisClient = (await import("src/db/redis")).default as any;
+    const redisClient = (await import("../db/redis.js")).default as any;
     redisClient.get.mockResolvedValue(null);
     redisClient.setEx.mockResolvedValue("OK");
 

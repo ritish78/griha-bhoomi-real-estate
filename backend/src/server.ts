@@ -31,7 +31,7 @@ declare module "express-session" {
   }
 }
 
-// app.use(helmet());
+app.use(helmet());
 app.disable("X-Powered-By");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

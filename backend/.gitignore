@@ -6,3 +6,4 @@ logs
 drizzle
 package.json
 pnpm-lock.yaml
+dist
