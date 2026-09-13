@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { newHouseSchema, updateHouseSchema } from "src/controller/property/houseSchema";
 import { newLandSchema, updateLandSchema } from "src/controller/property/landSchema";
 import { BadRequestError } from "src/utils/error";
-import { AnyZodObject, ZodError } from "zod";
+import { ZodError, ZodType } from "zod";
 
 /**
  * @param schema  Schema Object to compare against ZodSchema
@@ -12,7 +12,7 @@ import { AnyZodObject, ZodError } from "zod";
  * @returns       Response object from express || calls next middleware function
  */
 export const validateRequest =
-  (schema: AnyZodObject) => async (req: Request, res: Response, next: NextFunction) => {
+  (schema: ZodType) => async (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse({
         body: req.body,

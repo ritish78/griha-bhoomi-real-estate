@@ -286,12 +286,18 @@ router.route("/filter").get(async (req: Request, res: Response) => {
  * @access              Public
  */
 router.route("/id/:propertyId").get(cache(600), async (req: Request, res: Response, next: NextFunction) => {
-  console.log("Property search by id", req.params.propertyId);
-  const propertyById = await getPropertyById(req.params.propertyId, req.session.userId);
+  const propertyId = Array.isArray(req.params.propertyId) ? req.params.propertyId[0] : req.params.propertyId;
+
+  if (!propertyId) {
+    return next(new BadRequestError("Property id is required!"));
+  }
+
+  console.log("Property search by id", propertyId);
+  const propertyById = await getPropertyById(propertyId, req.session.userId);
 
   if (!propertyById) {
     logger.notFound(
-      `Property ID: ${req.params.propertyId} - (${new Date().toISOString()})`,
+      `Property ID: ${propertyId} - (${new Date().toISOString()})`,
       {
         userId: req.session.userId,
         email: req.session.email,
@@ -299,7 +305,7 @@ router.route("/id/:propertyId").get(cache(600), async (req: Request, res: Respon
       },
       true
     );
-    next(new NotFoundError(`Property of id ${req.params.propertyId} not found!`));
+    next(new NotFoundError(`Property of id ${propertyId} not found!`));
   } else {
     return res.status(200).send(propertyById);
   }
@@ -381,12 +387,18 @@ router.get("/map/viewport", async (req: Request, res: Response, next: NextFuncti
  * @access              Public
  */
 router.route("/:slug").get(cache(600), async (req: Request, res: Response, next: NextFunction) => {
-  console.log("Property search by id", req.params.slug);
-  const propertyBySlug = await getPropertyBySlug(req.params.slug, req.session.userId);
+  const slug = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
+
+  if (!slug) {
+    return next(new BadRequestError("Property slug is required!"));
+  }
+
+  console.log("Property search by id", slug);
+  const propertyBySlug = await getPropertyBySlug(slug, req.session.userId);
 
   if (!propertyBySlug) {
     logger.notFound(
-      `Property slug: ${req.params.slug} - (${new Date().toISOString()})`,
+      `Property slug: ${slug} - (${new Date().toISOString()})`,
       {
         userId: req.session.userId,
         email: req.session.email,
@@ -394,7 +406,7 @@ router.route("/:slug").get(cache(600), async (req: Request, res: Response, next:
       },
       true
     );
-    return next(new NotFoundError(`Property of slug ${req.params.slug} not found!`));
+    return next(new NotFoundError(`Property of slug ${slug} not found!`));
   }
 
   return res.status(200).send(propertyBySlug);
@@ -411,7 +423,14 @@ router
   .route("/id/:propertyId")
   .delete(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
     const currentUserId = req.session.userId;
-    const propertyIdToBeDeleted = req.params.propertyId;
+    const propertyIdToBeDeleted = Array.isArray(req.params.propertyId)
+      ? req.params.propertyId[0]
+      : req.params.propertyId;
+
+    if (!propertyIdToBeDeleted) {
+      return next(new BadRequestError("Property id is required!"));
+    }
+
     console.log(propertyIdToBeDeleted);
 
     //Logging into the log file before making any changes
@@ -460,11 +479,18 @@ router
     onlyIfLoggedIn,
     validateRequest(updatePropertySchema),
     async (req: Request, res: Response, next: NextFunction) => {
-      const idOfPropertyToUpdate = req.params.propertyId;
+      const idOfPropertyToUpdate = Array.isArray(req.params.propertyId)
+        ? req.params.propertyId[0]
+        : req.params.propertyId;
+
+      if (!idOfPropertyToUpdate) {
+        return next(new BadRequestError("Property id is required!"));
+      }
+
       const currentUserId = req.session.userId as string;
 
       if (!currentUserId) {
-        next(new AuthError("Please login to perform this action!"));
+        return next(new AuthError("Please login to perform this action!"));
       }
 
       const updatedProperty = await updatePropertyById(idOfPropertyToUpdate, currentUserId, req.body);
@@ -480,9 +506,9 @@ router
           .status(200)
           .send({ message: `Property of id ${idOfPropertyToUpdate} updated successfully!` });
       } else if (updatedProperty === -1) {
-        next(new ForbiddenError("User is not allowed to perform this action!"));
+        return next(new ForbiddenError("User is not allowed to perform this action!"));
       } else {
-        next(new NotFoundError("Property to update does not exists!"));
+        return next(new NotFoundError("Property to update does not exists!"));
       }
     }
   );
@@ -497,11 +523,18 @@ router
 router
   .route("/id/:propertyId/private")
   .post(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
-    const idOfPropertyToTogglePrivate = req.params.propertyId;
+    const idOfPropertyToTogglePrivate = Array.isArray(req.params.propertyId)
+      ? req.params.propertyId[0]
+      : req.params.propertyId;
+
+    if (!idOfPropertyToTogglePrivate) {
+      return next(new BadRequestError("Property id is required!"));
+    }
+
     const currentUserId = req.session.userId as string;
 
     if (!currentUserId) {
-      next(new AuthError("Please login to perform this action!"));
+      return next(new AuthError("Please login to perform this action!"));
     }
 
     const privatePropertyToggled = await togglePropertyPrivate(idOfPropertyToTogglePrivate, currentUserId);
@@ -526,11 +559,18 @@ router
 router
   .route("/id/:propertyId/bookmark")
   .post(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
-    const idOfPropertyToBookmark = req.params.propertyId;
+    const idOfPropertyToBookmark = Array.isArray(req.params.propertyId)
+      ? req.params.propertyId[0]
+      : req.params.propertyId;
+
+    if (!idOfPropertyToBookmark) {
+      return next(new BadRequestError("Property id is required!"));
+    }
+
     const currentUserId = req.session.userId as string;
 
     if (!currentUserId) {
-      next(new AuthError("Please login to perform this action!"));
+      return next(new AuthError("Please login to perform this action!"));
     }
 
     const isBookmarked = await toggleBookmark(currentUserId, idOfPropertyToBookmark);
@@ -542,7 +582,7 @@ router
         .status(200)
         .send({ message: `Bookmark deleted of property of id ${idOfPropertyToBookmark}` });
     } else {
-      next(new NotFoundError("Property to bookmark does not exists!"));
+      return next(new NotFoundError("Property to bookmark does not exists!"));
     }
   });
 
