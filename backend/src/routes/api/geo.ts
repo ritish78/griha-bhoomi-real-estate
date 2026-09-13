@@ -34,9 +34,6 @@ router.get("/reverse", async (req: Request, res: Response, next: NextFunction) =
       "accept-language": "en"
     });
 
-    console.log("Fetching from Nominatim:", `${nominatimUrl}/reverse?${params.toString()}`);
-    console.log("Fetching from Nominatim:", `${nominatimUrl}/reverse?${params.toString()}`);
-    console.log("Fetching from Nominatim:", `${nominatimUrl}/reverse?${params.toString()}`);
     const response = await fetch(`${nominatimUrl}/reverse?${params.toString()}`);
 
     if (!response.ok) {
@@ -55,17 +52,16 @@ router.get("/reverse", async (req: Request, res: Response, next: NextFunction) =
 
       houseNumber: address.house_number ?? null,
 
-      street: address.road ?? address.pedestrian ?? address.residential ?? null,
+      street: address.road ?? null,
 
-      municipality: address.municipality ?? address.city ?? null,
+      city: address.suburb ?? null,
 
-      city: address.city ?? address.town ?? address.village ?? address.municipality ?? null,
+      municipality: address.city ?? null,
 
-      district: address.county ?? address.state_district ?? null,
+      district: address.county ?? null,
 
       province: address.state ?? null,
 
-      //We don't need to extract ward number from the address because Nominatim doesn't provide it. Instead, we can extract it from the house number if it's in the format "house number, ward number".
       wardNumber: extractWardNumber(address)
     });
   } catch (error) {

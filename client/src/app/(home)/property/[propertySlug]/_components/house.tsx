@@ -27,8 +27,10 @@ export default function House({ property }: HouseProps) {
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-foreground font-bold text-2xl">
-            ${formatPrice(property.price)} 
-            {property.toRent && <span className="text-xl text-muted-foreground font-normal"> per month</span>}
+            ${formatPrice(property.price)}
+            {property.toRent && (
+              <span className="text-xl text-muted-foreground font-normal"> per month</span>
+            )}
           </p>
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <Badge variant="default" className="font-medium px-3 py-1.5">
@@ -36,7 +38,9 @@ export default function House({ property }: HouseProps) {
             </Badge>
             <div className="flex items-center gap-1.5">
               <Icons.eye className="size-4" />
-              <span>{property.views} {property.views > 1 ? "views" : "view"}</span>
+              <span>
+                {property.views} {property.views > 1 ? "views" : "view"}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Icons.calendar className="size-4" />

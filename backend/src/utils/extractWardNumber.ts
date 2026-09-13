@@ -6,10 +6,17 @@ export function extractWardNumber(address: NominatimAddress): number | null {
   for (const candidate of candidates) {
     if (!candidate) continue;
 
-    const match = candidate.match(/(?:ward(?:\s+no\.?)?\s*)(\d+)/i);
+    //"Ward 7", "Ward No. 7"
+    const wardMatch = candidate.match(/ward(?:\s+no\.?)?\s*(\d+)/i);
 
-    if (match?.[1]) {
-      return Number(match[1]);
+    if (wardMatch?.[1]) {
+      return Number(wardMatch[1]);
+    }
+
+    const dashMatch = candidate.match(/-(\d+)$/);
+
+    if (dashMatch?.[1]) {
+      return Number(dashMatch[1]);
     }
   }
 

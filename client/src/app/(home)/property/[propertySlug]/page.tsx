@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent
-} from "@/components/ui/accordion";
+// import {
+//   Accordion,
+//   AccordionItem,
+//   AccordionTrigger,
+//   AccordionContent
+// } from "@/components/ui/accordion";
 
 import { Separator } from "@/components/ui/separator";
 import PropertyCard from "@/components/property-card";

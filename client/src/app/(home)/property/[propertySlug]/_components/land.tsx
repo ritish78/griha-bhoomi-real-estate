@@ -20,7 +20,7 @@ export default function Land({ property }: LandProps) {
             <Icons.mapPin className="size-5 mt-0.5 flex-shrink-0 text-muted-foreground"></Icons.mapPin>
             <span className="text-muted-foreground text-base font-medium break-words leading-relaxed">
               {property.street && `${property.street}, `}
-              {property.municipality && `${property.municipality}, `}
+              {/* {property.municipality && `${property.municipality}, `} */}
               {property.city && `${property.city}, `}
               {property.district && `${property.district}`}
             </span>
@@ -28,8 +28,10 @@ export default function Land({ property }: LandProps) {
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-foreground font-bold text-3xl">
-            ${formatPrice(property.price)} 
-            {property.toRent && <span className="text-xl text-muted-foreground font-normal"> per month</span>}
+            ${formatPrice(property.price)}
+            {property.toRent && (
+              <span className="text-xl text-muted-foreground font-normal"> per month</span>
+            )}
           </p>
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <Badge variant="default" className="font-medium px-3 py-1.5">
@@ -37,7 +39,9 @@ export default function Land({ property }: LandProps) {
             </Badge>
             <div className="flex items-center gap-1.5">
               <Icons.eye className="size-4" />
-              <span>{property.views} {property.views > 1 ? "views" : "view"}</span>
+              <span>
+                {property.views} {property.views > 1 ? "views" : "view"}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Icons.calendar className="size-4" />
