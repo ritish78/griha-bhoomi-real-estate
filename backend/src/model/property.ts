@@ -48,7 +48,7 @@ export const property = pgTable(
     featured: boolean("featured").default(false),
     private: boolean("private").default(false),
     expiresOn: timestamp("expires_on", { mode: "string" }).notNull(),
-    views: integer("views").default(1).notNull()
+    views: integer("views").default(0).notNull()
     // searchVector: tsvector("search_vector", {
     //   sources: ["title", "description", "address", "close_landmark"]
     // })

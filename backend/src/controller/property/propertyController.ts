@@ -193,7 +193,9 @@ export const addProperty = async (sellerId: string, body) => {
 
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
-    const slug = `${idOfToBeInsertedProperty.split("-")[0]}-${slugify(title, { lower: true })}`; 
+    //i want to make title to appear before the id of the property
+    //as it makes the url more user friendly
+    const slug = `${slugify(title, { lower: true })}-${idOfToBeInsertedProperty.split("-")[0]}`;
 
     await preparedInsertProperty.execute({
       id: idOfToBeInsertedProperty,
@@ -241,13 +243,12 @@ export const addProperty = async (sellerId: string, body) => {
 
     //Even though the variable is named `idOfTheToBeInsertedProperty`, once we reach here
     //it is id of inserted property and still the same uuidv4 string
-    return {idOfToBeInsertedProperty, slug };
+    return { idOfToBeInsertedProperty, slug };
   } catch (error) {
     logger.error(`${error.message} - (${new Date().toISOString()})`, {
       error: error.message,
       stack: error.stack
     });
-    
   }
 };
 

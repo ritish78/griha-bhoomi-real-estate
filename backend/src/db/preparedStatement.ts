@@ -103,7 +103,7 @@ export const preparedInsertProperty = db
     imageUrl: sql`${sql.placeholder("imageUrl")}`,
     status: sql.placeholder("status"),
     expiresOn: sql.placeholder("expiresOn"),
-    views: 1
+    views: 0
   })
   .prepare("insert-property");
 
