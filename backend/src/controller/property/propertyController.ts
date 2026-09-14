@@ -27,6 +27,7 @@ import { house } from "src/model/house";
 import { land } from "src/model/land";
 import { addAddress } from "../address/addressController";
 import { address } from "src/model/address";
+import { buildRadiusCondition } from "src/utils/buildRadiusCondition";
 
 /**
  * @param dummyPropertyData array of property
@@ -456,6 +457,7 @@ export const getPropertyBySlug = async (slug: string, userId) => {
  */
 export const filterProperties = async (filters) => {
   try {
+    const radiusCondition = buildRadiusCondition(filters);
     //These are the fields that the users can search. It can be queried from url
     //so we are not following camel case to name the fields. Users can just type
     //and search using the api without having to remember which letter to capitalize
@@ -534,6 +536,12 @@ export const filterProperties = async (filters) => {
     const mapAddressFilterOptions = new Map();
 
     for (const key in filters) {
+      // These are handled by the spatial condition.
+      // "location" is only a display label.
+      if (["location", "latitude", "longitude", "radius"].includes(key)) {
+        continue;
+      }
+
       //The search query needs to be within the above `filterOptions`. User might search using `&test=ok`
       //and we might use it to query against the database. So, we only allow what can be queried
       //We also don't allow users to searches with same filter options twice in same request
@@ -582,7 +590,8 @@ export const filterProperties = async (filters) => {
       mapPropertyFilterOptions.size === 0 &&
       mapHouseFilterOptions.size === 0 &&
       mapLandFilterOptions.size === 0 &&
-      mapAddressFilterOptions.size === 0
+      mapAddressFilterOptions.size === 0 &&
+      !radiusCondition
     ) {
       return -1;
     }
@@ -591,16 +600,16 @@ export const filterProperties = async (filters) => {
     //it is neglected. We need to make it search with other fields as well
     //if the filter is only one `keyword` then we return them with the function
     //that we have created below named `searchPropertyByKeyword`
-    if (
-      mapPropertyFilterOptions.size === 1 &&
-      filters.keyword &&
-      mapHouseFilterOptions.size === 0 &&
-      mapLandFilterOptions.size === 0 &&
-      mapAddressFilterOptions.size === 0
-    ) {
-      const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), filters?.page || 1);
-      return listOfProperties;
-    }
+    // if (
+    //   mapPropertyFilterOptions.size === 1 &&
+    //   filters.keyword &&
+    //   mapHouseFilterOptions.size === 0 &&
+    //   mapLandFilterOptions.size === 0 &&
+    //   mapAddressFilterOptions.size === 0
+    // ) {
+    //   const listOfProperties = await searchPropertyByKeyword(filters.keyword.trim(), filters?.page || 1);
+    //   return listOfProperties;
+    // }
 
     const sortField = mapPropertyFilterOptions.get("sortby") || "views";
     const sortOrder =
@@ -643,6 +652,7 @@ export const filterProperties = async (filters) => {
       .leftJoin(land, eq(property.propertyTypeId, land.id))
       .where(
         and(
+          radiusCondition,
           // mapPropertyFilterOptions.get("keyword")
           //   ? sql`search_vector @@ to_tsquery('english', '${mapPropertyFilterOptions.get("keyword").replace(" ", " | ")}')`
           //   : undefined,
@@ -864,7 +874,8 @@ export const filterProperties = async (filters) => {
       properties: filteredProperties.length > 0 ? filteredProperties : []
     };
   } catch (error) {
-    console.log("Error occurred while filtering results!");
+    console.error("Error occurred while filtering results:", error);
+    throw error;
   }
 };
 

@@ -25,3 +25,11 @@ export interface NominatimReverseResponse {
   display_name?: string;
   address?: NominatimAddress;
 }
+
+export interface NominatimSearchResult {
+  osm_type: string;
+  osm_id: number;
+  lat: string;
+  lon: string;
+  display_name: string;
+}

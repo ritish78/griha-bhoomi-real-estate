@@ -61,6 +61,12 @@ export async function getFilteredListOfProperties(filters: string, limit: number
 
     const data = await response.json();
 
+    if (!response.ok) {
+      return {
+        error: data.message || "Could not search properties."
+      };
+    }
+
     return data;
   } catch (error: unknown) {
     return { error: getErrorMessage(error) };

@@ -29,6 +29,7 @@ import {
   DrawerTrigger
 } from "@/components/ui/drawer";
 import CountRange, { COUNT_FILTERS } from "./count-range";
+import LocationSearch from "./location-search";
 
 type Patch = Record<string, string>;
 
@@ -114,6 +115,39 @@ function readFilters(query: string) {
 }
 
 function validateFilters(params: URLSearchParams) {
+  const locationKeys = ["location", "latitude", "longitude", "radius"];
+
+  const hasLocation = locationKeys.some((key) => params.has(key));
+
+  if (hasLocation) {
+    const latitudeText = params.get("latitude");
+    const longitudeText = params.get("longitude");
+    const radiusText = params.get("radius");
+
+    if (!latitudeText?.trim() || !longitudeText?.trim() || !radiusText?.trim()) {
+      return "Choose a location and search radius, or clear the location.";
+    }
+
+    const latitude = Number(latitudeText);
+    const longitude = Number(longitudeText);
+    const radius = Number(radiusText);
+
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      return "Please choose a valid search location.";
+    }
+
+    if (!Number.isFinite(radius) || radius <= 0 || radius > 50) {
+      return "Search radius must be greater than 0 and at most 50 km.";
+    }
+  }
+
   for (const key of NUMBER_KEYS) {
     const value = params.get(key);
 
@@ -253,6 +287,7 @@ function FilterForm({
 
   return (
     <form
+      className="min-w-0"
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
@@ -269,6 +304,56 @@ function FilterForm({
             onChange={(event) => update({ keyword: event.target.value })}
           />
         </div>
+        <LocationSearch
+          label={get("location")}
+          latitude={get("latitude")}
+          longitude={get("longitude")}
+          onSelect={(location) => {
+            update({
+              location: location.label,
+              latitude: String(location.latitude),
+              longitude: String(location.longitude),
+              radius: get("radius") || "3"
+            });
+          }}
+          onClear={() => {
+            update({
+              location: "",
+              latitude: "",
+              longitude: "",
+              radius: ""
+            });
+          }}
+        />
+
+        {get("latitude") !== "" && get("longitude") !== "" && (
+          <div className="space-y-2">
+            <Label htmlFor={`${id}-radius`}>Search radius</Label>
+
+            <Select value={get("radius")} onValueChange={(value) => update({ radius: value })}>
+              <SelectTrigger id={`${id}-radius`}>
+                <SelectValue placeholder="Choose a radius" />
+              </SelectTrigger>
+
+              <SelectContent>
+                {["1", "3", "5", "10", "25", "50"].map((radius) => (
+                  <SelectItem key={radius} value={radius}>
+                    Within {radius} km
+                  </SelectItem>
+                ))}
+
+                {/* Restore valid custom distances from copied URLs. */}
+                {get("radius") && !["1", "3", "5", "10", "25", "50"].includes(get("radius")) && (
+                  <SelectItem value={get("radius")}>Within {get("radius")} km</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+
+            <p className="text-xs text-muted-foreground">
+              Straight-line distance from the selected location.
+            </p>
+          </div>
+        )}
 
         {choice("status", "Looking to", ["Sale", "Rent"])}
 
@@ -390,11 +475,11 @@ function FilterForm({
             </p>
           )}
 
-          <div className="grid grid-cols-[auto_1fr] gap-2">
+          <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-2">
+            {" "}
             <Button type="button" variant="outline" onClick={reset}>
               Reset
             </Button>
-
             <Button type="submit">{pending ? "Searching…" : "Apply filters"}</Button>
           </div>
 
@@ -451,14 +536,27 @@ function FilterLayout({ initialQuery, children }: { initialQuery: string; childr
   function reset() {
     const next = new URLSearchParams();
 
-    // Reset search criteria while preserving result ordering.
+    // Keep the current result ordering.
+    const appliedParams = new URLSearchParams(initialQuery);
+
     for (const key of ["sortby", "order"]) {
-      const value = draft.get(key);
+      const value = appliedParams.get(key);
       if (value) next.set(key, value);
     }
 
+    next.set("page", "1");
+
     setDraft(next);
     setError(null);
+    setOpen(false);
+
+    if (next.toString() === initialQuery) return;
+
+    startTransition(() => {
+      router.push(`${pathname}?${next.toString()}`, {
+        scroll: false
+      });
+    });
   }
 
   function apply() {
