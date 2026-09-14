@@ -37,9 +37,9 @@ export const dummyPropertyData: Property[] = [
     expiresOn: "2024-06-19 18:15:00",
     views: 1,
     bathroomCount: null,
-    length: "28.3 feet",
-    breadth: "10 feet",
-    landArea: "283 square feet",
+    length: "28.3",
+    breadth: "10",
+    landArea: "283 sq ft",
     landConnectedToRoad: false,
     landDistanceToRoad: 25
   },
@@ -83,7 +83,7 @@ export const dummyPropertyData: Property[] = [
     houseConnectedToRoad: true,
     length: null,
     breadth: null,
-    houseArea: "180 square feet"
+    houseArea: "180 sq ft"
   },
   {
     id: "a65b3f20-7912-4e1a-9349-5d2e3b762c34",
@@ -126,6 +126,6 @@ export const dummyPropertyData: Property[] = [
     evCharging: true,
     length: null,
     breadth: null,
-    houseArea: "755 square feet"
+    houseArea: "755 sq ft"
   }
 ];

@@ -1,14 +1,10 @@
 import { redirect } from "next/navigation";
 import { getFilteredListOfProperties } from "@/actions/property";
 import { ListOfPropertiesResponse } from "@/types/property";
-import { PropertyPageContent } from "@/components/property-page-content";
-import { Suspense } from "react";
-import PropertyCardSkeletonList from "../../_components/property-skeleton-list";
 import PropertyListPage from "../_components/properties-list-page";
 import PaginationButton from "@/components/pagination-button";
 import { Shell } from "@/components/shell";
 import SearchSheet from "./_components/search-sheet";
-import KeywordSearch from "./_components/keyword-search";
 import { Metadata } from "next";
 
 export interface SearchPropertyPageProps {
@@ -76,68 +72,55 @@ export default async function SearchPropertyPage(props: SearchPropertyPageProps)
   const totalResults = listOfFilteredProperty.properties.length;
 
   return (
-    <Shell className="pb-12 md:pb-14 bg-slate-50 dark:bg-transparent">
-      <div className="flex flex-col gap-8">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold leading-tight">
-              Find Your Perfect Property
-            </h1>
-            <p className="text-muted-foreground text-base md:text-lg">
-              Apply filters to narrow down your search and discover properties that match your needs
-            </p>
-          </div>
-          <div className="border rounded-lg bg-card p-4 md:p-6 shadow-sm">
-            <KeywordSearch />
-            <SearchSheet />
-          </div>
+    <Shell className="pb-12 md:pb-14">
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold md:text-3xl">Find your next property</h1>
+
+          <p className="text-muted-foreground">
+            Search by location, price and the details that matter to you.
+          </p>
         </div>
-        {hasResults ? (
-          <>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold">Search Results</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Showing {totalResults} {totalResults === 1 ? "property" : "properties"}
-                    {listOfFilteredProperty.numberOfPages > 1 && (
-                      <span>
-                        {" "}
-                        • Page {pageNumber} of {listOfFilteredProperty.numberOfPages}
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
 
-              <PropertyPageContent title="" description="" className="pt-0">
-                <Suspense fallback={<PropertyCardSkeletonList numberOfSkeletons={6} />}>
-                  <PropertyListPage propertyList={listOfFilteredProperty} />
-                </Suspense>
-              </PropertyPageContent>
+        <SearchSheet>
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold">Search results</h2>
 
-              {listOfFilteredProperty.numberOfPages > 1 && (
-                <div className="flex justify-center pt-4">
-                  <PaginationButton
-                    searchParams={searchParams}
-                    totalPages={listOfFilteredProperty.numberOfPages}
-                    page={pageNumber}
-                  />
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4 py-12">
-            <div className="text-center space-y-3 max-w-md">
-              <h2 className="text-2xl md:text-3xl font-bold">No properties found</h2>
-              <p className="text-muted-foreground text-base">
-                Try adjusting your filters to see more results. You can modify your search criteria
-                using the filters above.
+              <p className="mt-1 text-sm text-muted-foreground">
+                Showing {totalResults} {totalResults === 1 ? "property" : "properties"}
+                {listOfFilteredProperty.numberOfPages > 1 &&
+                  ` · Page ${pageNumber} of ${listOfFilteredProperty.numberOfPages}`}
               </p>
             </div>
+
+            {hasResults ? (
+              <>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] items-stretch gap-4">
+                  <PropertyListPage propertyList={listOfFilteredProperty} />
+                </div>
+
+                {listOfFilteredProperty.numberOfPages > 1 && (
+                  <div className="flex justify-center pt-4">
+                    <PaginationButton
+                      searchParams={searchParams}
+                      totalPages={listOfFilteredProperty.numberOfPages}
+                      page={pageNumber}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="rounded-xl border border-dashed px-6 py-16 text-center">
+                <h3 className="text-lg font-semibold">No matching properties</h3>
+
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Try widening your price or room range, or reset your filters and apply again.
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </SearchSheet>
       </div>
     </Shell>
   );

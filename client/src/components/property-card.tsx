@@ -11,9 +11,22 @@ import { Badge } from "./ui/badge";
 import { Property } from "@/types/property";
 import { formatPrice } from "@/lib/formatPrice";
 import { formatAddress } from "@/lib/formatAddress";
+import { ReactNode } from "react";
 
 interface PropertyCardProps {
   property: Property;
+}
+
+function PropertyStat({ icon, text }: { icon: ReactNode; text: string }) {
+  return (
+    <div className="flex min-w-0 items-center justify-center gap-1 px-1.5" title={text}>
+      <span aria-hidden="true" className="shrink-0 text-muted-foreground [&_svg]:size-4">
+        {icon}
+      </span>
+
+      <span className="truncate text-sm font-semibold tabular-nums">{text}</span>
+    </div>
+  );
 }
 
 export default function PropertyCard({ property }: PropertyCardProps) {
@@ -61,7 +74,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </AspectRatio>
         </CardHeader>
       </Link>
-      <CardContent className="p-4 border-b-2 flex flex-col flex-grow">
+      <CardContent className="flex flex-grow flex-col border-b-2 px-4 pt-4 pb-2">
+        {" "}
         <div className="flex-grow">
           <CardTitle className="text-lg mb-2">
             <strong>
@@ -72,59 +86,57 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             <CardDescription className="mb-4 text-lg font-bold">{property.title}</CardDescription>
           </Link>
         </div>
-        <CardDescription className="flex h-5 mr-auto mb-1">
-          <Icons.pin className="size-1 max-h-1" />
-          <span className="text-muted-foreground">
-            {/* {property.street && `${property.street}, `}
-            {property.municipality && `${property.municipality}, `}
-            {property.city && `${property.city}, `}
-            {property.district && `${property.district}`} */}
-            {formatAddress(property)}
+        <CardDescription className="mt-2 flex items-start gap-2">
+          {" "}
+          <Icons.mapPin
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+          />
+          <span
+            className="line-clamp-2 text-sm leading-5 text-muted-foreground"
+            title={formatAddress(property)}
+          >
+            {formatAddress(property) || "Location not provided"}
           </span>
         </CardDescription>
       </CardContent>
-      <CardFooter className="flex flex-wrap items-center gap-y-4 p-2">
+      <CardFooter className="mt-auto grid grid-cols-3 divide-x divide-border px-2 py-3">
+        {" "}
         {property.propertyType === "House" ? (
           <>
-            <Badge variant="secondary" className="mr-2">
-              <Icons.bedroom className="mb-1"></Icons.bedroom>
-              <strong className="ml-1">
-                {property.roomCount && property.kitchenCount
-                  ? property.roomCount + property.kitchenCount
-                  : property.roomCount}
-              </strong>
-              <span className="ml-1">Rooms</span>
-            </Badge>
-            <Badge variant="secondary" className="mr-2">
-              <Icons.bathroom className="mb-1"></Icons.bathroom>
-              <strong className="ml-1">{property.bathroomCount}</strong>
-              <span className="ml-1">Bathrooms</span>
-            </Badge>
-            <Badge variant="secondary" className="">
-              <Icons.land className="size-4"></Icons.land>
-              <strong className="ml-1">{property.houseArea?.split(" ")[0]}</strong>
-              <span className="ml-1">
-                {property.houseArea?.split(" ")[1] ? property.houseArea?.split(" ")[1] : "Sq ft"}
-              </span>
-            </Badge>
+            <PropertyStat
+              icon={<Icons.bedroom />}
+              text={
+                property.roomCount == null
+                  ? "— rooms"
+                  : `${property.roomCount} ${property.roomCount === 1 ? "room" : "rooms"}`
+              }
+            />
+
+            <PropertyStat
+              icon={<Icons.bathroom />}
+              text={
+                property.bathroomCount == null
+                  ? "— baths"
+                  : `${property.bathroomCount} ${property.bathroomCount === 1 ? "bath" : "baths"}`
+              }
+            />
+
+            <PropertyStat icon={<Icons.land />} text={property.houseArea?.trim() || "Area —"} />
           </>
         ) : (
           <>
-            <Badge variant="secondary" className="mr-2">
-              <Icons.pencilRuler className="mb-1"></Icons.pencilRuler>
-              <strong className="ml-1">{property.length}</strong>
-              <span className="ml-1">Length</span>
-            </Badge>
-            <Badge variant="secondary" className="mr-2">
-              <Icons.ruler className="mb-1"></Icons.ruler>
-              <strong className="ml-1">{property.breadth}</strong>
-              <span className="ml-1">Breadth</span>
-            </Badge>
-            <Badge variant="secondary" className="">
-              <Icons.land className="size-4"></Icons.land>
-              <strong className="ml-1">{property.landArea?.split(" ")[0]}</strong>
-              <span className="ml-1">Sq ft</span>
-            </Badge>
+            <PropertyStat
+              icon={<Icons.pencilRuler />}
+              text={property.length?.trim() ? `Length ${property.length.trim()} ft` : "Length —"}
+            />
+
+            <PropertyStat
+              icon={<Icons.ruler />}
+              text={property.breadth?.trim() ? `Width ${property.breadth.trim()} ft` : "Width —"}
+            />
+
+            <PropertyStat icon={<Icons.land />} text={property.landArea?.trim() || "Area —"} />
           </>
         )}
       </CardFooter>
