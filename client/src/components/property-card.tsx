@@ -10,6 +10,7 @@ import { AspectRatio } from "./ui/aspect-ratio";
 import { Badge } from "./ui/badge";
 import { Property } from "@/types/property";
 import { formatPrice } from "@/lib/formatPrice";
+import { formatAddress } from "@/lib/formatAddress";
 
 interface PropertyCardProps {
   property: Property;
@@ -74,10 +75,11 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <CardDescription className="flex h-5 mr-auto mb-1">
           <Icons.pin className="size-1 max-h-1" />
           <span className="text-muted-foreground">
-            {property.street && `${property.street}, `}
+            {/* {property.street && `${property.street}, `}
             {property.municipality && `${property.municipality}, `}
             {property.city && `${property.city}, `}
-            {property.district && `${property.district}`}
+            {property.district && `${property.district}`} */}
+            {formatAddress(property)}
           </span>
         </CardDescription>
       </CardContent>

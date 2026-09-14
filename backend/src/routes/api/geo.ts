@@ -2,6 +2,7 @@ import { Request, Response, NextFunction, Router } from "express";
 import { NominatimReverseResponse } from "src/types/address";
 import { BadRequestError } from "src/utils/error";
 import { extractWardNumber } from "src/utils/extractWardNumber";
+import { normaliseNominatimAddress } from "src/utils/normaliseNominatimAddress";
 
 const router = Router();
 
@@ -42,6 +43,8 @@ router.get("/reverse", async (req: Request, res: Response, next: NextFunction) =
 
     const result = (await response.json()) as NominatimReverseResponse;
 
+    console.log("Raw Nominatim address:", JSON.stringify(result.address, null, 2));
+
     const address = result.address ?? {};
 
     return res.status(200).json({
@@ -50,19 +53,7 @@ router.get("/reverse", async (req: Request, res: Response, next: NextFunction) =
 
       displayName: result.display_name ?? null,
 
-      houseNumber: address.house_number ?? null,
-
-      street: address.road ?? null,
-
-      city: address.suburb ?? null,
-
-      municipality: address.city ?? null,
-
-      district: address.county ?? null,
-
-      province: address.state ?? null,
-
-      wardNumber: extractWardNumber(address)
+      ...normaliseNominatimAddress(address)
     });
   } catch (error) {
     next(error);

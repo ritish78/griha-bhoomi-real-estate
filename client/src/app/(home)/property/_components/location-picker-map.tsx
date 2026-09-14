@@ -33,7 +33,7 @@ export default function LocationPickerMap({ latitude, longitude, onSelect }: Pro
       <MapContainer
         center={[latitude ?? 27.7172, longitude ?? 85.324]}
         zoom={13}
-        className="h-[420px] w-full"
+        className="h-[420px] w-full z-0" //map was being displayed above navbar when scrolling down
       >
         <TileLayer
           url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"

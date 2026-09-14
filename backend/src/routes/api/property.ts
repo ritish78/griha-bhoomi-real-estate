@@ -8,7 +8,7 @@ import {
   getPropertyById,
   getPropertyBySlug,
   togglePropertyPrivate,
-  seedProperty,
+  // seedProperty,
   updatePropertyById
 } from "src/controller/property/propertyController";
 import { newPropertySchema, updatePropertySchema } from "src/controller/property/propertySchema";
@@ -36,17 +36,17 @@ const router = Router();
  * @desc        Seed dummy property into postgresql db
  * @access      Auth User
  */
-router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
-  try {
-    for (const property of seedProperties) {
-      await seedProperty(property);
-    }
-    res.status(201).send({ message: "Property info seeded successfully!" });
-  } catch (error) {
-    console.log("Error while seeding the property to database!");
-    res.status(500).send({ message: "Could not seed property info to database!" });
-  }
-});
+// router.route("/seed-property").post(onlyIfLoggedIn, async (req: Request, res: Response) => {
+//   try {
+//     for (const property of seedProperties) {
+//       await seedProperty(property);
+//     }
+//     res.status(201).send({ message: "Property info seeded successfully!" });
+//   } catch (error) {
+//     console.log("Error while seeding the property to database!");
+//     res.status(500).send({ message: "Could not seed property info to database!" });
+//   }
+// });
 
 /**
  * @route               /api/v1/property/new

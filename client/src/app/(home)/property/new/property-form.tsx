@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitErrorHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Icons } from "@/components/icons";
@@ -126,6 +126,9 @@ const propertyFormSchema = z.object({
 
 type PropertyFormValues = z.infer<typeof propertyFormSchema>;
 
+const fieldLabel = (name: string) =>
+  name.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
+
 export function PropertyForm() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const [isLoading, setIsLoading] = useState(false);
@@ -189,6 +192,27 @@ export function PropertyForm() {
   const availableFrom = form.watch("availableFrom");
   const availableTill = form.watch("availableTill");
   const isHouse = propertyType === "House";
+
+  const onInvalid: SubmitErrorHandler<PropertyFormValues> = (errors) => {
+    //Address fields can be hidden by the map tab while still being required.
+    if (
+      errors.street ||
+      errors.city ||
+      errors.district ||
+      errors.province ||
+      errors.municipality ||
+      errors.wardNumber ||
+      errors.houseNumber
+    ) {
+      setLocationMode("manual");
+    }
+
+    toast.error("Please check the listing details", {
+      description: Object.entries(errors)
+        .map(([name, error]) => `${fieldLabel(name)}: ${error?.message ?? "Invalid value"}`)
+        .join(". ")
+    });
+  };
 
   useEffect(() => {
     if (connectedToRoad) {
@@ -432,7 +456,17 @@ export function PropertyForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        onInvalidCapture={(event) => {
+          // Native constraints run before React Hook Form's submit handler.
+          const input = event.target as HTMLInputElement;
+          toast.error("Please check the listing details", {
+            description: `${input.labels?.[0]?.textContent || input.name || "Field"}: ${input.validationMessage}`
+          });
+        }}
+        className="space-y-8"
+      >
         {/* Section 1: Basic Information */}
         <Card>
           <div className="h-1 w-full bg-primary/80 rounded-t-md" />
@@ -527,7 +561,7 @@ export function PropertyForm() {
                   <FormItem>
                     <FormLabel>Price (NPR)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
+                      <Input type="number" step="any" placeholder="0" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -562,6 +596,7 @@ export function PropertyForm() {
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
+                            type="button"
                             variant={"outline"}
                             className={cn(
                               "pl-3 text-left font-normal",
@@ -597,6 +632,7 @@ export function PropertyForm() {
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
+                            type="button"
                             variant={"outline"}
                             className={cn(
                               "pl-3 text-left font-normal",
@@ -735,7 +771,7 @@ export function PropertyForm() {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City/VDC</FormLabel>
+                        <FormLabel>City</FormLabel>
                         <FormControl>
                           <Input placeholder="e.g. Balaju" {...field} />
                         </FormControl>
@@ -903,7 +939,13 @@ export function PropertyForm() {
                   <FormItem>
                     <FormLabel>Distance to Road (ft)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0" {...field} disabled={connectedToRoad} />
+                      <Input
+                        type="number"
+                        step="any"
+                        placeholder="0"
+                        {...field}
+                        disabled={connectedToRoad}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1038,6 +1080,7 @@ export function PropertyForm() {
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
+                                type="button"
                                 variant="outline"
                                 role="combobox"
                                 className={cn(
@@ -1265,6 +1308,21 @@ export function PropertyForm() {
             <ImagePreview images={uploadedImages} onRemove={handleRemoveImage} />
           </CardContent>
         </Card>
+
+        {form.formState.isSubmitted && Object.keys(form.formState.errors).length > 0 && (
+          <div role="alert" className="rounded-md border border-destructive p-4 text-destructive">
+            <p className="font-medium">
+              Please correct these details before creating your listing:
+            </p>
+            <ul className="mt-2 list-disc pl-5">
+              {Object.entries(form.formState.errors).map(([name, error]) => (
+                <li key={name}>
+                  {fieldLabel(name)}: {error?.message ?? "Invalid value"}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="flex justify-end">
           <Button type="submit" size="lg" className="mx-auto flex w-fit group" disabled={isLoading}>

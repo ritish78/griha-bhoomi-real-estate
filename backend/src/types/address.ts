@@ -7,9 +7,11 @@ export interface NominatimAddress {
   city?: string;
   town?: string;
   village?: string;
+  hamlet?: string;
   county?: string;
   state_district?: string;
   state?: string;
+  province?: string;
   city_district?: string;
   suburb?: string;
   quarter?: string;

@@ -31,38 +31,38 @@ import { address } from "src/model/address";
 /**
  * @param dummyPropertyData array of property
  */
-export const seedProperty = async (dummyPropertyData) => {
-  await db.transaction(async (tx) => {
-    for (const row of dummyPropertyData) {
-      try {
-        await tx.insert(property).values([
-          {
-            id: uuidv4(),
-            sellerId: row.sellerId,
-            title: row.title,
-            slug: row.title,
-            description: row.description,
-            toRent: row.toRent,
-            address: row.address,
-            closeLandmark: row.closeLandmark,
-            propertyType: row.propertyType,
-            availableFrom: row.availableFrom,
-            availableTill: row.availableTill,
-            price: row.price,
-            negotiable: row.negotiable,
-            imageUrl: row.imageUrl,
-            status: row.status,
-            expiresOn: row.expiresOn,
-            views: 1
-          }
-        ]);
-      } catch (error) {
-        console.log(`Error inserting row: ${JSON.stringify(row)}`);
-        console.log(error);
-      }
-    }
-  });
-};
+// export const seedProperty = async (dummyPropertyData) => {
+//   await db.transaction(async (tx) => {
+//     for (const row of dummyPropertyData) {
+//       try {
+//         await tx.insert(property).values([
+//           {
+//             id: uuidv4(),
+//             sellerId: row.sellerId,
+//             title: row.title,
+//             slug: row.title,
+//             description: row.description,
+//             toRent: row.toRent,
+//             address: row.address,
+//             closeLandmark: row.closeLandmark,
+//             propertyType: row.propertyType,
+//             availableFrom: row.availableFrom,
+//             availableTill: row.availableTill,
+//             price: row.price,
+//             negotiable: row.negotiable,
+//             imageUrl: row.imageUrl,
+//             status: row.status,
+//             expiresOn: row.expiresOn,
+//             views: 1
+//           }
+//         ]);
+//       } catch (error) {
+//         console.log(`Error inserting row: ${JSON.stringify(row)}`);
+//         console.log(error);
+//       }
+//     }
+//   });
+// };
 
 /**
  * @route                   /api/v1/auth/property/new
@@ -626,7 +626,7 @@ export const filterProperties = async (filters) => {
         views: property.views,
         street: address.street,
         municipality: address.municipality,
-        city: address.municipality,
+        city: address.city,
         district: address.district,
         roomCount: house.roomCount,
         bathroomCount: house.bathroomCount,

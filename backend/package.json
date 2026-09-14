@@ -40,8 +40,6 @@
     "zod": "^4.6.4"
   },
   "devDependencies": {
-    "@esbuild-kit/core-utils": "3.3.2",
-    "@esbuild-kit/esm-loader": "2.6.5",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -50,7 +48,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
-    "@types/uuid": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
     "drizzle-kit": "0.31.10",

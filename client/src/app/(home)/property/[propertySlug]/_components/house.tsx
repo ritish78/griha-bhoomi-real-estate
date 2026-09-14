@@ -1,6 +1,7 @@
 import { Icons } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { formatAddress } from "@/lib/formatAddress";
 import { formatBuiltDate, formatListedAtDate } from "@/lib/formatDate";
 import { formatPrice } from "@/lib/formatPrice";
 import { Property } from "@/types/property";
@@ -18,10 +19,11 @@ export default function House({ property }: HouseProps) {
           <div className="flex mr-auto gap-x-2 items-start mb-3">
             <Icons.mapPin className="size-5 mt-0.5 flex-shrink-0 text-muted-foreground"></Icons.mapPin>
             <span className="text-muted-foreground text-base font-medium break-words leading-relaxed">
-              {property.street && `${property.street}, `}
+              {/* {property.street && `${property.street}, `}
               {property.municipality && `${property.municipality}, `}
               {property.city && `${property.city}, `}
-              {property.district && `${property.district}`}
+              {property.district && `${property.district}`} */}
+              {formatAddress(property)}
             </span>
           </div>
         </div>
