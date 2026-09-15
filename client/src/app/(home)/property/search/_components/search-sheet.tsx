@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/drawer";
 import CountRange, { COUNT_FILTERS } from "./count-range";
 import LocationSearch from "./location-search";
+import BuiltYearFilter from "@/components/built-year";
 
 type Patch = Record<string, string>;
 
@@ -444,7 +445,11 @@ function FilterForm({
 
                     {choice("evcharging", "EV charging", ["true", "false"])}
 
-                    {numeric("builtat", "Built in or after")}
+                    <BuiltYearFilter
+                      value={get("builtat")}
+                      onChange={(year) => update({ builtat: year })}
+                      disabled={pending}
+                    />
 
                     {roadFields("house")}
                   </div>

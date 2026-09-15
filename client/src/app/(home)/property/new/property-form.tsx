@@ -50,6 +50,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LocationPickerMap from "../_components/location-picker-map";
 import { FACILITIES, isFacilityAllowed } from "@/types/facilities";
 import { FacilitiesPicker } from "@/components/property-facilities";
+import BuiltYearFilter from "@/components/built-year";
 
 const propertyFormSchema = z.object({
   // Basic Property Details
@@ -1087,70 +1088,20 @@ export function PropertyForm() {
                 <FormField
                   control={form.control}
                   name="builtAt"
-                  render={({ field }) => {
-                    const currentYear = new Date().getFullYear();
-                    const years = Array.from({ length: currentYear - 1900 + 1 }, (_, i) =>
-                      (currentYear - i).toString()
-                    );
-
-                    return (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Built Year</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "justify-between font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? new Date(field.value).getFullYear().toString()
-                                  : "Select year"}
-                                <Icons.upDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[200px] p-0">
-                            <Command>
-                              <CommandInput placeholder="Search year..." />
-                              <CommandList>
-                                <CommandEmpty>No year found.</CommandEmpty>
-                                <CommandGroup>
-                                  {years.map((year) => (
-                                    <CommandItem
-                                      key={year}
-                                      value={year}
-                                      onSelect={(currentValue) => {
-                                        const date = new Date(`${currentValue}-01-01`);
-                                        field.onChange(date);
-                                      }}
-                                    >
-                                      <Icons.check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          field.value &&
-                                            new Date(field.value).getFullYear().toString() === year
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                      {year}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <BuiltYearFilter
+                        label="Built year"
+                        placeholder="Select year"
+                        value={field.value ? new Date(field.value).getFullYear().toString() : ""}
+                        onChange={(year) => {
+                          field.onChange(year ? new Date(Number(year), 0, 1) : undefined);
+                        }}
+                        disabled={form.formState.isSubmitting}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
                 <FormField
                   control={form.control}
