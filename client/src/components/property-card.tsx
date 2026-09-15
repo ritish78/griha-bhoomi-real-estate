@@ -79,7 +79,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <div className="flex-grow">
           <CardTitle className="text-lg mb-2">
             <strong>
-              ${formatPrice(property.price, "en-US")} {property.status === "Rent" && "per month"}
+              Rs. {formatPrice(property.price, "en-US")} {property.status === "Rent" && "per month"}
             </strong>
           </CardTitle>
           <Link href={`/property/${property.slug}`}>

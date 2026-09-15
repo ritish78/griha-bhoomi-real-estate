@@ -31,7 +31,7 @@ export default function Land({ property }: LandProps) {
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-foreground font-bold text-3xl">
-            ${formatPrice(property.price)}
+            Rs. {formatPrice(property.price)}
             {property.toRent && (
               <span className="text-xl text-muted-foreground font-normal"> per month</span>
             )}
@@ -131,7 +131,6 @@ export default function Land({ property }: LandProps) {
       <Separator className="my-1.5" />
       <div className="mb-4">
         <div className="mb-2">
-          <h2 className="font-bold text-xl mb-4">Facilities</h2>
           <FacilitiesDisplay propertyType={property.propertyType} value={property.facilities} />
         </div>
       </div>

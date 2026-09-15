@@ -30,7 +30,7 @@ export default function House({ property }: HouseProps) {
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-foreground font-bold text-2xl">
-            ${formatPrice(property.price)}
+            Rs. {formatPrice(property.price)}
             {property.toRent && (
               <span className="text-xl text-muted-foreground font-normal"> per month</span>
             )}
