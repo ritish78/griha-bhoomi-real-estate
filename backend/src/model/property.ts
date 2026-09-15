@@ -1,4 +1,4 @@
-import { InferSelectModel } from "drizzle-orm";
+import { InferSelectModel, sql } from "drizzle-orm";
 import {
   pgTable,
   pgEnum,
@@ -42,6 +42,10 @@ export const property = pgTable(
     price: integer("price").notNull(),
     negotiable: boolean("negotiable").default(false).notNull(),
     imageUrl: text("image_url").array(),
+    facilities: text("facilities")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`), //House table has facilities but not land. we are moving it into property
     status: PropertyStatus("status").default("Sale").notNull(),
     listedAt: timestamp("listed_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),

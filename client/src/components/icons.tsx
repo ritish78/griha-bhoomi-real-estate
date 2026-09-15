@@ -22,7 +22,36 @@ import {
   MagnifyingGlassIcon,
   KeyboardIcon
 } from "@radix-ui/react-icons";
-import { ChevronLeft, ChevronUp, CloudUploadIcon, ChevronsUpDown } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronUp,
+  CloudUploadIcon,
+  ChevronsUpDown,
+  Droplets,
+  Fence,
+  ShieldCheck,
+  Trees,
+  Zap,
+  Container,
+  Waves,
+  Sun,
+  Heater,
+  Network,
+  Cylinder,
+  BatteryCharging,
+  Plug,
+  Wifi,
+  Fuel,
+  PanelsTopLeft,
+  DoorOpen,
+  Sprout,
+  TrendingDown,
+  Camera,
+  ArrowUpDown,
+  Building2,
+  BrickWall,
+  CircleCheck
+} from "lucide-react";
 
 export const Icons = {
   logo: HomeIcon,
@@ -668,6 +697,29 @@ export const Icons = {
   bin: TrashIcon,
   search: MagnifyingGlassIcon,
   keyboard: KeyboardIcon,
+  droplets: Droplets,
+  zap: Zap,
+  trees: Trees,
+  shieldCheck: ShieldCheck,
+  fence: Fence,
+  container: Container,
+  waves: Waves,
+  heater: Heater,
+  network: Network,
+  cylinder: Cylinder,
+  plug: Plug,
+  batteryCharging: BatteryCharging,
+  fuel: Fuel,
+  wifi: Wifi,
+  balcony: PanelsTopLeft,
+  brickWall: BrickWall,
+  gate: DoorOpen,
+  sprout: Sprout,
+  trendingDown: TrendingDown,
+  camera: Camera,
+  arrowUpDown: ArrowUpDown,
+  circleCheck: CircleCheck,
+
   google: (props: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

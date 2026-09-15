@@ -48,6 +48,8 @@ import { ImagePreview } from "@/components/image-preview";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LocationPickerMap from "../_components/location-picker-map";
+import { FACILITIES, isFacilityAllowed } from "@/types/facilities";
+import { FacilitiesPicker } from "@/components/property-facilities";
 
 const propertyFormSchema = z.object({
   // Basic Property Details
@@ -100,7 +102,7 @@ const propertyFormSchema = z.object({
   bikeParking: z.coerce.number().optional().default(0),
   builtAt: z.coerce.date().optional(),
   sharedBathroom: z.boolean().optional().default(false),
-  facilities: z.array(z.string()).optional().default([]),
+  facilities: z.array(z.string()).max(FACILITIES.length).default([]),
   evCharging: z.boolean().optional().default(false),
 
   //For House and Land
@@ -482,7 +484,25 @@ export function PropertyForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Property Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(next) => {
+                        if (next !== "House" && next !== "Land") return;
+
+                        field.onChange(next);
+
+                        const current = form.getValues("facilities") ?? [];
+
+                        form.setValue(
+                          "facilities",
+                          current.filter((id) => isFacilityAllowed(id, next)),
+                          {
+                            shouldDirty: true,
+                            shouldValidate: true
+                          }
+                        );
+                      }}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select property type" />
@@ -1246,6 +1266,45 @@ export function PropertyForm() {
                 />
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <div className="h-1 w-full bg-primary/80 rounded-t-md" />
+          <CardHeader className="space-y-2 my-5 ml-6">
+            <CardTitle>
+              {isHouse ? "Facilities & amenities" : "Utilities & site features"}
+            </CardTitle>
+
+            <CardDescription>
+              {isHouse
+                ? "Select facilities currently available at this property."
+                : "Select connections and features already present on the plot."}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="facilities"
+              render={({ field }) => (
+                <FormItem>
+                  <FacilitiesPicker
+                    propertyType={propertyType}
+                    value={field.value ?? []}
+                    onChange={field.onChange}
+                    disabled={isLoading}
+                  />
+
+                  <FormDescription>
+                    Leave unconfirmed facilities unselected. Explain shared access or additional
+                    charges in the description.
+                  </FormDescription>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
 

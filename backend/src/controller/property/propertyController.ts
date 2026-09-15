@@ -28,6 +28,8 @@ import { land } from "src/model/land";
 import { addAddress } from "../address/addressController";
 import { address } from "src/model/address";
 import { buildRadiusCondition } from "src/utils/buildRadiusCondition";
+import { BadRequestError } from "src/utils/error";
+import { parseFacilities } from "./facilitiesSchema";
 
 /**
  * @param dummyPropertyData array of property
@@ -106,6 +108,12 @@ import { buildRadiusCondition } from "src/utils/buildRadiusCondition";
  */
 export const addProperty = async (sellerId: string, body) => {
   try {
+    if (body.propertyType !== "House" && body.propertyType !== "Land") {
+      throw new BadRequestError("Invalid property type.");
+    }
+
+    const selectedFacilities = parseFacilities(body.facilities, body.propertyType);
+
     const {
       title,
       description,
@@ -125,7 +133,7 @@ export const addProperty = async (sellerId: string, body) => {
       kitchenCount,
       sharedBathroom,
       bathroomCount,
-      facilities,
+      // facilities,
       facing,
       area,
       furnished,
@@ -148,12 +156,6 @@ export const addProperty = async (sellerId: string, body) => {
       latitude,
       longitude
     } = body;
-    console.log("Image URL", imageUrl);
-    console.log("Image URL", imageUrl);
-    console.log("Image URL", imageUrl);
-    console.log("Image URL", imageUrl);
-    console.log("Image URL", imageUrl);
-    console.log("Image URL", imageUrl);
     const idOfToBeInsertedProperty = uuidv4();
 
     let propertyTypeId;
@@ -165,7 +167,6 @@ export const addProperty = async (sellerId: string, body) => {
         kitchenCount,
         sharedBathroom,
         bathroomCount,
-        facilities,
         furnished,
         area,
         facing,
@@ -213,6 +214,7 @@ export const addProperty = async (sellerId: string, body) => {
       availableTill,
       price,
       negotiable,
+      facilities: selectedFacilities,
       imageUrl,
       status,
       expiresOn: nextMonth.toISOString()
@@ -282,7 +284,6 @@ export const addHouse = async (
   kitchenCount: number,
   sharedBathroom: boolean,
   bathroomCount: number,
-  facilities: string[],
   furnished: boolean,
   area: string,
   facing: string,
@@ -303,7 +304,6 @@ export const addHouse = async (
     kitchenCount,
     sharedBathroom,
     bathroomCount,
-    facilities,
     area,
     furnished,
     facing,
@@ -498,7 +498,7 @@ export const filterProperties = async (filters) => {
       "bathroomcount",
       "minbathroomcount",
       "maxbathroomcount",
-      "facilites",
+      // "facilities",
       "area",
       "furnished",
       "facing",
@@ -629,6 +629,7 @@ export const filterProperties = async (filters) => {
         toRent: property.toRent,
         propertyType: property.propertyType,
         price: property.price,
+        // facilities: property.facilities, //but does the filter really need facilities?
         imageUrl: property.imageUrl,
         status: property.status,
         featured: property.featured,
@@ -1044,6 +1045,25 @@ export const updatePropertyById = async (
     return 0;
   }
 
+  const currentUserCanEdit = propertyById.sellerId === currentUserId || (await isAdmin(currentUserId));
+
+  /**
+   * If we are checking property's seller id is same as the current user id in the previous statement
+   * then we might also use is currentuseradmin checking on the same if statement.
+   * That might mean second query to the database which might not be needed. We exit out on that
+   * if statement if the current user is the user that is providing the update fields.
+   */
+  if (!currentUserCanEdit) {
+    return -1;
+  }
+
+  if (propertyFieldsToUpdate.facilities !== undefined) {
+    propertyFieldsToUpdate = {
+      ...propertyFieldsToUpdate,
+      facilities: parseFacilities(propertyFieldsToUpdate.facilities, propertyById.propertyType)
+    };
+  }
+
   //The list contains what the user can update of the property listing.
   const validUpdatePropertyOptions: string[] = [
     "title",
@@ -1054,6 +1074,7 @@ export const updatePropertyById = async (
     "availableTill",
     "price",
     "negotiable",
+    "facilities",
     "imageUrl",
     "status",
     "private"
@@ -1076,7 +1097,6 @@ export const updatePropertyById = async (
     "kitchenCount",
     "sharedBathroom",
     "bathroomCount",
-    "facilities",
     "area",
     "furnished",
     "facing",
@@ -1116,37 +1136,29 @@ export const updatePropertyById = async (
       return obj;
     }, {});
 
-  let houseOrLandUpdated = false;
-  if (propertyById.propertyType.toUpperCase() === "HOUSE" && hasHouseFields(propertyFieldsToUpdate)) {
+  let updated = false;
+
+  if (propertyById.propertyType.toUpperCase() === "HOUSE" && hasHouseFields(validHouseFieldsToUpdate)) {
     await updateHouseListingById(propertyById.propertyTypeId, validHouseFieldsToUpdate);
-    houseOrLandUpdated = true;
-  } else if (propertyById.propertyType.toUpperCase() === "LAND" && hasLandFields(propertyFieldsToUpdate)) {
+
+    updated = true;
+  } else if (propertyById.propertyType.toUpperCase() === "LAND" && hasLandFields(validLandFieldsToUpdate)) {
     await updateLandListingById(propertyById.propertyTypeId, validLandFieldsToUpdate);
-    houseOrLandUpdated = true;
+
+    updated = true;
   }
 
-  //If the property listing is created by the current user then we allow the update to happen
-  if (propertyById.sellerId === currentUserId && Object.keys(validPropertyFieldsToUpdate).length > 0) {
+  //we have already checked for permission above for both owners and admin
+  if (Object.keys(validPropertyFieldsToUpdate).length > 0) {
     await updatePropertyListingById(propertyId, validPropertyFieldsToUpdate);
-    return 1;
-  }
 
-  /**
-   * If we are checking property's seller id is same as the current user id in the previous statement
-   * then we might also use is currentuseradmin checking on the same if statement.
-   * That might mean second query to the database which might not be needed. We exit out on that
-   * if statement if the current user is the user that is providing the update fields.
-   */
-  const currentUserIsAdmin = await isAdmin(currentUserId);
-  if (currentUserIsAdmin && Object.keys(validPropertyFieldsToUpdate).length > 0) {
-    await updatePropertyListingById(propertyId, propertyFieldsToUpdate);
-    return 1;
+    updated = true;
   }
 
   //If the user who sent the request to update the property is neither the user who posted
   //the listing and isn't admin then we return -1 back to api handler where we throw
   //ForbiddenError with the status code of 403.
-  return houseOrLandUpdated ? 1 : -1;
+  return updated ? 1 : -1;
 };
 
 /**

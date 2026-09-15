@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PropertyStatus, PropertyType } from "src/model/property";
+import { facilitiesSchema } from "./facilitiesSchema";
 
 const ZodPropertyTypeEnum = z.enum(PropertyType.enumValues);
 export type PropertyTypeEnum = z.infer<typeof ZodPropertyTypeEnum>;
@@ -18,6 +19,7 @@ export const newPropertySchema = z.object({
     availableTill: z.string().datetime(),
     price: z.number().gte(1),
     negotiable: z.boolean(),
+    facilities: facilitiesSchema.optional(),
     imageUrl: z.array(z.string()).nonempty(),
     status: ZodPropertyStatusEnum
   })
@@ -39,6 +41,7 @@ export const updatePropertySchema = z.object({
       availableTill: z.string().datetime().optional(),
       price: z.number().gte(1).optional(),
       negotiable: z.boolean().optional(),
+      facilities: facilitiesSchema.optional(),
       imageUrl: z.array(z.string()).nonempty().optional(),
       status: z.string().min(1, { message: "Please enter valid status of property!" }).optional(),
       private: z.boolean().optional()
@@ -46,7 +49,7 @@ export const updatePropertySchema = z.object({
     .refine((data) => Object.values(data).some((field) => field !== undefined), {
       message: "Please provide atleast one field to update!",
       path: [
-        "title, description, toRent, address, closeLandmark, propertyType, availableFrom, availableTill, price, negotiable, imageUrl, status, private"
+        "title, description, toRent, address, closeLandmark, propertyType, availableFrom, availableTill, price, negotiable, imageUrl, facilities,status, private"
       ]
     })
 });

@@ -1,4 +1,5 @@
 import { Icons } from "@/components/icons";
+import { FacilitiesDisplay } from "@/components/property-facilities";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatAddress } from "@/lib/formatAddress";
@@ -125,6 +126,13 @@ export default function Land({ property }: LandProps) {
             <Icons.mapPin className="size-5" />
             <p className="ml-3">{property.closeLandmark}</p>
           </div>
+        </div>
+      </div>
+      <Separator className="my-1.5" />
+      <div className="mb-4">
+        <div className="mb-2">
+          <h2 className="font-bold text-xl mb-4">Facilities</h2>
+          <FacilitiesDisplay propertyType={property.propertyType} value={property.facilities} />
         </div>
       </div>
     </div>

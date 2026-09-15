@@ -32,7 +32,6 @@ export interface House {
   kitchenCount?: number | null;
   sharedBathroom?: boolean | null;
   bathroomCount?: number | null;
-  facilities?: string[] | null;
   houseFacing?: string | null;
   carParking?: number | null;
   bikeParking?: number | null;
@@ -58,6 +57,7 @@ export interface Property extends Address, Land, House, User {
   availableTill: string;
   price: number;
   negotiable: boolean;
+  facilities?: string[] | null;
   imageUrl: string[];
   status: "Sale" | "Rent" | "Hold" | "Sold";
   listedAt: string;

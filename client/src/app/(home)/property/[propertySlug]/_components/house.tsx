@@ -1,4 +1,5 @@
 import { Icons } from "@/components/icons";
+import { FacilitiesDisplay } from "@/components/property-facilities";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatAddress } from "@/lib/formatAddress";
@@ -233,9 +234,7 @@ export default function House({ property }: HouseProps) {
       <Separator className="my-1.5" />
       <div className="mb-4">
         <div className="mb-2">
-          <h2 className="font-bold text-xl mb-4">Facilities</h2>
-          <p>{property.facilities}</p>
-          {/* <ul>{property.facilities?.map((facility, index) => <li key={index}>{facility}</li>)}</ul> */}
+          <FacilitiesDisplay propertyType={property.propertyType} value={property.facilities} />
         </div>
       </div>
     </div>
