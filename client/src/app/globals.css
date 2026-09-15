@@ -145,8 +145,7 @@ html[data-theme-reveal="true"]::view-transition-old(root) {
 html[data-theme-reveal="true"]::view-transition-new(root) {
   mix-blend-mode: normal;
   z-index: 2;
-  animation: theme-circle-reveal 550ms cubic-bezier(0.22, 1, 0.36, 1)
-    both;
+  animation: theme-circle-reveal 550ms linear both;
 }
 
 @keyframes theme-circle-reveal {

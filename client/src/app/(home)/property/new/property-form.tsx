@@ -172,7 +172,7 @@ export function PropertyForm() {
     kitchenCount: 0,
     carParking: 0,
     sharedBathroom: false,
-    facilities: ["24 hour Water", "24 hour Electricity"],
+    facilities: [],
     evCharging: false,
     furnished: false,
     bikeParking: 0,
