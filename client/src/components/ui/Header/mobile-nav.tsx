@@ -33,6 +33,7 @@ export function MobileNav({ items }: MobileNavProps) {
           variant="ghost"
           size="icon"
           className="ms-4 z-20 size-5 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 lg:hidden"
+          // className="size-5 shrink-0 lg:hidden"
         >
           <Icons.menu aria-hidden="true" />
           <span className="sr-only">Toggle Menu</span>

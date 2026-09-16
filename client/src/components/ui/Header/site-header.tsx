@@ -1,35 +1,47 @@
+import Link from "next/link";
+
 import { siteConfig } from "@/config/siteConfig";
-import { MainNav } from "./main-nav";
-import { MobileNav } from "./mobile-nav";
+import { Icons } from "@/components/icons";
 import { SearchBox } from "@/components/search-box";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import Link from "next/link";
-import { Icons } from "@/components/icons";
+import { MainNav } from "./main-nav";
+import { MobileNav } from "./mobile-nav";
 import { AuthNav } from "../auth-nav";
 import PostProperty from "./post-property";
 
 export default function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="container flex h-16 items-center">
-        <MainNav items={siteConfig.mainNav} />
-        <div className="mobile-nav-title lg:hidden absolute inset-x-0 top-0 flex justify-center items-center h-full">
-          <Link className="font-bold text-lg flex items-center" href="/">
-            <Icons.logo className="mr-2 size-4" aria-hidden="true" />
-            GrihaBhoomi
-          </Link>
-        </div>
+    <header className="sticky top-0 z-40 w-full border-b bg-background">
+      {/* Mobile and tablet */}
+      <div className="grid h-16 grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2 px-4 lg:hidden">
         <MobileNav items={siteConfig.mainNav} />
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-2">
-            <PostProperty />
-            <SearchBox />
-            <div className="flex w-24 shrink-0 items-center justify-end">
-              <AuthNav />
-            </div>
-            <ThemeToggle />
-          </nav>
+
+        <Link href="/" className="flex min-w-0 items-center justify-center gap-2 font-bold">
+          <Icons.logo className="size-5 shrink-0" aria-hidden="true" />
+          <span className="truncate text-lg">GrihaBhoomi</span>
+        </Link>
+
+        <div className="flex justify-center">
+          <ThemeToggle />
         </div>
+      </div>
+
+      {/* Desktop */}
+      <div className="container hidden h-16 items-center gap-4 lg:flex">
+        <MainNav items={siteConfig.mainNav} />
+
+        <nav
+          aria-label="Account and property actions"
+          className="ml-auto flex shrink-0 items-center gap-2"
+        >
+          <SearchBox />
+          <PostProperty />
+          <ThemeToggle />
+
+          <div className="flex w-36 shrink-0 items-center justify-end">
+            <AuthNav />
+          </div>
+        </nav>
       </div>
     </header>
   );

@@ -28,14 +28,17 @@ export function AuthNav() {
   //before showing user's avatar and their name. we will show skeleton instead
   if (loading) {
     return (
-      <div role="status" className="flex h-10 w-full items-center gap-2 px-2">
+      <div
+        role="status"
+        className="flex h-12 w-full min-w-0 items-center justify-center gap-1.5 px-1.5"
+      >
         <Skeleton
           aria-hidden="true"
-          className="size-8 shrink-0 rounded-full motion-reduce:animate-none"
+          className="w-10 h-10 shrink-0 rounded-full motion-reduce:animate-none"
         />
         <Skeleton
           aria-hidden="true"
-          className="hidden h-7 w-16 md:block motion-reduce:animate-none"
+          className="h-7 w-16 md:block min-w-0 motion-reduce:animate-none"
         />
       </div>
     );
@@ -53,20 +56,20 @@ export function AuthNav() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-fit rounded-md px-2 flex items-center gap-2"
+          className="relative flex h-12 w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-1.5"
           size="sm"
         >
-          <Avatar className="h-8 w-8 shrink-0">
+          <Avatar className="h-10 w-10 shrink-0">
             {user.profilePicUrl && (
               <AvatarImage src={user.profilePicUrl} alt={`${user.firstName} ${user.lastName}`} />
             )}
             <AvatarFallback>{getInitials(user.firstName, user.lastName)}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium hidden md:inline-block">{user.firstName}</span>
+          <span className="text-sm font-medium truncate min-w-0">{user.firstName}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
