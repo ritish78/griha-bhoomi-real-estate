@@ -12,7 +12,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "GrihaBhoomi",
-  description: "An opensource real-estate website built using Nextjs 14.",
+  description: "An opensource real-estate website built using Nextjs 16.",
   links,
   mainNav: [
     {
@@ -20,13 +20,13 @@ export const siteConfig = {
       items: [
         {
           title: "Rent",
-          href: "/rent",
+          href: "/property/search?status=Rent&page=1",
           description: "View or add property for rent!",
           items: []
         },
         {
           title: "Buy",
-          href: "/sale",
+          href: "/property/search?status=Sale&page=1",
           description: "View property that you want to buy or, add property for sale!",
           items: []
         }
@@ -37,13 +37,13 @@ export const siteConfig = {
       items: [
         {
           title: "Land",
-          href: "/rent/land",
+          href: "/property/search?propertytype=Land&status=Rent&page=1",
           description: "View Land that are available for rent!",
           items: []
         },
         {
           title: "House",
-          href: "/rent/house",
+          href: "/property/search?propertytype=House&status=Rent&page=1",
           description: "View House that are available for rent!",
           items: []
         }
@@ -54,13 +54,13 @@ export const siteConfig = {
       items: [
         {
           title: "Land",
-          href: "/sale/land",
+          href: "/property/search?propertytype=Land&status=Sale&page=1",
           description: "View Land that are available for sale!",
           items: []
         },
         {
           title: "House",
-          href: "/sale/house",
+          href: "/property/search?propertytype=House&status=Sale&page=1",
           description: "View House that are available for sale!",
           items: []
         }

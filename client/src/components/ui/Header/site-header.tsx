@@ -24,7 +24,9 @@ export default function SiteHeader() {
           <nav className="flex items-center space-x-2">
             <PostProperty />
             <SearchBox />
-            <AuthNav />
+            <div className="flex w-24 shrink-0 items-center justify-end">
+              <AuthNav />
+            </div>
             <ThemeToggle />
           </nav>
         </div>

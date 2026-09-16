@@ -4,8 +4,6 @@ import { SiteFooter } from "@/components/ui/footer/site-footer";
 interface HomeLayoutProps extends React.PropsWithChildren {}
 
 export default async function HomeLayout({ children }: HomeLayoutProps) {
-  //TODO: Add functionality to get signed in user
-
   return (
     <div className="relative flex min-h-screen flex-col">
       <SiteHeader />
