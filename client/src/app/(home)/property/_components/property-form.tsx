@@ -962,32 +962,80 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
 
             <Separator className="my-4" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              className={cn(
+                "grid grid-cols-1 gap-4",
+                isHouse ? "md:grid-cols-3" : "md:grid-cols-2"
+              )}
+            >
+              {isHouse && (
+                <FormField
+                  control={form.control}
+                  name="houseType"
+                  render={({ field }) => (
+                    <FormItem className="min-w-0">
+                      <FormLabel>House Type</FormLabel>
+
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select house type" />
+                          </SelectTrigger>
+                        </FormControl>
+
+                        <SelectContent>
+                          {[
+                            "House",
+                            "Flat",
+                            "Shared",
+                            "Room",
+                            "Apartment",
+                            "Bungalow",
+                            "Villa"
+                          ].map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <FormField
                 control={form.control}
                 name="area"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{isHouse ? "House Area" : "Land Area"}</FormLabel>
+
                     <FormControl>
                       <Input type="number" min="0" step="any" placeholder="e.g. 1200" {...field} />
                     </FormControl>
+
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="areaUnit"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Area Unit</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select area unit" />
                         </SelectTrigger>
                       </FormControl>
+
                       <SelectContent>
                         <SelectItem value="sq-ft">Square feet (sq ft)</SelectItem>
                         <SelectItem value="sq-m">Square meters (sq m)</SelectItem>
@@ -997,6 +1045,7 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
                         <SelectItem value="bigha">Bigha</SelectItem>
                       </SelectContent>
                     </Select>
+
                     <FormMessage />
                   </FormItem>
                 )}
