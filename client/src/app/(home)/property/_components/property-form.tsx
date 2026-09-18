@@ -466,6 +466,7 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
                   <FormItem>
                     <FormLabel>Property Type</FormLabel>
                     <Select
+                      disabled={isEditing}
                       value={field.value}
                       onValueChange={(next) => {
                         if (next !== "House" && next !== "Land") return;
@@ -1101,14 +1102,60 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="North">North</SelectItem>
-                          <SelectItem value="East">East</SelectItem>
-                          <SelectItem value="West">West</SelectItem>
-                          <SelectItem value="South">South</SelectItem>
-                          <SelectItem value="North-East">North-East</SelectItem>
-                          <SelectItem value="North-West">North-West</SelectItem>
-                          <SelectItem value="South-East">South-East</SelectItem>
-                          <SelectItem value="South-West">South-West</SelectItem>
+                          <SelectItem value="North">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassNorthSouth
+                                className="size-4 shrink-0"
+                                aria-hidden="true"
+                              />
+                              <span>North</span>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="East">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassEW className="size-4 shrink-0" aria-hidden="true" />
+                              <span>East</span>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="West">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassEW className="size-4 shrink-0" aria-hidden="true" />
+                              <span>West</span>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="South">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassNorthSouth
+                                className="size-4 shrink-0"
+                                aria-hidden="true"
+                              />
+                              <span>South</span>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="North-East">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassNESW className="size-4 shrink-0" aria-hidden="true" />
+                              <span>North-East</span>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="North-West">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassNWSE className="size-4 shrink-0" aria-hidden="true" />
+                              <span>North-West</span>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="South-East">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassNWSE className="size-4 shrink-0" aria-hidden="true" />
+                              <span>South-East</span>
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="South-West">
+                            <span className="inline-flex items-center gap-2">
+                              <Icons.compassNESW className="size-4 shrink-0" aria-hidden="true" />
+                              <span>South-West</span>
+                            </span>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -1319,7 +1366,7 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
           </div>
         )}
 
-        <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse items-center gap-3 pt-6 sm:flex-row sm:justify-center">
           {editSlug && (
             <Button
               asChild
@@ -1338,7 +1385,6 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
               </Link>
             </Button>
           )}
-
           <Button
             type="submit"
             disabled={isLoading || isUploading || isResolvingAddress}
@@ -1346,8 +1392,8 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
           >
             {isLoading
               ? isEditing
-                ? "Saving changes..."
-                : "Creating listing..."
+                ? "Saving!"
+                : "Creating listing!"
               : isEditing
                 ? "Save changes"
                 : "Create New Property Listing"}
