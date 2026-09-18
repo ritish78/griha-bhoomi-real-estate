@@ -38,7 +38,7 @@ export default function SiteHeader() {
           <PostProperty />
           <ThemeToggle />
 
-          <div className="flex w-36 shrink-0 items-center justify-end">
+          <div className="flex w-28 shrink-0 items-center justify-end">
             <AuthNav />
           </div>
         </nav>
