@@ -28,7 +28,7 @@ import { land } from "src/model/land";
 import { addAddress } from "../address/addressController";
 import { address } from "src/model/address";
 import { buildRadiusCondition } from "src/utils/buildRadiusCondition";
-import { BadRequestError } from "src/utils/error";
+import { BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error";
 import { parseFacilities } from "./facilitiesSchema";
 
 /**
@@ -374,7 +374,7 @@ export const getPropertyById = async (propertyId: string, userId) => {
     //count if the current user isn't signed in.
     //Might reference it later to make it better.
     if (!userId || propertyById.sellerId !== userId) {
-      await increaseViewOfProperty(propertyById);
+      await increaseViewOfProperty(propertyById.id);
       propertyById.views += 1;
     }
 
@@ -409,7 +409,11 @@ export const getPropertyById = async (propertyId: string, userId) => {
  * @param slug  string - slug of the searched property
  * @returns     Property
  */
-export const getPropertyBySlug = async (slug: string, userId) => {
+export const getPropertyBySlug = async (
+  slug: string,
+  userId: string | undefined,
+  countView: boolean = true
+) => {
   const [propertyBySlug] = await preparedGetPropertyBySlug.execute({ slug });
 
   ///if property does not exists, we immediately return null back from the function
@@ -420,8 +424,13 @@ export const getPropertyBySlug = async (slug: string, userId) => {
   if (!propertyBySlug.private && new Date(propertyBySlug.expiresOn) > new Date()) {
     //If the property listing hasn't expired and the property is not set to private
     //finally, we increase the view count of the property by one before returning property
-    await increaseViewOfProperty(propertyBySlug);
-    propertyBySlug.views += 1;
+    if (countView) {
+      const updatedViews = await increaseViewOfProperty(propertyBySlug.id);
+
+      if (updatedViews !== undefined) {
+        propertyBySlug.views = updatedViews;
+      }
+    }
 
     return propertyBySlug;
   }
@@ -1203,13 +1212,18 @@ const updateLandListingById = async (landId: string, landFieldsToUpdate) => {
 };
 
 /**
- * @param propertyToUpdate      Property - property to update
+ * @param propertyId      string - id of the property to update
  */
-const increaseViewOfProperty = async (propertyToUpdate: Property) => {
-  await db
+const increaseViewOfProperty = async (propertyId: string) => {
+  const [updatedProperty] = await db
     .update(property)
-    .set({ views: propertyToUpdate.views + 1 })
-    .where(eq(property.id, propertyToUpdate.id));
+    .set({
+      views: sql`${property.views} + 1`
+    })
+    .where(eq(property.id, propertyId))
+    .returning({ views: property.views });
+
+  return updatedProperty?.views;
 };
 
 /**
@@ -1250,4 +1264,105 @@ const propertyPrivateToggleHandler = async (propertyById: Property, propertyId: 
     .update(property)
     .set({ private: !propertyById.private, updatedAt: nowToday })
     .where(eq(property.id, propertyId));
+};
+
+/**
+ * Load the values required by the edit-property form.
+ * Only the listing owner or an admin may access them.
+ */
+export const getPropertyForEdit = async (slug: string, currentUserId: string) => {
+  const propertyBySlug = await getPropertyBySlug(slug, currentUserId, false);
+
+  if (!propertyBySlug) {
+    throw new NotFoundError("Property to update not found!");
+  }
+
+  if (!propertyBySlug.sellerId || propertyBySlug.sellerId !== currentUserId || !isAdmin(currentUserId)) {
+    throw new ForbiddenError("You are not allowed to edit this property!");
+  }
+
+  if (!propertyBySlug.address) {
+    throw new NotFoundError("Property address not found!");
+  }
+
+  //Verify that the LEFT JOIN found the address record.
+  //These columns are NOT NULL in the address table.
+  if (
+    propertyBySlug.city === null ||
+    propertyBySlug.district === null ||
+    propertyBySlug.province === null ||
+    propertyBySlug.wardNumber === null
+  ) {
+    throw new NotFoundError("Property address details not found!");
+  }
+
+  const isHouse = propertyBySlug.propertyType === "House";
+
+  if ((isHouse && propertyBySlug.houseType === null) || (!isHouse && propertyBySlug.landType === null)) {
+    throw new NotFoundError("Property details not found!");
+  }
+
+  const commonValues = {
+    title: propertyBySlug.title,
+    description: propertyBySlug.description,
+    price: propertyBySlug.price,
+    negotiable: propertyBySlug.negotiable,
+    toRent: propertyBySlug.toRent,
+    propertyType: propertyBySlug.propertyType,
+    status: propertyBySlug.status,
+    availableFrom: propertyBySlug.availableFrom,
+    availableTill: propertyBySlug.availableTill,
+    closeLandmark: propertyBySlug.closeLandmark ?? "",
+    imageUrl: propertyBySlug.imageUrl ?? [],
+    facilities: propertyBySlug.facilities ?? [],
+
+    houseNumber: propertyBySlug.houseNumber ?? "",
+    street: propertyBySlug.street ?? "",
+    wardNumber: propertyBySlug.wardNumber,
+    municipality: propertyBySlug.municipality ?? "",
+    city: propertyBySlug.city,
+    district: propertyBySlug.district,
+    province: propertyBySlug.province,
+    latitude: propertyBySlug.latitude,
+    longitude: propertyBySlug.longitude
+  };
+
+  const typeValues = isHouse
+    ? {
+        houseType: propertyBySlug.houseType,
+        roomCount: propertyBySlug.roomCount,
+        floorCount: propertyBySlug.floorCount,
+        kitchenCount: propertyBySlug.kitchenCount,
+        sharedBathroom: propertyBySlug.sharedBathroom,
+        bathroomCount: propertyBySlug.bathroomCount,
+        furnished: propertyBySlug.furnished,
+        carParking: propertyBySlug.carParking,
+        bikeParking: propertyBySlug.bikeParking,
+        evCharging: propertyBySlug.evCharging,
+        builtAt: propertyBySlug.builtAt,
+
+        // Convert query aliases to the form's field names.
+        facing: propertyBySlug.houseFacing ?? "",
+        area: propertyBySlug.houseArea ?? "",
+        connectedToRoad: propertyBySlug.houseConnectedToRoad,
+        distanceToRoad: propertyBySlug.houseDistanceToRoad
+      }
+    : {
+        landType: propertyBySlug.landType,
+        length: propertyBySlug.length ?? "",
+        breadth: propertyBySlug.breadth ?? "",
+
+        area: propertyBySlug.landArea ?? "",
+        connectedToRoad: propertyBySlug.landConnectedToRoad,
+        distanceToRoad: propertyBySlug.landDistanceToRoad
+      };
+
+  return {
+    id: propertyBySlug.id,
+    slug: propertyBySlug.slug,
+    values: {
+      ...commonValues,
+      ...typeValues
+    }
+  };
 };

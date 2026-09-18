@@ -2,14 +2,17 @@ import { eq } from "drizzle-orm";
 import db from "src/db";
 import {
   preparedDeleteAddress,
+  preparedGetAddressById,
   preparedGetPropertyById,
   preparedInsertAddress
 } from "src/db/preparedStatement";
 import { address } from "src/model/address";
 import { Property } from "src/model/property";
-import { NotFoundError } from "src/utils/error";
+import { ForbiddenError, NotFoundError } from "src/utils/error";
 import logger from "src/utils/logger";
 import { v4 as uuidv4 } from "uuid";
+import { getPropertyBySlug } from "../property/propertyController";
+import { isAdmin } from "src/utils/isAdmin";
 
 /**
  * @param houseNumber       string - house number
@@ -72,7 +75,7 @@ export const deleteAddress = async (addressId: string) => {
  * @param latitude          number(float) - latitude of the property
  * @param longitude         number(float) - longitude of the property
  */
-export const updateAddressById = async (propertyId: string, addressId: string, updateFields) => {
+export const updateAddressById = async (propertyId: string, addressId: string, updateFields: any) => {
   logger.info(`Updating address of id: ${addressId}`);
 
   //Destructuring the update fields of address from req.body that was passed from api handler
@@ -103,3 +106,18 @@ export const updateAddressById = async (propertyId: string, addressId: string, u
 
   logger.info(`Updating address of id: ${addressId}`, addressFieldsToUpdate, true);
 };
+
+
+/**
+ * @param addressId       string - uuid of the address to fetch
+ */
+export const getAddressById = async (addressId: string) => {
+  const addressById = await preparedGetAddressById.execute({ addressId });
+
+  if (!addressById || addressById.length === 0) {
+    throw new NotFoundError("Address not found!");
+  }
+
+  return addressById[0];
+};
+

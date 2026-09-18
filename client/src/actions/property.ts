@@ -1,6 +1,9 @@
 "use server";
 
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import z from "zod";
 
 export async function getListOfProperties(pageNumber: number = 1, limit: number = 6) {
   try {
@@ -87,9 +90,9 @@ export async function createProperty(data: any): Promise<CreatePropertyResponse>
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Cookie: cookieHeader,
+        Cookie: cookieHeader
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     });
 
     const result = await response.json();
@@ -101,5 +104,59 @@ export async function createProperty(data: any): Promise<CreatePropertyResponse>
     return { success: true, slug: result.slug };
   } catch (error: any) {
     return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+export async function updateProperty(
+  slug: string,
+  payload: Record<string, unknown>
+): Promise<CreatePropertyResponse> {
+  try {
+    const cookieStore = await cookies();
+
+    const response = await fetch(
+      `http://localhost:5000/api/v1/property/edit/${encodeURIComponent(slug)}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: cookieStore.toString()
+        },
+        cache: "no-store",
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const body: unknown = await response.json();
+
+    if (!response.ok) {
+      const parsedError = z.object({ message: z.string().optional() }).safeParse(body);
+
+      return {
+        success: false,
+        error: (parsedError.success && parsedError.data.message) || "Could not save your changes."
+      };
+    }
+
+    const saved = z
+      .object({
+        slug: z.string().min(1)
+      })
+      .parse(body);
+
+    revalidatePath(`/property/${saved.slug}`);
+    revalidatePath(`/property/${saved.slug}/edit`);
+    revalidatePath("/property/search");
+    revalidatePath("/");
+
+    return {
+      success: true,
+      slug: saved.slug
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: getErrorMessage(error)
+    };
   }
 }

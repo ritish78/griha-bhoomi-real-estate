@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitErrorHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Icons } from "@/components/icons";
 import { format } from "date-fns";
 
@@ -33,109 +32,46 @@ import { cn } from "@/lib/utlis";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toaster";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from "@/components/ui/command";
 import { useRouter } from "next/navigation";
-import { createProperty } from "@/actions/property";
+import { createProperty, updateProperty } from "@/actions/property";
 import { uploadMultipleToCloudinary } from "@/lib/cloudinaryUpload";
 import { ImagePreview } from "@/components/image-preview";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LocationPickerMap from "../_components/location-picker-map";
-import { FACILITIES, isFacilityAllowed } from "@/types/facilities";
+import { isFacilityAllowed } from "@/types/facilities";
 import { FacilitiesPicker } from "@/components/property-facilities";
 import BuiltYearFilter from "@/components/built-year";
+import { propertyFormSchema, PropertyFormValues } from "@/lib/propertyFormSchema";
+import Link from "next/link";
+import dynamic from "next/dynamic";
 
-const propertyFormSchema = z.object({
-  // Basic Property Details
-  title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.coerce.number().min(0, "Price must be a positive number"),
-  negotiable: z.boolean().default(false),
-  toRent: z.boolean().default(false), // false = Sale, true = Rent
-  propertyType: z.enum(["House", "Land"]),
-  status: z.enum(["Sale", "Rent", "Hold", "Sold"]).default("Sale"),
-  availableFrom: z.date({
-    required_error: "Available from date is required"
-  }),
-  availableTill: z.date({
-    required_error: "Available till date is required"
-  }),
-
-  // Address
-  street: z.string().min(2, "Street address is required"),
-  city: z.string().min(2, "City is required"),
-  district: z.string().min(2, "District is required"),
-  municipality: z.string().optional(),
-  wardNumber: z.coerce.number().optional(),
-  province: z.string().min(2, "Province is required"),
-  houseNumber: z.string().optional(),
-  closeLandmark: z.string().optional(),
-  latitude: z
-    .number()
-    .min(-90, "Invalid latitude")
-    .max(90, "Invalid latitude")
-    .nullable()
-    .optional(),
-  longitude: z
-    .number()
-    .min(-180, "Invalid longitude")
-    .max(180, "Invalid longitude")
-    .nullable()
-    .optional(),
-  imageUrl: z.array(z.string()).optional().default([]),
-
-  //For House
-  houseType: z.string().optional().default("House"),
-  roomCount: z.coerce.number().optional().default(0),
-  bathroomCount: z.coerce.number().optional().default(0),
-  floorCount: z.coerce.number().optional().default(0),
-  kitchenCount: z.coerce.number().optional().default(0),
-  furnished: z.boolean().optional().default(false),
-  facing: z.string().optional(),
-  carParking: z.coerce.number().optional().default(0),
-  bikeParking: z.coerce.number().optional().default(0),
-  builtAt: z.coerce.date().optional(),
-  sharedBathroom: z.boolean().optional().default(false),
-  facilities: z.array(z.string()).max(FACILITIES.length).default([]),
-  evCharging: z.boolean().optional().default(false),
-
-  //For House and Land
-  area: z
-    .string()
-    .trim()
-    .min(1, "Please enter the property area")
-    .refine(
-      (value) => Number.isFinite(Number(value)) && Number(value) > 0,
-      "Area must be greater than 0"
-    ),
-  areaUnit: z.enum(["sq-ft", "sq-m", "aana", "dhur", "kattha", "bigha"]),
-
-  //For Land
-  landType: z.string().optional(),
-  length: z.string().optional(),
-  breadth: z.string().optional(),
-
-  //For both House and Land
-  connectedToRoad: z.boolean().optional(),
-  distanceToRoad: z.coerce.number().optional()
+const LocationPickerMap = dynamic(() => import("./location-picker-map"), {
+  ssr: false,
+  loading: () => (
+    <div
+      role="status"
+      className="flex h-[400px] w-full items-center justify-center rounded-lg border bg-muted/40"
+    >
+      <p className="text-sm text-muted-foreground">Loading map…</p>
+    </div>
+  )
 });
-
-type PropertyFormValues = z.infer<typeof propertyFormSchema>;
 
 const fieldLabel = (name: string) =>
   name.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
 
-export function PropertyForm() {
+type PropertyFormProps = {
+  editSlug?: string;
+  initialValues?: Partial<PropertyFormValues>;
+};
+
+export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
+  const isEditing = Boolean(editSlug);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>(() => [
+    ...(initialValues?.imageUrl ?? [])
+  ]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -186,7 +122,10 @@ export function PropertyForm() {
 
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertyFormSchema),
-    defaultValues
+    defaultValues: {
+      ...defaultValues,
+      ...initialValues
+    }
   });
 
   const propertyType = form.watch("propertyType");
@@ -218,18 +157,21 @@ export function PropertyForm() {
   };
 
   useEffect(() => {
-    if (connectedToRoad) {
+    if (connectedToRoad && (!isEditing || form.getFieldState("connectedToRoad").isDirty)) {
       form.setValue("distanceToRoad", 0);
     }
-  }, [connectedToRoad, form]);
+  }, [connectedToRoad, form, isEditing]);
 
   useEffect(() => {
+    if (isEditing) return;
+
     if (availableFrom && availableTill && availableFrom >= availableTill) {
       const nextDay = new Date(availableFrom);
       nextDay.setDate(nextDay.getDate() + 1);
+
       form.setValue("availableTill", nextDay);
     }
-  }, [availableFrom, availableTill, form]);
+  }, [availableFrom, availableTill, form, isEditing]);
 
   // Handle file selection and upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -324,10 +266,27 @@ export function PropertyForm() {
   };
 
   async function onSubmit(data: PropertyFormValues) {
-    // Validate that at least one image is uploaded
+    if (isLoading || isUploading || isResolvingAddress) {
+      return;
+    }
+
     if (uploadedImages.length === 0) {
-      toast.error("No images", {
-        description: "Please upload at least one image of the property."
+      toast.error("Add at least one property image.");
+      return;
+    }
+
+    if (data.availableTill <= data.availableFrom) {
+      form.setError("availableTill", {
+        type: "manual",
+        message: "Available till must be after available from."
+      });
+      return;
+    }
+
+    if (isEditing && data.propertyType === "House" && !data.builtAt) {
+      form.setError("builtAt", {
+        type: "manual",
+        message: "Please select the built year."
       });
       return;
     }
@@ -336,41 +295,61 @@ export function PropertyForm() {
 
     try {
       const adjustDate = (date: Date) => {
-        if (!date) return undefined;
         const adjustedDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+
         return adjustedDate.toISOString();
+      };
+
+      // Preserve unchanged saved timestamps exactly.
+      const serializeDate = (value: Date, original: Date | undefined) => {
+        if (isEditing && original && value.getTime() === original.getTime()) {
+          return original.toISOString();
+        }
+
+        return adjustDate(value);
       };
 
       const payload = {
         ...data,
         imageUrl: uploadedImages,
-        area: data.area ? `${data.area} ${data.areaUnit.replace("-", " ")}` : "",
-        bikeParking: data.carParking * 3,
-        builtAt: data.builtAt ? adjustDate(new Date(data.builtAt)) : adjustDate(new Date()),
-        availableFrom: adjustDate(new Date(data.availableFrom)),
-        availableTill: adjustDate(new Date(data.availableTill))
+        area: `${data.area} ${data.areaUnit.replace("-", " ")}`,
+
+        // Do not overwrite the saved bike-parking value during edits.
+        bikeParking: isEditing ? data.bikeParking : data.carParking * 3,
+
+        builtAt: data.builtAt
+          ? serializeDate(data.builtAt, initialValues?.builtAt)
+          : data.propertyType === "House"
+            ? adjustDate(new Date())
+            : undefined,
+
+        availableFrom: serializeDate(data.availableFrom, initialValues?.availableFrom),
+
+        availableTill: serializeDate(data.availableTill, initialValues?.availableTill),
+
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null
       };
 
-      const result = await createProperty(payload);
+      const result = editSlug
+        ? await updateProperty(editSlug, payload)
+        : await createProperty(payload);
 
       if (!result.success) {
         throw new Error(result.error);
       }
 
-      toast.success("Property Listed", {
-        description: "Your property has been successfully listed."
+      toast.success(isEditing ? "Property updated" : "Property listed", {
+        description: isEditing
+          ? "Your changes have been saved."
+          : "Your property has been successfully listed."
       });
 
-      // Reset the form and images
-      form.reset();
-      setUploadedImages([]);
-
-      // Redirect to the newly created property page
       router.push(`/property/${result.slug}`);
-    } catch (error: any) {
-      console.error("Submission error:", error);
-      toast.error("Error", {
-        description: error.message || "Something went wrong. Please try again."
+      router.refresh();
+    } catch (error) {
+      toast.error(isEditing ? "Could not update property" : "Could not list property", {
+        description: error instanceof Error ? error.message : "Please try again."
       });
     } finally {
       setIsLoading(false);
@@ -462,7 +441,7 @@ export function PropertyForm() {
       <form
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         onInvalidCapture={(event) => {
-          // Native constraints run before React Hook Form's submit handler.
+          //Native constraints run before React Hook Form's submit handler.
           const input = event.target as HTMLInputElement;
           toast.error("Please check the listing details", {
             description: `${input.labels?.[0]?.textContent || input.name || "Field"}: ${input.validationMessage}`
@@ -480,6 +459,7 @@ export function PropertyForm() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
+                disabled={isEditing}
                 control={form.control}
                 name="propertyType"
                 render={({ field }) => (
@@ -514,6 +494,11 @@ export function PropertyForm() {
                         <SelectItem value="Land">Land</SelectItem>
                       </SelectContent>
                     </Select>
+                    {isEditing && (
+                      <FormDescription>
+                        The property type cannot be changed after listing.
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -1334,17 +1319,38 @@ export function PropertyForm() {
           </div>
         )}
 
-        <div className="flex justify-end">
-          <Button type="submit" size="lg" className="mx-auto flex w-fit group" disabled={isLoading}>
-            {isLoading ? "Listing..." : "Create New Property Listing"}
-            {!isLoading ? (
-              <Icons.rightArrow
-                className="ml-1 size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none"
-                aria-hidden="true"
-              />
-            ) : (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            )}
+        <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
+          {editSlug && (
+            <Button
+              asChild
+              variant="outline"
+              className={cn(
+                "w-full sm:w-auto",
+                (isLoading || isUploading) && "pointer-events-none opacity-50"
+              )}
+            >
+              <Link
+                href={`/property/${editSlug}`}
+                aria-disabled={isLoading || isUploading}
+                tabIndex={isLoading || isUploading ? -1 : undefined}
+              >
+                Cancel
+              </Link>
+            </Button>
+          )}
+
+          <Button
+            type="submit"
+            disabled={isLoading || isUploading || isResolvingAddress}
+            className="w-full sm:w-auto"
+          >
+            {isLoading
+              ? isEditing
+                ? "Saving changes..."
+                : "Creating listing..."
+              : isEditing
+                ? "Save changes"
+                : "Create New Property Listing"}
           </Button>
         </div>
       </form>

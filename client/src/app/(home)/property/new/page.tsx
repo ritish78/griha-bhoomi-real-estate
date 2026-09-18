@@ -1,6 +1,6 @@
 import { Shell } from "@/components/shell";
 import { Metadata } from "next";
-import { PropertyForm } from "./property-form";
+import { PropertyForm } from "../_components/property-form";
 import ProtectedRoute from "@/components/auth/protected-route";
 
 export const metadata: Metadata = {

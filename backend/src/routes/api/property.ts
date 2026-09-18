@@ -7,6 +7,7 @@ import {
   getListOfPropertiesByPagination,
   getPropertyById,
   getPropertyBySlug,
+  getPropertyForEdit,
   togglePropertyPrivate,
   // seedProperty,
   updatePropertyById
@@ -27,6 +28,7 @@ import {
 } from "src/db/preparedStatement";
 import { toggleBookmark } from "src/controller/bookmark/bookmarkController";
 import { cache, invalidateCache } from "src/middleware/cache";
+import { getAddressById } from "src/controller/address/addressController";
 
 const router = Router();
 
@@ -394,7 +396,7 @@ router.route("/:slug").get(cache(600), async (req: Request, res: Response, next:
   }
 
   console.log("Property search by id", slug);
-  const propertyBySlug = await getPropertyBySlug(slug, req.session.userId);
+  const propertyBySlug = await getPropertyBySlug(slug, req.session.userId as string);
 
   if (!propertyBySlug) {
     logger.notFound(
@@ -585,5 +587,34 @@ router
       return next(new NotFoundError("Property to bookmark does not exists!"));
     }
   });
+
+/**
+ * @route               /api/v1/property/edit/:slug
+ * @method              GET
+ * @desc                Get property for edit using its slug
+ * @reqParams           string - slug
+ * @access              Private
+ */
+router.get("/edit/:slug", onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
+  const slugOfPropertyToUpdate = Array.isArray(req.params.slug)
+    ? req.params.slug[0].trim()
+    : req.params.slug.trim();
+
+  if (!slugOfPropertyToUpdate) {
+    return next(new BadRequestError("Property info is required!"));
+  }
+
+  const currentUserId = req.session.userId as string;
+
+  if (!currentUserId) {
+    return next(new AuthError("Please login to perform this action!"));
+  }
+
+  const propertyToEdit = await getPropertyForEdit(slugOfPropertyToUpdate, currentUserId);
+
+  res.setHeader("Cache-Control", "private, no-store");
+
+  return res.status(200).json(propertyToEdit);
+});
 
 export default router;

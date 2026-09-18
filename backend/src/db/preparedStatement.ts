@@ -210,6 +210,7 @@ export const preparedGetPropertyBySlug = db
     slug: property.slug,
     description: property.description,
     toRent: property.toRent,
+    address: property.address,
     closeLandmark: property.closeLandmark,
     propertyType: property.propertyType,
     availableFrom: property.availableFrom,
@@ -624,3 +625,11 @@ export async function getPropertiesByViewport(
 
   return result.rows;
 }
+
+export const preparedGetAddressById = db
+  .select()
+  .from(address)
+  .where(eq(address.id, sql.placeholder("addressId")))
+  .limit(1)
+  .prepare("get-address-by-id");
+
