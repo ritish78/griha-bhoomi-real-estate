@@ -31,25 +31,29 @@ export default async function EditPropertyPage({
     }
 
     return (
-      <div className="container max-w-2xl py-10">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {result.status === 403
-                ? "You cannot edit this listing"
-                : "Could not load the listing"}
-            </CardTitle>
+      <Shell className="bg-slate-50 pb-12 dark:bg-transparent/5 md:pb-14">
+        <div className="container max-w-4xl py-6 lg:py-10">
+          <Card className="overflow-hidden border-t-4 border-t-black shadow-sm dark:border-t-white">
+            <CardHeader className="space-y-3 p-6 pb-0 sm:p-8 sm:pb-0">
+              <CardTitle className="text-xl font-semibold leading-snug sm:text-2xl">
+                {result.status === 403
+                  ? "You cannot edit this listing"
+                  : "Could not load the listing"}
+              </CardTitle>
 
-            <CardDescription>{result.error}</CardDescription>
-          </CardHeader>
+              <CardDescription className="text-base leading-relaxed text-muted-foreground">
+                {result.error}
+              </CardDescription>
+            </CardHeader>
 
-          <CardContent>
-            <Button asChild variant="outline">
-              <Link href={`/property/${propertySlug}`}>Back to property</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            <CardContent className="p-6 pt-6 sm:p-8 sm:pt-6">
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link href={`/property/${propertySlug}`}>Back to property</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </Shell>
     );
   }
 
