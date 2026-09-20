@@ -19,15 +19,15 @@ export const siteConfig = {
       title: "Property",
       items: [
         {
-          title: "Rent",
-          href: "/property/search?status=Rent&page=1",
-          description: "View or add property for rent!",
+          title: "House",
+          href: "property/search?propertytype=House&page=1",
+          description: "View houses that are on sale or for rent!",
           items: []
         },
         {
-          title: "Buy",
-          href: "/property/search?status=Sale&page=1",
-          description: "View property that you want to buy or, add property for sale!",
+          title: "Land",
+          href: "/property/search?propertytype=Land&page=1",
+          description: "View land that are on sale or for rent!",
           items: []
         }
       ]
@@ -36,15 +36,15 @@ export const siteConfig = {
       title: "Rent",
       items: [
         {
-          title: "Land",
-          href: "/property/search?propertytype=Land&status=Rent&page=1",
-          description: "View Land that are available for rent!",
-          items: []
-        },
-        {
           title: "House",
           href: "/property/search?propertytype=House&status=Rent&page=1",
           description: "View House that are available for rent!",
+          items: []
+        },
+        {
+          title: "Land",
+          href: "/property/search?propertytype=Land&status=Rent&page=1",
+          description: "View Land that are available for rent!",
           items: []
         }
       ]
@@ -53,15 +53,15 @@ export const siteConfig = {
       title: "Buy",
       items: [
         {
-          title: "Land",
-          href: "/property/search?propertytype=Land&status=Sale&page=1",
-          description: "View Land that are available for sale!",
-          items: []
-        },
-        {
           title: "House",
           href: "/property/search?propertytype=House&status=Sale&page=1",
           description: "View House that are available for sale!",
+          items: []
+        },
+        {
+          title: "Land",
+          href: "/property/search?propertytype=Land&status=Sale&page=1",
+          description: "View Land that are available for sale!",
           items: []
         }
       ]
