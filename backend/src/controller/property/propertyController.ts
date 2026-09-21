@@ -25,11 +25,13 @@ import { isAdmin } from "src/utils/isAdmin";
 import { hasHouseFields, hasLandFields } from "src/middleware/validateRequest";
 import { house } from "src/model/house";
 import { land } from "src/model/land";
-import { addAddress } from "../address/addressController";
+import { addAddress, updateAddressById } from "../address/addressController";
 import { address } from "src/model/address";
 import { buildRadiusCondition } from "src/utils/buildRadiusCondition";
 import { BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error";
 import { parseFacilities } from "./facilitiesSchema";
+import { updatePropertySchema } from "./propertySchema";
+import { updateAddressSchema } from "../address/addressSchema";
 
 /**
  * @param dummyPropertyData array of property
@@ -1066,6 +1068,20 @@ export const updatePropertyById = async (
     return -1;
   }
 
+  //We validate the common property fields using our existing update schema.
+  //Keep the original request object because house, land and address fields
+  //will be filtered and validated separately below.
+  const parsedPropertyFieldsToUpdate = updatePropertySchema.parse({ body: propertyFieldsToUpdate }).body;
+
+  //The user can change House Type or Land Type, but cannot change the listing
+  //itself from House to Land or from Land to House.
+  if (
+    parsedPropertyFieldsToUpdate.propertyType !== undefined &&
+    parsedPropertyFieldsToUpdate.propertyType !== propertyById.propertyType
+  ) {
+    throw new BadRequestError("The property type cannot be changed after listing.");
+  }
+
   if (propertyFieldsToUpdate.facilities !== undefined) {
     propertyFieldsToUpdate = {
       ...propertyFieldsToUpdate,
@@ -1097,6 +1113,30 @@ export const updatePropertyById = async (
       obj[key] = propertyFieldsToUpdate[key];
       return obj;
     }, {});
+
+  //When the user updates only one availability date, we compare it against
+  //the other saved date instead of requiring both dates in every update.
+  if (
+    parsedPropertyFieldsToUpdate.availableFrom !== undefined ||
+    parsedPropertyFieldsToUpdate.availableTill !== undefined
+  ) {
+    const availableFrom = parsedPropertyFieldsToUpdate.availableFrom ?? propertyById.availableFrom;
+    const availableTill = parsedPropertyFieldsToUpdate.availableTill ?? propertyById.availableTill;
+
+    if (availableTill && new Date(availableTill) <= new Date(availableFrom)) {
+      throw new BadRequestError("Available till must be after available from.");
+    }
+  }
+
+  //The address update schema reuses the fields from newAddressSchema.
+  //We update the address already linked to the property, not an ID from the request.
+  const addressFieldsToUpdate = updateAddressSchema.parse({ body: propertyFieldsToUpdate }).body;
+  const hasAddressChanges = Object.values(addressFieldsToUpdate).some((value) => value !== undefined);
+  const addressId = propertyById.address;
+
+  if (hasAddressChanges && !addressId) {
+    throw new NotFoundError("Property address not found!");
+  }
 
   //We do the same for house table. We have fields that the user can update
   const validUpdateHouseOptions: string[] = [
@@ -1145,29 +1185,50 @@ export const updatePropertyById = async (
       return obj;
     }, {});
 
-  let updated = false;
+  //All the fields have been validated and the user's permission has been checked.
+  //We use one transaction so that if any update fails, changes to the other
+  //tables are rolled back as well.
+  await db.transaction(async (tx) => {
+    if (hasAddressChanges && addressId) {
+      await updateAddressById(propertyId, addressId, addressFieldsToUpdate, tx);
+    }
+    if (validHouseFieldsToUpdate) {
+      await updateHouseListingById(propertyById.propertyTypeId, validHouseFieldsToUpdate, tx);
+    } else if (validLandFieldsToUpdate) {
+      await updateLandListingById(propertyById.propertyTypeId, validLandFieldsToUpdate, tx);
+    }
 
-  if (propertyById.propertyType.toUpperCase() === "HOUSE" && hasHouseFields(validHouseFieldsToUpdate)) {
-    await updateHouseListingById(propertyById.propertyTypeId, validHouseFieldsToUpdate);
+    //This helper also updates the listing's updatedAt value, even when the user
+    //has changed only the address or the house/land details.
+    await updatePropertyListingById(propertyId, validPropertyFieldsToUpdate, tx);
+  });
 
-    updated = true;
-  } else if (propertyById.propertyType.toUpperCase() === "LAND" && hasLandFields(validLandFieldsToUpdate)) {
-    await updateLandListingById(propertyById.propertyTypeId, validLandFieldsToUpdate);
+  //We return 1 only after the transaction completes successfully.
+  return 1;
 
-    updated = true;
-  }
+  // let updated = false;
 
-  //we have already checked for permission above for both owners and admin
-  if (Object.keys(validPropertyFieldsToUpdate).length > 0) {
-    await updatePropertyListingById(propertyId, validPropertyFieldsToUpdate);
+  // if (propertyById.propertyType.toUpperCase() === "HOUSE" && hasHouseFields(validHouseFieldsToUpdate)) {
+  //   await updateHouseListingById(propertyById.propertyTypeId, validHouseFieldsToUpdate);
 
-    updated = true;
-  }
+  //   updated = true;
+  // } else if (propertyById.propertyType.toUpperCase() === "LAND" && hasLandFields(validLandFieldsToUpdate)) {
+  //   await updateLandListingById(propertyById.propertyTypeId, validLandFieldsToUpdate);
 
-  //If the user who sent the request to update the property is neither the user who posted
-  //the listing and isn't admin then we return -1 back to api handler where we throw
-  //ForbiddenError with the status code of 403.
-  return updated ? 1 : -1;
+  //   updated = true;
+  // }
+
+  // //we have already checked for permission above for both owners and admin
+  // if (Object.keys(validPropertyFieldsToUpdate).length > 0) {
+  //   await updatePropertyListingById(propertyId, validPropertyFieldsToUpdate);
+
+  //   updated = true;
+  // }
+
+  // //If the user who sent the request to update the property is neither the user who posted
+  // //the listing and isn't admin then we return -1 back to api handler where we throw
+  // //ForbiddenError with the status code of 403.
+  // return updated ? 1 : -1;
 };
 
 /**
@@ -1188,9 +1249,13 @@ const deleteProperty = async (propertyToDelete: Property) => {
  * @param propertyFieldsToUpdate    object - property fields to update
  * @returns                         Promise<void>
  */
-const updatePropertyListingById = async (propertyId: string, propertyFieldsToUpdate) => {
+const updatePropertyListingById = async (
+  propertyId: string,
+  propertyFieldsToUpdate,
+  database: Pick<typeof db, "update"> = db
+) => {
   propertyFieldsToUpdate.updatedAt = new Date();
-  await db.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
+  await database.update(property).set(propertyFieldsToUpdate).where(eq(property.id, propertyId));
 };
 
 /**
@@ -1198,8 +1263,12 @@ const updatePropertyListingById = async (propertyId: string, propertyFieldsToUpd
  * @param houseFieldsToUpdate       object - house fields to update
  * @returns                         Promise<void>
  */
-const updateHouseListingById = async (houseId: string, houseFieldsToUpdate) => {
-  await db.update(house).set(houseFieldsToUpdate).where(eq(house.id, houseId));
+const updateHouseListingById = async (
+  houseId: string,
+  houseFieldsToUpdate,
+  database: Pick<typeof db, "update"> = db
+) => {
+  await database.update(house).set(houseFieldsToUpdate).where(eq(house.id, houseId));
 };
 
 /**
@@ -1207,8 +1276,12 @@ const updateHouseListingById = async (houseId: string, houseFieldsToUpdate) => {
  * @param landFieldsToUpdate        object - land fields to update
  * @returns                         Promise<void>
  */
-const updateLandListingById = async (landId: string, landFieldsToUpdate) => {
-  await db.update(land).set(landFieldsToUpdate).where(eq(land.id, landId));
+const updateLandListingById = async (
+  landId: string,
+  landFieldsToUpdate,
+  database: Pick<typeof db, "update"> = db
+) => {
+  await database.update(land).set(landFieldsToUpdate).where(eq(land.id, landId));
 };
 
 /**

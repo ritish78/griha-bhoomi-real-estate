@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import db from "src/db";
 import {
   preparedDeleteAddress,
@@ -75,7 +75,12 @@ export const deleteAddress = async (addressId: string) => {
  * @param latitude          number(float) - latitude of the property
  * @param longitude         number(float) - longitude of the property
  */
-export const updateAddressById = async (propertyId: string, addressId: string, updateFields: any) => {
+export const updateAddressById = async (
+  propertyId: string,
+  addressId: string,
+  updateFields: any,
+  database: Pick<typeof db, "update"> = db
+) => {
   logger.info(`Updating address of id: ${addressId}`);
 
   //Destructuring the update fields of address from req.body that was passed from api handler
@@ -89,6 +94,13 @@ export const updateAddressById = async (propertyId: string, addressId: string, u
     throw new NotFoundError("Property to update does not exists!");
   }
 
+  const location =
+    latitude === undefined
+      ? undefined
+      : latitude === null
+        ? null
+        : sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`;
+
   const addressFieldsToUpdate: Partial<Property> = {};
   addressFieldsToUpdate.updatedAt = new Date();
 
@@ -101,12 +113,12 @@ export const updateAddressById = async (propertyId: string, addressId: string, u
   if (province) addressFieldsToUpdate.province = province;
   if (latitude) addressFieldsToUpdate.latitude = latitude;
   if (longitude) addressFieldsToUpdate.longitude = longitude;
+  if (location) addressFieldsToUpdate.location = location;
 
-  await db.update(address).set(addressFieldsToUpdate).where(eq(address.id, addressId));
+  await database.update(address).set(addressFieldsToUpdate).where(eq(address.id, addressId));
 
   logger.info(`Updating address of id: ${addressId}`, addressFieldsToUpdate, true);
 };
-
 
 /**
  * @param addressId       string - uuid of the address to fetch
@@ -120,4 +132,3 @@ export const getAddressById = async (addressId: string) => {
 
   return addressById[0];
 };
-

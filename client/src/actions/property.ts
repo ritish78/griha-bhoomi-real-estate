@@ -127,14 +127,32 @@ export async function updateProperty(
       }
     );
 
+    //Check that the backend returned JSON before trying to read it.
+    if (!response.headers.get("content-type")?.includes("json")) {
+      throw new Error(
+        `The property service returned an unexpected response (HTTP ${response.status}).`
+      );
+    }
+
     const body: unknown = await response.json();
 
     if (!response.ok) {
-      const parsedError = z.object({ message: z.string().optional() }).safeParse(body);
+      //The backend can return a single message or an array of validation errors.
+      const parsedError = z
+        .object({
+          message: z.string().optional(),
+          errors: z.array(z.object({ message: z.string() })).optional()
+        })
+        .safeParse(body);
+
+      const errorMessage = parsedError.success
+        ? parsedError.data.message ||
+          parsedError.data.errors?.map((error) => error.message).join(" ")
+        : undefined;
 
       return {
         success: false,
-        error: (parsedError.success && parsedError.data.message) || "Could not save your changes."
+        error: errorMessage || "Could not save your changes."
       };
     }
 

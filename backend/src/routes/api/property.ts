@@ -617,4 +617,37 @@ router.get("/edit/:slug", onlyIfLoggedIn, async (req: Request, res: Response, ne
   return res.status(200).json(propertyToEdit);
 });
 
+/**
+ * @route   /api/v1/property/edit/:slug
+ * @method  PUT
+ * @desc    Save the edit form using the existing update controller and schemas
+ * @access  Listing owner or admin
+ */
+router.put(
+  "/edit/:slug",
+  onlyIfLoggedIn,
+  validateRequest(updatePropertySchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const slug = Array.isArray(req.params.slug) ? req.params.slug[0].trim() : req.params.slug.trim();
+      const currentUserId = req.session.userId;
+
+      if (!slug) throw new BadRequestError("Please provide the identifier of the product!");
+      if (!currentUserId) throw new AuthError("You need to  login to perform this action!");
+
+      const propertyToEdit = await getPropertyForEdit(slug, currentUserId);
+      const updated = await updatePropertyById(propertyToEdit.id, currentUserId, req.body);
+
+      if (updated === 0) throw new NotFoundError("Property to update does not exist!");
+      if (updated === -1) throw new ForbiddenError("You are not allowed to edit this property!");
+
+      res.setHeader("Cache-Control", "private, no-store");
+
+      return res.status(200).json({ slug: propertyToEdit.slug });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;
