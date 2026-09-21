@@ -12,6 +12,9 @@ interface User {
   phone: string;
   dob: string;
   profilePicUrl?: string;
+  isAdmin: boolean;
+  isAgent: boolean;
+  role: "ADMIN" | "MODERATOR" | "VIEWER";
 }
 
 interface AuthContextType {

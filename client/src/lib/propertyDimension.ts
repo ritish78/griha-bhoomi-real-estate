@@ -43,7 +43,7 @@ export function parsePropertyDimension(value: unknown): { amount: string; unit: 
     return { amount: dimension, unit: "ft" };
   }
 
-  const match = dimension.match(/^(.+?)\s*(ft|m|yd|in|cm)$/i);
+  const match = dimension.match(/^(.+?)\s*(ft|m|in)$/i);
   const amount = match?.[1]?.trim();
   const unit = match?.[2]?.toLowerCase() as DimensionUnit | undefined;
 

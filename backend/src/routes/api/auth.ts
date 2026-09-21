@@ -129,7 +129,10 @@ router.route("/me").get(onlyIfLoggedIn, async (req: Request, res: Response, next
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        profilePicUrl: user.profilePicUrl
+        profilePicUrl: user.profilePicUrl,
+        isAdmin: user.isAdmin, //should we send isAdmin, isAgent and role back to the client?
+        isAgent: user.isAgent, //i made isAgent incase the user signs in using agent account, but haven't used so far.
+        role: user.role //we should recheck it everytime against database when we need to see if the current user is admin or moderator
       }
     });
   } catch (error) {

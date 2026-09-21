@@ -7,6 +7,7 @@ import { formatCase } from "@/lib/formatCase";
 import { formatListedAtDate } from "@/lib/formatDate";
 import { formatPrice } from "@/lib/formatPrice";
 import { Property } from "@/types/property";
+import PropertyActions from "./property-action";
 
 interface LandProps {
   property: Property;
@@ -17,7 +18,13 @@ export default function Land({ property }: LandProps) {
     <div className="flex w-full flex-col gap-6 md:w-1/2">
       <div className="space-y-4">
         <div>
-          <h2 className="line-clamp-2 font-bold text-3xl mb-3 leading-tight">{property.title}</h2>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <h2 className="min-w-0 flex-1 line-clamp-2 break-words font-bold text-3xl leading-tight">
+              {property.title}
+            </h2>
+
+            <PropertyActions slug={property.slug} sellerId={property.sellerId} />
+          </div>
           <div className="flex mr-auto gap-x-2 items-start mb-3">
             <Icons.mapPin className="size-5 mt-0.5 flex-shrink-0 text-muted-foreground"></Icons.mapPin>
             <span className="text-muted-foreground text-base font-medium break-words leading-relaxed">

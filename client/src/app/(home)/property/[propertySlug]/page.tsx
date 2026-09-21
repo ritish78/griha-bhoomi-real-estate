@@ -10,7 +10,6 @@ import { notFound } from "next/navigation";
 // } from "@/components/ui/accordion";
 
 import { Separator } from "@/components/ui/separator";
-import PropertyCard from "@/components/property-card";
 import { Shell } from "@/components/shell";
 import { PropertyImageCarousel } from "@/components/property-image-carousel";
 import { getPropertyBySlug } from "@/actions/property";
@@ -19,7 +18,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import House from "./_components/house";
 import Land from "./_components/land";
 import { dummyPropertyData } from "@/dummy-data";
-import { Property } from "@/types/property";
 
 interface PropertyPageProps {
   params: Promise<{
