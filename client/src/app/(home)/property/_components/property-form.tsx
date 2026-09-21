@@ -44,6 +44,11 @@ import BuiltYearFilter from "@/components/built-year";
 import { propertyFormSchema, PropertyFormValues } from "@/lib/propertyFormSchema";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import {
+  DIMENSION_UNIT_LABELS,
+  DIMENSION_UNITS,
+  serializePropertyDimension
+} from "@/lib/propertyDimension";
 
 const LocationPickerMap = dynamic(() => import("./location-picker-map"), {
   ssr: false,
@@ -117,7 +122,9 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
     areaUnit: "sq-ft",
     landType: "",
     length: "",
-    breadth: ""
+    lengthUnit: "ft",
+    breadth: "",
+    breadthUnit: "ft"
   };
 
   const form = useForm<PropertyFormValues>({
@@ -309,10 +316,25 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
         return adjustDate(value);
       };
 
+      //The unit selectors are form fields. We include their values in the
+      //existing length and breadth strings before sending them to the backend.
+      const { lengthUnit, breadthUnit, ...propertyData } = data;
+
       const payload = {
-        ...data,
+        ...propertyData,
         imageUrl: uploadedImages,
         area: `${data.area} ${data.areaUnit.replace("-", " ")}`,
+
+        // data.propertyType === "Land"
+        //in the jsx return statement below, I had disabled the formfield if user were editing
+        //<FormField disabled={isEditing}
+        //By setting it as disabled, the React hook form was not submitting the propertytype field
+        //so, length and breadth was being sent as undefined.
+        length: serializePropertyDimension(data.length, lengthUnit),
+        // : undefined,
+
+        // data.propertyType === "Land"
+        breadth: serializePropertyDimension(data.breadth, breadthUnit), // : undefined,
 
         // Do not overwrite the saved bike-parking value during edits.
         bikeParking: isEditing ? data.bikeParking : data.carParking * 3,
@@ -330,6 +352,9 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
         latitude: data.latitude ?? null,
         longitude: data.longitude ?? null
       };
+
+      // if (data.propertyType === "Land") {
+      // }
 
       const result = editSlug
         ? await updateProperty(editSlug, payload)
@@ -459,7 +484,7 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                disabled={isEditing}
+                // disabled={isEditing}
                 control={form.control}
                 name="propertyType"
                 render={({ field }) => (
@@ -1270,32 +1295,62 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="length"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Length (ft)</FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="breadth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Breadth (ft)</FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-2">
+                  {(["length", "breadth"] as const).map((dimension) => (
+                    <div key={dimension} className="grid min-w-0 grid-cols-2 gap-3">
+                      <FormField
+                        control={form.control}
+                        name={dimension}
+                        render={({ field }) => (
+                          <FormItem className="min-w-0">
+                            <FormLabel>{fieldLabel(dimension)}</FormLabel>
+
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="any"
+                                placeholder="e.g. 30"
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`${dimension}Unit`}
+                        render={({ field }) => (
+                          <FormItem className="min-w-0">
+                            <FormLabel>{fieldLabel(dimension)} Unit</FormLabel>
+
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <FormControl>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select unit" />
+                                </SelectTrigger>
+                              </FormControl>
+
+                              <SelectContent>
+                                {DIMENSION_UNITS.map((unit) => (
+                                  <SelectItem key={unit} value={unit}>
+                                    {DIMENSION_UNIT_LABELS[unit]}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </CardContent>

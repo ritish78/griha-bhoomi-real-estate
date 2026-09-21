@@ -118,7 +118,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               text={
                 property.bathroomCount == null
                   ? "— baths"
-                  : `${property.bathroomCount} ${property.bathroomCount === 1 ? "bath" : "baths"}`
+                  : `${property.bathroomCount} ${property.bathroomCount === 1 ? "bathroom" : "bathrooms"}`
               }
             />
 
@@ -128,12 +128,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           <>
             <PropertyStat
               icon={<Icons.pencilRuler />}
-              text={property.length?.trim() ? `Length ${property.length.trim()} ft` : "Length —"}
+              text={property.length?.trim() ? `Length ${property.length.trim()}` : "Length —"}
             />
 
             <PropertyStat
               icon={<Icons.ruler />}
-              text={property.breadth?.trim() ? `Width ${property.breadth.trim()} ft` : "Width —"}
+              text={property.breadth?.trim() ? `Width ${property.breadth.trim()}` : "Width —"}
             />
 
             <PropertyStat icon={<Icons.land />} text={property.landArea?.trim() || "Area —"} />

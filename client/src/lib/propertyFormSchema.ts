@@ -1,5 +1,15 @@
 import { FACILITIES } from "@/types/facilities";
 import z from "zod";
+import { DIMENSION_UNITS, isValidDimensionAmount } from "./propertyDimension";
+
+const dimensionAmountSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value === "" || isValidDimensionAmount(value),
+    "Enter a non-negative number for the dimension."
+  )
+  .optional();
 
 export const propertyFormSchema = z.object({
   // Basic Property Details
@@ -68,8 +78,10 @@ export const propertyFormSchema = z.object({
 
   //For Land
   landType: z.string().optional(),
-  length: z.string().optional(),
-  breadth: z.string().optional(),
+  length: dimensionAmountSchema,
+  lengthUnit: z.enum(DIMENSION_UNITS).default("ft"),
+  breadth: dimensionAmountSchema,
+  breadthUnit: z.enum(DIMENSION_UNITS).default("ft"),
 
   //For both House and Land
   connectedToRoad: z.boolean().optional(),

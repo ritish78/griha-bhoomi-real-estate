@@ -3,6 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { propertyFormSchema, PropertyFormValues } from "./propertyFormSchema";
+import { parsePropertyDimension } from "./propertyDimension";
 
 const responseSchema = z.object({
   id: z.string().uuid(),
@@ -50,6 +51,19 @@ function toFormValues(values: Record<string, unknown>): Partial<PropertyFormValu
 
   normalized.area = match[1];
   normalized.areaUnit = match[2]?.toLowerCase().replace(/\s+/g, "-");
+
+  //Length and breadth now include their units in the database.
+  //Older amounts without units are treated as feet.
+  if (values.propertyType === "Land") {
+    const length = parsePropertyDimension(values.length);
+    const breadth = parsePropertyDimension(values.breadth);
+
+    normalized.length = length.amount;
+    normalized.lengthUnit = length.unit;
+
+    normalized.breadth = breadth.amount;
+    normalized.breadthUnit = breadth.unit;
+  }
 
   // Validate known values instead of silently replacing invalid data.
   return propertyFormSchema.partial().parse(normalized);

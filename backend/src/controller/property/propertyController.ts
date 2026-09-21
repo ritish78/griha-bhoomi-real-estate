@@ -32,6 +32,8 @@ import { BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error"
 import { parseFacilities } from "./facilitiesSchema";
 import { updatePropertySchema } from "./propertySchema";
 import { updateAddressSchema } from "../address/addressSchema";
+import { updateHouseSchema } from "./houseSchema";
+import { updateLandSchema } from "./landSchema";
 
 /**
  * @param dummyPropertyData array of property
@@ -1185,6 +1187,20 @@ export const updatePropertyById = async (
       return obj;
     }, {});
 
+  //We validate the fields for the saved property type before updating any table.
+  //The filtered objects exist for both types, so checking the object alone
+  //does not tell us whether this listing is a House or Land.
+  let houseFieldsToUpdate;
+  let landFieldsToUpdate;
+
+  if (propertyById.propertyType === "House" && Object.keys(validHouseFieldsToUpdate).length > 0) {
+    houseFieldsToUpdate = updateHouseSchema.parse(validHouseFieldsToUpdate);
+  } else if (propertyById.propertyType === "Land" && Object.keys(validLandFieldsToUpdate).length > 0) {
+    console.log("UPDATING LAND INFO:", validLandFieldsToUpdate);
+    console.log("UPDATING LAND INFO:", validLandFieldsToUpdate);
+    landFieldsToUpdate = updateLandSchema.parse(validLandFieldsToUpdate);
+  }
+
   //All the fields have been validated and the user's permission has been checked.
   //We use one transaction so that if any update fails, changes to the other
   //tables are rolled back as well.
@@ -1192,18 +1208,18 @@ export const updatePropertyById = async (
     if (hasAddressChanges && addressId) {
       await updateAddressById(propertyId, addressId, addressFieldsToUpdate, tx);
     }
-    if (validHouseFieldsToUpdate) {
-      await updateHouseListingById(propertyById.propertyTypeId, validHouseFieldsToUpdate, tx);
-    } else if (validLandFieldsToUpdate) {
-      await updateLandListingById(propertyById.propertyTypeId, validLandFieldsToUpdate, tx);
+
+    if (houseFieldsToUpdate) {
+      await updateHouseListingById(propertyById.propertyTypeId, houseFieldsToUpdate, tx);
+    } else if (landFieldsToUpdate) {
+      await updateLandListingById(propertyById.propertyTypeId, landFieldsToUpdate, tx);
     }
 
-    //This helper also updates the listing's updatedAt value, even when the user
-    //has changed only the address or the house/land details.
+    //This also updates the listing's updatedAt value when only its
+    //address or House/Land details have changed.
     await updatePropertyListingById(propertyId, validPropertyFieldsToUpdate, tx);
   });
 
-  //We return 1 only after the transaction completes successfully.
   return 1;
 
   // let updated = false;
