@@ -58,8 +58,8 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
   return (
     <Shell className="pb-12 md:pb-14 bg-slate-50 dark:bg-transparent">
-      <div className="flex flex-col gap-8 md:flex-row md:gap-16">
-        <div className="w-full md:w-1/2">
+      <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-16">
+        <div className="w-full md:sticky md:top-24 md:w-1/2 md:self-start">
           <PropertyImageCarousel
             className="w-full"
             imageUrls={property.imageUrl ?? ["https://placehold.co/1800x1200.png"]}
