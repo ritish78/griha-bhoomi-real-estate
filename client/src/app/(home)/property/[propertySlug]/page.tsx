@@ -92,9 +92,12 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
         {property.propertyType === "House" && <House property={property} />}
         {property.propertyType === "Land" && <Land property={property} />}
       </div>
-      <Suspense fallback={null}>
-        <SimilarProperties slug={property.slug} />
-      </Suspense>
+      {/* Not showing similar properties for dummy data */}
+      {!dummyDataSlug.includes(propertySlug) && (
+        <Suspense fallback={null}>
+          <SimilarProperties slug={property.slug} />
+        </Suspense>
+      )}
     </Shell>
   );
 }

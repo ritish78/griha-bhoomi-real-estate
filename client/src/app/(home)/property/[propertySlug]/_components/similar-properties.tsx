@@ -1,5 +1,5 @@
 import { getSimilarProperties } from "@/actions/property";
-import PropertyCard from "@/components/property-card";
+import SimilarPropertiesCarousel from "../../_components/similar-properties-carousel";
 
 interface SimilarPropertiesProps {
   slug: string;
@@ -18,23 +18,5 @@ export default async function SimilarProperties({ slug }: SimilarPropertiesProps
     return null;
   }
 
-  return (
-    <section aria-labelledby="similar-properties-heading" className="min-w-0 border-t pt-8">
-      <div className="mb-6">
-        <h2 id="similar-properties-heading" className="text-2xl font-bold">
-          Similar listings
-        </h2>
-
-        <p className="mt-1 text-sm text-muted-foreground">
-          Ordered from nearest to farthest from this property.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {result.properties.map((property) => (
-          <PropertyCard key={property.id} property={property} />
-        ))}
-      </div>
-    </section>
-  );
+  return <SimilarPropertiesCarousel properties={result.properties} />;
 }
