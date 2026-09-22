@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, ilike, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, ilike, isNull, lte, ne, or, sql } from "drizzle-orm";
 import slugify from "slugify";
 import { v4 as uuidv4 } from "uuid";
 import { PROPERTY_COUNT_LIMIT_PER_PAGE } from "src/config";
@@ -34,6 +34,7 @@ import { updatePropertySchema } from "./propertySchema";
 import { updateAddressSchema } from "../address/addressSchema";
 import { updateHouseSchema } from "./houseSchema";
 import { updateLandSchema } from "./landSchema";
+import { user } from "src/model/user";
 
 /**
  * @param dummyPropertyData array of property
@@ -1454,4 +1455,173 @@ export const getPropertyForEdit = async (slug: string, currentUserId: string) =>
       ...typeValues
     }
   };
+};
+
+/**
+ * @param slug          string - slug of the property currently being viewed
+ * @param currentUserId string - id of the current user, if logged in
+ * @returns             Similar properties ordered nearest first
+ */
+export const getSimilarProperties = async (slug: string, currentUserId?: string) => {
+  //We reuse the existing visibility checks without increasing the view count again.
+  const propertyBySlug = await getPropertyBySlug(slug, currentUserId, false);
+
+  if (!propertyBySlug) {
+    throw new NotFoundError("Property not found!");
+  }
+
+  const { latitude, longitude } = propertyBySlug;
+
+  //Zero is a valid coordinate, so we do not use a truthiness check here.
+  const hasValidLocation =
+    latitude != null &&
+    longitude != null &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180;
+
+  //Featured and non-featured recommendations must be within the same radius.
+  //We can change this value to increase or decrease the recommendation area.
+  const similarPropertyRadiusInKm = 10;
+
+  //We calculate distance only when the current property has valid coordinates.
+  //Otherwise, we will recommend featured properties without a distance condition.
+  const distanceInMetres = hasValidLocation
+    ? sql<number>`
+      ST_Distance(
+        CASE
+          WHEN ${address.latitude} BETWEEN -90 AND 90
+           AND ${address.longitude} BETWEEN -180 AND 180
+          THEN ST_SetSRID(
+            ST_MakePoint(${address.longitude}, ${address.latitude}), 4326
+          )::geography
+          ELSE NULL::geography
+        END,
+        ST_SetSRID(
+          ST_MakePoint(${longitude}, ${latitude}), 4326
+        )::geography
+      )
+    `
+    : undefined;
+
+  const nowTodayInISOString = new Date().toISOString();
+
+  //We return the complete listing details, including the fields our search cards display.
+  const similarProperties = await db
+    .select({
+      //The common property listing fields.
+      id: property.id,
+      sellerId: property.sellerId,
+      propertyTypeId: property.propertyTypeId,
+      title: property.title,
+      slug: property.slug,
+      description: property.description,
+      toRent: property.toRent,
+      address: property.address,
+      closeLandmark: property.closeLandmark,
+      propertyType: property.propertyType,
+      availableFrom: property.availableFrom,
+      availableTill: property.availableTill,
+      price: property.price,
+      negotiable: property.negotiable,
+      imageUrl: property.imageUrl,
+      facilities: property.facilities,
+      status: property.status,
+      listedAt: property.listedAt,
+      updatedAt: property.updatedAt,
+      featured: property.featured,
+      private: property.private,
+      expiresOn: property.expiresOn,
+      views: property.views,
+
+      //The seller details already used on the property page.
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      profilePicUrl: user.profilePicUrl,
+
+      //The address linked to the property listing.
+      houseNumber: address.houseNumber,
+      street: address.street,
+      wardNumber: address.wardNumber,
+      municipality: address.municipality,
+      city: address.city,
+      district: address.district,
+      province: address.province,
+      latitude: address.latitude,
+      longitude: address.longitude,
+
+      //The house details, using our existing property response names.
+      houseType: house.houseType,
+      roomCount: house.roomCount,
+      floorCount: house.floorCount,
+      kitchenCount: house.kitchenCount,
+      sharedBathroom: house.sharedBathroom,
+      bathroomCount: house.bathroomCount,
+      houseFacing: house.facing,
+      carParking: house.carParking,
+      bikeParking: house.bikeParking,
+      evCharging: house.evCharging,
+      builtAt: house.builtAt,
+      houseArea: house.area,
+      furnished: house.furnished,
+      houseConnectedToRoad: house.connectedToRoad,
+      houseDistanceToRoad: house.distanceToRoad,
+
+      //The land details, using our existing property response names.
+      landType: land.landType,
+      landArea: land.area,
+      length: land.length,
+      breadth: land.breadth,
+      landConnectedToRoad: land.connectedToRoad,
+      landDistanceToRoad: land.distanceToRoad
+    })
+    .from(property)
+    .leftJoin(user, eq(property.sellerId, user.id))
+    .leftJoin(address, eq(property.address, address.id))
+    .leftJoin(house, eq(property.propertyTypeId, house.id))
+    .leftJoin(land, eq(property.propertyTypeId, land.id))
+    .where(
+      and(
+        //We exclude the current listing and match both property type and rent/sale.
+        ne(property.id, propertyBySlug.id),
+        eq(property.propertyType, propertyBySlug.propertyType),
+        eq(property.toRent, propertyBySlug.toRent),
+        eq(property.status, propertyBySlug.toRent ? "Rent" : "Sale"),
+
+        //Only public, unexpired and currently available listings are suggested.
+        eq(property.private, false),
+        gt(property.expiresOn, nowTodayInISOString),
+        lte(property.availableFrom, nowTodayInISOString),
+        or(isNull(property.availableTill), gt(property.availableTill, nowTodayInISOString)),
+
+        //When the current property has coordinates, all recommendations,
+        //including featured properties, must be within the specified radius.
+        //Otherwise, we return matching featured properties without a location filter.
+        distanceInMetres !== undefined
+          ? sql`${distanceInMetres} <= ${similarPropertyRadiusInKm * 1000}`
+          : eq(property.featured, true)
+      )
+    )
+    //Featured properties appear first, followed by non-featured properties.
+    //Within each group, the closest properties appear first.
+    //Without a location, the newest featured listings appear first.
+    .orderBy(
+      sql`${property.featured} DESC NULLS LAST`,
+      ...(distanceInMetres !== undefined ? [asc(distanceInMetres)] : []),
+      sql`${property.listedAt} DESC NULLS LAST`,
+      asc(property.id)
+    )
+    .limit(6);
+
+  //Our existing card expects an image array and a boolean featured value.
+  return similarProperties.map((property) => ({
+    ...property,
+    imageUrl: property.imageUrl ?? [],
+    featured: property.featured ?? false,
+    street: property.street ?? ""
+  }));
 };

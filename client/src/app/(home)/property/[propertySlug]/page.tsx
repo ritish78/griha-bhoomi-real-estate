@@ -18,6 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import House from "./_components/house";
 import Land from "./_components/land";
 import { dummyPropertyData } from "@/dummy-data";
+import { Suspense } from "react";
+import SimilarProperties from "./_components/similar-properties";
 
 interface PropertyPageProps {
   params: Promise<{
@@ -90,6 +92,9 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
         {property.propertyType === "House" && <House property={property} />}
         {property.propertyType === "Land" && <Land property={property} />}
       </div>
+      <Suspense fallback={null}>
+        <SimilarProperties slug={property.slug} />
+      </Suspense>
     </Shell>
   );
 }

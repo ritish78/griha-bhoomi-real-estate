@@ -1,6 +1,7 @@
 "use server";
 
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import { Property } from "@/types/property";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import z from "zod";
@@ -176,5 +177,45 @@ export async function updateProperty(
       success: false,
       error: getErrorMessage(error)
     };
+  }
+}
+
+export async function getSimilarProperties(
+  slug: string
+): Promise<{ properties: Property[]; error?: never } | { error: string; properties?: never }> {
+  try {
+    const cookieStore = await cookies();
+
+    const response = await fetch(
+      `http://localhost:5000/api/v1/property/${encodeURIComponent(slug)}/similar`,
+      {
+        headers: {
+          Accept: "application/json",
+          Cookie: cookieStore.toString()
+        },
+        cache: "no-store"
+      }
+    );
+
+    if (!response.headers.get("content-type")?.includes("json")) {
+      throw new Error("The property service returned an unexpected response.");
+    }
+
+    const data: {
+      properties: Property[];
+      message?: string;
+    } = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Could not load similar listings.");
+    }
+
+    if (!Array.isArray(data.properties)) {
+      throw new Error("The property service returned an unexpected response.");
+    }
+
+    return { properties: data.properties };
+  } catch (error: unknown) {
+    return { error: getErrorMessage(error) };
   }
 }

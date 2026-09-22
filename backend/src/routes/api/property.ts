@@ -8,6 +8,7 @@ import {
   getPropertyById,
   getPropertyBySlug,
   getPropertyForEdit,
+  getSimilarProperties,
   togglePropertyPrivate,
   // seedProperty,
   updatePropertyById
@@ -649,5 +650,29 @@ router.put(
     }
   }
 );
+
+/**
+ * @route   /api/v1/property/:slug/similar
+ * @method  GET
+ * @desc    Get up to six similar listings, ordered nearest first
+ * @access  Public listings; the source listing uses its existing visibility checks
+ */
+router.get("/:slug/similar", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const slug = Array.isArray(req.params.slug) ? req.params.slug[0]?.trim() : req.params.slug.trim();
+
+    if (!slug) {
+      throw new BadRequestError("Please provide the property slug!");
+    }
+
+    const similarProperties = await getSimilarProperties(slug, req.session.userId);
+
+    res.setHeader("Cache-Control", "private, no-store");
+
+    return res.status(200).send({ properties: similarProperties });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;
