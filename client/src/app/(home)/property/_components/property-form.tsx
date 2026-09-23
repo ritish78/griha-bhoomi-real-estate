@@ -49,6 +49,7 @@ import {
   DIMENSION_UNITS,
   serializePropertyDimension
 } from "@/lib/propertyDimension";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 const LocationPickerMap = dynamic(() => import("./location-picker-map"), {
   ssr: false,
@@ -574,10 +575,18 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
+                    {/* <Textarea
                       placeholder="Describe the property features, neighborhood, etc."
                       className="resize-none min-h-[120px]"
                       {...field}
+                    /> */}
+                    <RichTextEditor
+                      ref={field.ref}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      disabled={isLoading}
+                      aria-label="Property description"
                     />
                   </FormControl>
                   <FormMessage />

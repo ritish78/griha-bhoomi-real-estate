@@ -125,7 +125,10 @@ export default function Land({ property }: LandProps) {
       <div className="mb-4">
         <div className="mb-6">
           <h2 className="font-bold text-xl mb-4">Description</h2>
-          <p>{property.description}</p>
+          {/* Like in House, I need to check user input as well before sending it in dangerouslySetInnerHTML */}
+          <div
+            dangerouslySetInnerHTML={{ __html: property.description.replaceAll("<script", "") }}
+          />
         </div>
         <div>
           <h2 className="font-bold text-xl mb-4">Close Landmark</h2>
