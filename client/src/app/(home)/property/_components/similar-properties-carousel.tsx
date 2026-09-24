@@ -93,29 +93,31 @@ export default function SimilarPropertiesCarousel({ properties }: SimilarPropert
           </p>
         </div>
 
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             type="button"
             variant="outline"
             size="icon"
+            className="aspect-square size-7 rounded-none sm:size-8"
             disabled={prevBtnDisabled}
             onClick={() => scrollProperties("previous")}
             aria-label="Show previous properties"
             aria-controls="similar-properties-list"
           >
-            <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+            <ChevronLeftIcon className="size-3 sm:size-4" aria-hidden="true" />
           </Button>
 
           <Button
             type="button"
             variant="outline"
             size="icon"
+            className="aspect-square size-7 rounded-none sm:size-8"
             disabled={nextBtnDisabled}
             onClick={() => scrollProperties("next")}
             aria-label="Show next properties"
             aria-controls="similar-properties-list"
           >
-            <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+            <ChevronRightIcon className="size-3 sm:size-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
