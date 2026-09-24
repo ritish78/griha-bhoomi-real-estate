@@ -4,7 +4,7 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/lib/utlis";
-
+import { getProfilePictureUrl } from "@/lib/getProfilePicture";
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -21,9 +21,10 @@ Avatar.displayName = AvatarPrimitive.Root.displayName;
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
+>(({ className, src, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
+    src={typeof src === "string" ? getProfilePictureUrl(src) : src} //this feels like a hack. getProfilePictureUrl(src) threw Argument of type 'string | Blob | undefined' is not assignable to parameter of type 'string | null | undefined'. Type 'Blob' is not assignable to type 'string'.
     className={cn("aspect-square h-full w-full", className)}
     {...props}
   />

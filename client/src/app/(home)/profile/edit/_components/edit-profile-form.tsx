@@ -24,6 +24,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import Link from "next/link";
 
 //The account email is displayed in the form but is not submitted for updating.
 //Using and() also preserves the password refinements in profileFormSchema.
@@ -231,7 +232,7 @@ export default function EditProfileForm({ user }: { user: User }) {
                     <FormItem className="w-full min-w-0 flex-1">
                       <FormLabel>Profile picture</FormLabel>
 
-                      <FormControl>
+                      <FormControl className="cursor-pointer">
                         <Input
                           ref={field.ref}
                           name={field.name}
@@ -537,6 +538,9 @@ export default function EditProfileForm({ user }: { user: User }) {
 
           {/* Form Actions */}
           <div className="flex flex-col-reverse items-center gap-3 pt-6 sm:flex-row sm:justify-center">
+            <Button asChild variant="outline">
+              <Link href="/">Cancel</Link>
+            </Button>
             <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? "Saving changes!" : "Save changes"}
             </Button>

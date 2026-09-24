@@ -1480,24 +1480,24 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
         )}
 
         <div className="flex flex-col-reverse items-center gap-3 pt-6 sm:flex-row sm:justify-center">
-          {editSlug && (
-            <Button
-              asChild
-              variant="outline"
-              className={cn(
-                "w-full sm:w-auto",
-                (isLoading || isUploading) && "pointer-events-none opacity-50"
-              )}
+          {/* {editSlug && ( */}
+          <Button
+            asChild
+            variant="outline"
+            className={cn(
+              "w-full sm:w-auto",
+              (isLoading || isUploading) && "pointer-events-none opacity-50"
+            )}
+          >
+            <Link
+              href={`/property/${editSlug}`}
+              aria-disabled={isLoading || isUploading}
+              tabIndex={isLoading || isUploading ? -1 : undefined}
             >
-              <Link
-                href={`/property/${editSlug}`}
-                aria-disabled={isLoading || isUploading}
-                tabIndex={isLoading || isUploading ? -1 : undefined}
-              >
-                Cancel
-              </Link>
-            </Button>
-          )}
+              Cancel
+            </Link>
+          </Button>
+          {/* )} */}
           <Button
             type="submit"
             disabled={isLoading || isUploading || isResolvingAddress}

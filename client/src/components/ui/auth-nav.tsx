@@ -82,7 +82,15 @@ export function AuthNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => logout()}>
+        {/* on other dropdown, i haven't changed to cursor pointer but
+        for this, I am changing as users are more likely to use this daily */}
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/profile/edit">
+            <Icons.avatar className="mr-2 size-5" />
+            Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
           <Icons.logout className="mr-2 size-4" />
           <span>Log out</span>
         </DropdownMenuItem>
