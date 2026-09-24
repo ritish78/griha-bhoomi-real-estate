@@ -110,7 +110,7 @@ export function PropertyImageCarousel({
           <Button
             variant="outline"
             size="icon"
-            className="mr-0.5 aspect-square size-7 rounded-none sm:mr-2 sm:size-8"
+            className="mr-0.5 aspect-square size-7 rounded sm:mr-2 sm:size-8"
             disabled={prevBtnDisabled}
             onClick={scrollPrev}
           >
@@ -123,7 +123,7 @@ export function PropertyImageCarousel({
               variant="outline"
               size="icon"
               className={cn(
-                "group relative aspect-square size-full max-w-[100px] rounded-none shadow-sm hover:bg-transparent focus-visible:ring-foreground",
+                "group relative aspect-square size-full max-w-[100px] rounded shadow-sm hover:bg-transparent focus-visible:ring-foreground",
                 index === selectedImageIndex && "ring-1 ring-foreground"
               )}
               onClick={() => scrollTo(index)}
@@ -144,7 +144,7 @@ export function PropertyImageCarousel({
           <Button
             variant="outline"
             size="icon"
-            className="ml-0.5 aspect-square size-7 rounded-none sm:ml-2 sm:size-8"
+            className="ml-0.5 aspect-square size-7 rounded sm:ml-2 sm:size-8"
             disabled={nextBtnDisabled}
             onClick={scrollNext}
           >

@@ -98,7 +98,7 @@ export default function SimilarPropertiesCarousel({ properties }: SimilarPropert
             type="button"
             variant="outline"
             size="icon"
-            className="aspect-square size-7 rounded-none sm:size-8"
+            className="aspect-square size-7 rounded sm:size-8"
             disabled={prevBtnDisabled}
             onClick={() => scrollProperties("previous")}
             aria-label="Show previous properties"
@@ -111,7 +111,7 @@ export default function SimilarPropertiesCarousel({ properties }: SimilarPropert
             type="button"
             variant="outline"
             size="icon"
-            className="aspect-square size-7 rounded-none sm:size-8"
+            className="aspect-square size-7 rounded sm:size-8"
             disabled={nextBtnDisabled}
             onClick={() => scrollProperties("next")}
             aria-label="Show next properties"
