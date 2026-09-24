@@ -1,8 +1,16 @@
 export interface User {
+  id: string;
   firstName: string;
   lastName: string;
-  phone?: string;
-  profilePicUrl?: string;
+  email: string;
+  phone: string | null;
+  dob: string;
+  bio?: string | null;
+  secondEmail?: string | null;
+  profilePicUrl?: string | null;
+  isAdmin: boolean;
+  isAgent: boolean;
+  role: "ADMIN" | "MODERATOR" | "VIEWER";
 }
 
 export interface Address {
