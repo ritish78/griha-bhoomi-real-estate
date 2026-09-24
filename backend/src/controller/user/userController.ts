@@ -7,7 +7,7 @@ import { User, user } from "src/model/user";
 import db from "src/db";
 import { eq } from "drizzle-orm";
 import { preparedGetUserById } from "src/db/preparedStatement";
-import { AuthError } from "src/utils/error";
+import { AuthError, BadRequestError } from "src/utils/error";
 
 /**
  * @route                       /api/v1/user/update
@@ -30,8 +30,32 @@ export const updateUser = async (userId: string, updateFields) => {
   logger.info(`Updating user of id: ${userId}`);
 
   //Destructuring the user fields from req.body that was passed from api handler
-  const { firstName, lastName, password, confirmPassword, phone, dob, bio, secondEmail, profilePicUrl } =
-    updateFields;
+  const {
+    firstName,
+    lastName,
+    currentPassword,
+    password,
+    confirmPassword,
+    phone,
+    dob,
+    bio,
+    secondEmail,
+    profilePicUrl
+  } = updateFields;
+
+  console.log(
+    "Updating User: ",
+    firstName,
+    lastName,
+    currentPassword,
+    password,
+    confirmPassword,
+    phone,
+    dob,
+    bio,
+    secondEmail,
+    profilePicUrl
+  );
 
   //First let's check if the user exists or not. The user should exists as we use the
   //`onlyIfLoggedIn` middleware to check if the valid token is received by the server
@@ -51,9 +75,29 @@ export const updateUser = async (userId: string, updateFields) => {
   if (secondEmail) userFieldsToUpdate.secondEmail = secondEmail;
   if (profilePicUrl) userFieldsToUpdate.profilePicUrl = profilePicUrl;
 
-  if (password && confirmPassword && password.trim() === confirmPassword.trim()) {
-    const hashedPassword = await hashPassword(password.trim(), NUMBER_OF_SALT_ROUNDS);
-    userFieldsToUpdate.password = hashedPassword;
+  //then we check to see if the user wants to update the password
+  //we will only change the password if all three fields: currentPassword,
+  //password, and confirmPassword is sent. We will also have to verify
+  //currentPassword before updating to the new password.
+  const userWantsToChangePassword =
+    currentPassword != undefined && password != undefined && confirmPassword != undefined;
+
+  if (userWantsToChangePassword) {
+    if (password.trim() !== confirmPassword.trim()) {
+      throw new BadRequestError("New passwords do not match!");
+    }
+
+    const hashOfCurrentPassword = await hashPassword(password.trim(), NUMBER_OF_SALT_ROUNDS);
+    const isCurrentPasswordValid = userById.password === hashOfCurrentPassword;
+
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestError("Please enter your correct current password to change your password!");
+    }
+
+    if (password && confirmPassword && password.trim() === confirmPassword.trim()) {
+      const hashedPassword = await hashPassword(password.trim(), NUMBER_OF_SALT_ROUNDS);
+      userFieldsToUpdate.password = hashedPassword;
+    }
   }
 
   await db.update(user).set(userFieldsToUpdate).where(eq(user.id, userId));

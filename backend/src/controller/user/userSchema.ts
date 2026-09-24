@@ -13,12 +13,14 @@ export const updateUserSchema = z.object({
       phone: z.string().min(10, { message: "Please enter a valid phone number!" }).optional(),
       dob: z.string().min(10, { message: "Please enter a valid date of birth!" }).optional(),
       bio: z.string().min(1, { message: "Please enter a valid bio for your profile!" }).optional(),
-      secondEmail: z
-        .string()
-        .min(1, { message: "Please enter email address!" })
-        .email("Please enter valid email address!")
-        .optional(),
-      profilePicUrl: z.string().url().optional()
+      secondEmail: z.email({ error: "Please enter valid email address!" }).optional(),
+      //zod was showing deprecated in .string().email(), now  we use .email() directly
+      // .string()
+      // .min(1, { message: "Please enter email address!" })
+      // .email("Please enter valid email address!")
+      // .optional(),
+      // profilePicUrl: z.string().url().optional()
+      profilePicUrl: z.url().optional()
     })
     .refine((data) => Object.values(data).some((field) => field !== undefined), {
       message: "Please provide atleast one field to update!",

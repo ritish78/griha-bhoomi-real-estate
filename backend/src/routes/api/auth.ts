@@ -129,7 +129,12 @@ router.route("/me").get(onlyIfLoggedIn, async (req: Request, res: Response, next
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        dob: user.dob, //i want to implement user to have feature to update their info
+        //secondEmail: user.secondEmail we also have secondEmail column in our database
+        //but we haven't implemented that and when we do, we can use this here
         profilePicUrl: user.profilePicUrl,
+        phone: user.phone,
+        bio: user.bio,
         isAdmin: user.isAdmin, //should we send isAdmin, isAgent and role back to the client?
         isAgent: user.isAgent, //i made isAgent incase the user signs in using agent account, but haven't used so far.
         role: user.role //we should recheck it everytime against database when we need to see if the current user is admin or moderator

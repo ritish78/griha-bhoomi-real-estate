@@ -632,4 +632,3 @@ export const preparedGetAddressById = db
   .where(eq(address.id, sql.placeholder("addressId")))
   .limit(1)
   .prepare("get-address-by-id");
-

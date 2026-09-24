@@ -6,10 +6,6 @@ import db from "src/db";
 
 import {
   getListOfProperties,
-  preparedDeleteAddress,
-  preparedDeleteHouseById,
-  preparedDeleteLandById,
-  preparedDeletePropertyById,
   preparedGetPropertyByFeaturedStatus,
   preparedGetPropertyById,
   preparedGetPropertyBySlug,
@@ -360,7 +356,7 @@ export const addLand = async (
  * @param userId      string | undefined - user id if signed in or undefined if not signed in
  * @returns           Property
  */
-export const getPropertyById = async (propertyId: string, userId) => {
+export const getPropertyById = async (propertyId: string, userId, countView: boolean = true) => {
   console.log("Searching for property of id:", propertyId);
   const [propertyById] = (await preparedGetPropertyById.execute({ propertyId })) as Property[];
 
@@ -379,8 +375,11 @@ export const getPropertyById = async (propertyId: string, userId) => {
     //count if the current user isn't signed in.
     //Might reference it later to make it better.
     if (!userId || propertyById.sellerId !== userId) {
-      await increaseViewOfProperty(propertyById.id);
-      propertyById.views += 1;
+      //similar to the one in getPropertyBySlug
+      if (countView) {
+        await increaseViewOfProperty(propertyById.id);
+        propertyById.views += 1;
+      }
     }
 
     return propertyById;
@@ -999,7 +998,7 @@ export const getListOfFeaturedPropertiesByPagination = async (offset: number, li
  */
 export const deletePropertyById = async (userId: string, propertyId: string) => {
   try {
-    const propertyById = await getPropertyById(propertyId, userId);
+    const propertyById = await getPropertyById(propertyId, userId, false);
 
     /**
      * Is it better to throw NotFoundError and say that the property does not exists!
@@ -1252,13 +1251,44 @@ export const updatePropertyById = async (
  * @param propertyToDelete        Property - Property object that the user is intending to delete
  */
 const deleteProperty = async (propertyToDelete: Property) => {
-  await preparedDeletePropertyById.execute({ propertyId: propertyToDelete.id });
-  await preparedDeleteAddress.execute({ addressId: propertyToDelete.address });
-  if (propertyToDelete.propertyType.toUpperCase() === "HOUSE") {
-    await preparedDeleteHouseById.execute({ houseId: propertyToDelete.propertyTypeId });
-  } else if (propertyToDelete.propertyType.toUpperCase() === "LAND") {
-    await preparedDeleteLandById.execute({ landId: propertyToDelete.propertyTypeId });
-  }
+  //We have property, address and house or land info to delete.
+  //We use a transaction so that if any of the deletion fails,
+  //the changes made to the other tables are rolled back as well.
+  await db.transaction(async (tx) => {
+    //First we delete the property listing as it references the address.
+    //The bookmarks of this property are deleted automatically because
+    //their foreign key has onDelete set to cascade.
+    const [deletedProperty] = await tx
+      .delete(property)
+      .where(eq(property.id, propertyToDelete.id))
+      .returning({
+        address: property.address,
+        propertyType: property.propertyType,
+        propertyTypeId: property.propertyTypeId
+      });
+
+    //We already checked if the property exists in deletePropertyById.
+    //However, another request might have deleted it before this query.
+    //If the property does not exists, we throw NotFoundError.
+    if (!deletedProperty) {
+      throw new NotFoundError("Property to delete does not exists!");
+    }
+
+    //Now let's check if the property has an address linked to it.
+    //If it has an address, then we delete that address using its id.
+    if (deletedProperty.address) {
+      await tx.delete(address).where(eq(address.id, deletedProperty.address));
+    }
+
+    //Now we check if the property listing is of house or land.
+    //If the property is a house, then we delete its house info.
+    //Otherwise, if it is land, then we delete its land info.
+    if (deletedProperty.propertyType.toUpperCase() === "HOUSE") {
+      await tx.delete(house).where(eq(house.id, deletedProperty.propertyTypeId));
+    } else if (deletedProperty.propertyType.toUpperCase() === "LAND") {
+      await tx.delete(land).where(eq(land.id, deletedProperty.propertyTypeId));
+    }
+  });
 };
 
 /**
