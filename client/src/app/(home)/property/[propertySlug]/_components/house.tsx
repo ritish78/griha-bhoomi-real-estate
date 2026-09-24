@@ -22,7 +22,11 @@ export default function House({ property }: HouseProps) {
               {property.title}
             </h2>
 
-            <PropertyActions slug={property.slug} sellerId={property.sellerId} />
+            <PropertyActions
+              slug={property.slug}
+              sellerId={property.sellerId}
+              propertyId={property.id}
+            />
           </div>
           <div className="flex mr-auto gap-x-2 items-start mb-3">
             <Icons.mapPin className="size-5 mt-0.5 flex-shrink-0 text-muted-foreground"></Icons.mapPin>

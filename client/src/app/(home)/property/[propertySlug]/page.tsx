@@ -82,7 +82,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
               </p>
               <div className="flex items-center mt-1">
                 <Icons.phone className="mr-2"></Icons.phone>
-                <p className="text-sm text-muted-foreground">{property.phone}</p>
+                <p className="text-sm text-muted-foreground ml-1.5">{property.phone}</p>
               </div>
             </div>
           </div>

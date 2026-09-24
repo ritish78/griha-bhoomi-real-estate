@@ -219,3 +219,59 @@ export async function getSimilarProperties(
     return { error: getErrorMessage(error) };
   }
 }
+
+export type DeletePropertyResponse =
+  | { success: true; error?: never }
+  | { success: false; error: string };
+
+export async function deleteProperty(propertyId: string): Promise<DeletePropertyResponse> {
+  try {
+    const cookieStore = await cookies();
+
+    const response = await fetch(
+      `http://localhost:5000/api/v1/property/id/${encodeURIComponent(propertyId)}`,
+      {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          Cookie: cookieStore.toString()
+        },
+        cache: "no-store"
+      }
+    );
+
+    //Check that the backend returned JSON before trying to read it.
+    if (!response.headers.get("content-type")?.includes("json")) {
+      throw new Error(
+        `The property service returned an unexpected response (HTTP ${response.status}).`
+      );
+    }
+
+    const body: unknown = await response.json();
+
+    if (!response.ok) {
+      //The backend provides the reason why the property could not be deleted.
+      const parsedError = z
+        .object({
+          message: z.string().optional()
+        })
+        .safeParse(body);
+
+      return {
+        success: false,
+        error:
+          (parsedError.success && parsedError.data.message) ||
+          "Could not delete the property listing."
+      };
+    }
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: getErrorMessage(error)
+    };
+  }
+}
