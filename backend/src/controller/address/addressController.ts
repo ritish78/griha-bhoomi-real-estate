@@ -131,12 +131,34 @@ export const updateAddressById = async (
   const addressFieldsToUpdate: PgUpdateSetSource<typeof address> = {};
   addressFieldsToUpdate.updatedAt = new Date();
 
+  //We add the address fields that the user provided for updating.
+  //If a field is undefined, we keep its existing value in the database.
   if (houseNumber !== undefined) {
     addressFieldsToUpdate.houseNumber = houseNumber;
   }
 
+  if (street !== undefined) {
+    addressFieldsToUpdate.street = street;
+  }
+
   if (wardNumber !== undefined) {
     addressFieldsToUpdate.wardNumber = wardNumber;
+  }
+
+  if (municipality !== undefined) {
+    addressFieldsToUpdate.municipality = municipality;
+  }
+
+  if (city !== undefined) {
+    addressFieldsToUpdate.city = city;
+  }
+
+  if (district !== undefined) {
+    addressFieldsToUpdate.district = district;
+  }
+
+  if (province !== undefined) {
+    addressFieldsToUpdate.province = province;
   }
 
   //Zero is a valid coordinate. Omitted coordinates keep the saved location.

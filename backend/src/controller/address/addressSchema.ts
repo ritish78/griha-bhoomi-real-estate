@@ -9,8 +9,8 @@ export const newAddressSchema = z.object({
     city: z.string().min(1, { message: "Please enter city name!" }),
     district: z.string().min(1, { message: "Please enter district name!" }),
     province: z.string().min(1, { message: "Please enter province name!" }),
-    latitude: z.number().min(-90).max(180),
-    longitude: z.number().min(-90).max(180)
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180)
   })
 });
 
