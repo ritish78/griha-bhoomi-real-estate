@@ -29,12 +29,13 @@ router
   .post(validateRequest(registerSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       //First, we destructure the request body to get the fields submitted by user
-      const { firstName, lastName, email, password, confirmPassword, phone, dob } = req.body;
+      const { firstName, lastName, email, password, confirmPassword, phone, dob } = registerSchema.parse({
+        body: req.body
+      }).body;
       console.log(firstName, email, dob);
       //Calling registerUser controller which is responsible for doing checks
       //and if all conditions is satisfied, then a new account is created.
       await registerUser(firstName, lastName, email, password.trim(), confirmPassword.trim(), phone, dob);
-
       //In the registerUser() controller, we throw BadRequestError if the
       //request does not satisfy our requirement. If no error is thrown
       //then a new account is created sucessfully.
@@ -59,8 +60,9 @@ router
   .post(validateRequest(loginSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       //Like in register route, we first destructure the body to get the required fields
-      const { email, password, test } = req.body;
-      console.log({ email, password, test });
+      //i was destructring 'test'  before. i don't remember why. I removed it now.
+      const { email, password } = loginSchema.parse({ body: req.body }).body;
+      console.log({ email, password });
 
       //Calling authUser controller which is responsible for doing checks
       //and if the user exists, we get the user back with their details
@@ -77,12 +79,15 @@ router
       req.session.email = userByEmail.email;
       req.session.save();
 
-      return res.status(200).send({ message: "Login Successful!", user: {
-        id: userByEmail.id,
-        firstName: userByEmail.firstName,
-        lastName: userByEmail.lastName,
-        email: userByEmail.email,
-      } });
+      return res.status(200).send({
+        message: "Login Successful!",
+        user: {
+          id: userByEmail.id,
+          firstName: userByEmail.firstName,
+          lastName: userByEmail.lastName,
+          email: userByEmail.email
+        }
+      });
     } catch (error) {
       next(error);
     }
@@ -107,7 +112,6 @@ router.route("/logout").post(onlyIfLoggedIn, async (req: Request, res: Response)
   });
 });
 
-
 /**
  * @route       /api/v1/auth/me
  * @method      GET
@@ -122,7 +126,6 @@ router.route("/me").get(onlyIfLoggedIn, async (req: Request, res: Response, next
 
     const user = await getUserById(req.session.userId);
 
-    
     return res.status(200).json({
       user: {
         id: user.id,

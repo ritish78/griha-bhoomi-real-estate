@@ -55,6 +55,10 @@ export const registerUser = async (
   phone: string,
   dob: string
 ) => {
+  firstName = firstName.trim();
+  lastName = lastName.trim();
+  email = email.trim().toLowerCase();
+
   //First let's check if the supplied password and confirmPassword matches
   console.log("Registering User!");
   if (password !== confirmPassword) {

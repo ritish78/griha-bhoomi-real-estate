@@ -3,8 +3,8 @@ import { z } from "zod";
 export const updateUserSchema = z.object({
   body: z
     .object({
-      firstName: z.string().min(1, { message: "Please enter your first name!" }).optional(),
-      lastName: z.string().min(1, { message: "Please enter your last name!" }).optional(),
+      firstName: z.string().trim().min(1, { message: "Please enter your first name!" }).optional(),
+      lastName: z.string().trim().min(1, { message: "Please enter your last name!" }).optional(),
       password: z.string().min(8, { message: "Please enter password of length 8 or more!" }).optional(),
       confirmPassword: z
         .string()
