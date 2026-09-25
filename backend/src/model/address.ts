@@ -1,4 +1,5 @@
-import { InferSelectModel } from "drizzle-orm";
+import { InferSelectModel, sql } from "drizzle-orm";
+import { check } from "drizzle-orm/pg-core";
 import { pgTable, index, uuid, varchar, timestamp, smallint, real, customType } from "drizzle-orm/pg-core";
 
 /**
@@ -29,9 +30,9 @@ export const address = pgTable(
     city: varchar("city", { length: 125 }).notNull(),
     district: varchar("district", { length: 125 }).notNull(),
     province: varchar("province", { length: 125 }).notNull(),
-    latitude: real("latitude"),
-    longitude: real("longitude"),
-    location: geometry("location"), //Our custom PostGIS column
+    latitude: real("latitude").notNull(),
+    longitude: real("longitude").notNull(),
+    location: geometry("location").notNull(), //Our custom PostGIS column
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull()
   },
@@ -40,7 +41,21 @@ export const address = pgTable(
       municipalityIndex: index("municipality_index").on(table.municipality),
       cityIndex: index("city_index").on(table.city),
       provinceIndex: index("province_index").on(table.province),
-      locationIndex: index("location_index").on(table.location)
+      locationIndex: index("location_index").on(table.location),
+      locationRequired: check(
+        "address_location_required",
+        sql`${table.latitude} IS NOT NULL
+          AND ${table.longitude} IS NOT NULL
+          AND ${table.location} IS NOT NULL`
+      ),
+      latitudeRange: check("address_latitude_range", sql`${table.latitude} BETWEEN -90 AND 90`),
+      longitudeRange: check("address_longitude_range", sql`${table.longitude} BETWEEN -180 AND 180`),
+      locationMatchesCoordinates: check(
+        "address_location_matches_coordinates",
+        sql`NOT ST_IsEmpty(${table.location})
+          AND ST_X(${table.location}) = ${table.longitude}::double precision
+          AND ST_Y(${table.location}) = ${table.latitude}::double precision`
+      )
     };
   }
 );

@@ -30,6 +30,7 @@ import {
 import { toggleBookmark } from "src/controller/bookmark/bookmarkController";
 import { cache, invalidateCache } from "src/middleware/cache";
 import { getAddressById } from "src/controller/address/addressController";
+import { newAddressSchema } from "src/controller/address/addressSchema";
 
 const router = Router();
 
@@ -76,6 +77,7 @@ router
   .post(
     onlyIfLoggedIn,
     validateRequest(newPropertySchema),
+    validateRequest(newAddressSchema),
     async (req: Request, res: Response, next: NextFunction) => {
       const userId = req.session.userId;
 

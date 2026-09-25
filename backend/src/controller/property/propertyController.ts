@@ -27,7 +27,7 @@ import { buildRadiusCondition } from "src/utils/buildRadiusCondition";
 import { BadRequestError, ForbiddenError, NotFoundError } from "src/utils/error";
 import { parseFacilities } from "./facilitiesSchema";
 import { updatePropertySchema } from "./propertySchema";
-import { updateAddressSchema } from "../address/addressSchema";
+import { newAddressSchema, updateAddressSchema } from "../address/addressSchema";
 import { updateHouseSchema } from "./houseSchema";
 import { updateLandSchema } from "./landSchema";
 import { user } from "src/model/user";
@@ -109,6 +109,11 @@ import { user } from "src/model/user";
  */
 export const addProperty = async (sellerId: string, body) => {
   try {
+    //We validate the address before inserting house, land or property info.
+    //Every new listing needs both coordinates, even when its address was entered manually.
+    const addressFields = newAddressSchema.parse({ body }).body;
+    body = { ...body, ...addressFields };
+
     if (body.propertyType !== "House" && body.propertyType !== "Land") {
       throw new BadRequestError("Invalid property type.");
     }

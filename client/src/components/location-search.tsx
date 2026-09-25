@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
-interface LocationOption {
+export interface LocationOption {
   id: string;
   label: string;
   latitude: number;
@@ -20,6 +20,8 @@ interface LocationSearchProps {
   longitude: string;
   onSelect: (location: LocationOption) => void;
   onClear: () => void;
+  disabled?: boolean;
+  emptyMessage?: string;
 }
 
 export default function LocationSearch({
@@ -27,7 +29,9 @@ export default function LocationSearch({
   latitude,
   longitude,
   onSelect,
-  onClear
+  onClear,
+  disabled = false,
+  emptyMessage = "No places found. Try adding a city or district."
 }: LocationSearchProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -52,6 +56,8 @@ export default function LocationSearch({
   }
 
   async function findPlaces() {
+    if (disabled) return;
+
     const term = query.trim();
 
     if (term.length < 2) {
@@ -77,7 +83,7 @@ export default function LocationSearch({
       const params = new URLSearchParams({ q: term });
 
       const response = await fetch(`${baseUrl}/api/v1/geo/search?${params.toString()}`, {
-        signal: controller.signal
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)])
       });
 
       const data = await response.json();
@@ -95,7 +101,7 @@ export default function LocationSearch({
       setResults(data);
 
       if (data.length === 0) {
-        setMessage("No places found. Try adding a city or district.");
+        setMessage(emptyMessage);
       }
     } catch (error) {
       if (controller.signal.aborted) return;
@@ -128,6 +134,7 @@ export default function LocationSearch({
         <PopoverTrigger asChild>
           <Button
             type="button"
+            disabled={disabled}
             variant="outline"
             role="combobox"
             aria-expanded={open}
@@ -150,8 +157,9 @@ export default function LocationSearch({
           {" "}
           <Command shouldFilter={false}>
             <CommandInput
+              disabled={disabled}
               aria-label="Place name"
-              placeholder="e.g. Chabahil, Kathmandu"
+              placeholder="e.g. Koteshwor, Kathmandu"
               value={query}
               onValueChange={changeQuery}
               onKeyDown={(event) => {
@@ -168,7 +176,7 @@ export default function LocationSearch({
                 type="button"
                 size="sm"
                 className="w-full"
-                disabled={loading || query.trim().length < 2}
+                disabled={disabled || loading || query.trim().length < 2}
                 onClick={() => void findPlaces()}
               >
                 {loading ? "Finding places…" : "Find places"}
@@ -186,6 +194,7 @@ export default function LocationSearch({
                 <CommandItem
                   key={location.id}
                   value={location.id}
+                  disabled={disabled}
                   onSelect={() => {
                     controllerRef.current?.abort();
                     onSelect(location);
@@ -208,6 +217,7 @@ export default function LocationSearch({
         <Button
           type="button"
           variant="ghost"
+          disabled={disabled}
           size="sm"
           className="h-7 px-1 text-xs text-muted-foreground"
           onClick={() => {

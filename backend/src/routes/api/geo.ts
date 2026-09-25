@@ -36,7 +36,9 @@ router.get("/reverse", async (req: Request, res: Response, next: NextFunction) =
       "accept-language": "en"
     });
 
-    const response = await fetch(`${nominatimUrl}/reverse?${params.toString()}`);
+    const response = await fetch(`${nominatimUrl}/reverse?${params.toString()}`, {
+      signal: AbortSignal.timeout(10000)
+    });
 
     if (!response.ok) {
       throw new Error(`Nominatim returned ${response.status}`);

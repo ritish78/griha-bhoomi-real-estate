@@ -13,6 +13,8 @@ import logger from "src/utils/logger";
 import { v4 as uuidv4 } from "uuid";
 import { getPropertyBySlug } from "../property/propertyController";
 import { isAdmin } from "src/utils/isAdmin";
+import { newAddressSchema, updateAddressSchema } from "./addressSchema";
+import { PgUpdateSetSource } from "drizzle-orm/pg-core";
 
 /**
  * @param houseNumber       string - house number
@@ -36,6 +38,22 @@ export const addAddress = async (
   latitude: number,
   longitude: number
 ) => {
+  //We also validate here so callers outside the property controller
+  //cannot insert an address without its location.
+  newAddressSchema.parse({
+    body: {
+      houseNumber,
+      street,
+      wardNumber,
+      municipality,
+      city,
+      district,
+      province,
+      latitude,
+      longitude
+    }
+  });
+
   const idOfToBeInsertedAddress = uuidv4();
 
   await preparedInsertAddress.execute({
@@ -83,6 +101,11 @@ export const updateAddressById = async (
 ) => {
   logger.info(`Updating address of id: ${addressId}`);
 
+  //just to be sure that fields are correct before updating
+  updateFields = updateAddressSchema.parse({
+    body: updateFields
+  }).body;
+
   //Destructuring the update fields of address from req.body that was passed from api handler
   const { houseNumber, street, wardNumber, municipality, city, district, province, latitude, longitude } =
     updateFields;
@@ -97,23 +120,37 @@ export const updateAddressById = async (
   const location =
     latitude === undefined
       ? undefined
-      : latitude === null
-        ? null
-        : sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`;
+      : sql`
+        ST_SetSRID(
+          ST_MakePoint(${longitude}::real, ${latitude}::real),
+          4326
+        )
+      `;
 
-  const addressFieldsToUpdate: Partial<Property> = {};
+  //it was Partial<Property> before but now using PgUpdateSetSource<typeof address>
+  const addressFieldsToUpdate: PgUpdateSetSource<typeof address> = {};
   addressFieldsToUpdate.updatedAt = new Date();
 
-  if (houseNumber) addressFieldsToUpdate.houseNumber = houseNumber;
-  if (street) addressFieldsToUpdate.street = street;
-  if (wardNumber) addressFieldsToUpdate.wardNumber = wardNumber;
-  if (municipality) addressFieldsToUpdate.municipality = municipality;
-  if (city) addressFieldsToUpdate.city = city;
-  if (district) addressFieldsToUpdate.district = district;
-  if (province) addressFieldsToUpdate.province = province;
-  if (latitude) addressFieldsToUpdate.latitude = latitude;
-  if (longitude) addressFieldsToUpdate.longitude = longitude;
-  if (location) addressFieldsToUpdate.location = location;
+  if (houseNumber !== undefined) {
+    addressFieldsToUpdate.houseNumber = houseNumber;
+  }
+
+  if (wardNumber !== undefined) {
+    addressFieldsToUpdate.wardNumber = wardNumber;
+  }
+
+  //Zero is a valid coordinate. Omitted coordinates keep the saved location.
+  if (latitude !== undefined) {
+    addressFieldsToUpdate.latitude = latitude;
+  }
+
+  if (longitude !== undefined) {
+    addressFieldsToUpdate.longitude = longitude;
+  }
+
+  if (location !== undefined) {
+    addressFieldsToUpdate.location = location;
+  }
 
   await database.update(address).set(addressFieldsToUpdate).where(eq(address.id, addressId));
 

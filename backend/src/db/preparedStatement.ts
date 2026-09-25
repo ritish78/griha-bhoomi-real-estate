@@ -415,7 +415,15 @@ export const preparedInsertAddress = db
     district: sql.placeholder("district"),
     province: sql.placeholder("province"),
     latitude: sql.placeholder("latitude"),
-    longitude: sql.placeholder("longitude")
+    longitude: sql.placeholder("longitude"),
+    location: sql`
+      ST_SetSRID(
+        ST_MakePoint(
+          ${sql.placeholder("longitude")}::real,
+          ${sql.placeholder("latitude")}::real
+        ),
+        4326
+      )`
   })
   .prepare("insert-address");
 

@@ -29,7 +29,7 @@ import {
   DrawerTrigger
 } from "@/components/ui/drawer";
 import CountRange, { COUNT_FILTERS } from "./count-range";
-import LocationSearch from "./location-search";
+import LocationSearch from "../../../../../components/location-search";
 import BuiltYearFilter from "@/components/built-year";
 
 type Patch = Record<string, string>;

@@ -49,6 +49,7 @@ export const propertyFormSchema = z.object({
     .nullable()
     .optional(),
   imageUrl: z.array(z.string()).optional().default([]),
+  locationConfirmed: z.boolean().refine((value) => value, "Please confirm the property location!"),
 
   //For House
   houseType: z.string().optional().default("House"),

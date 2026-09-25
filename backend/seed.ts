@@ -32,6 +32,7 @@ type PropertySeed = {
   province: string;
   latitude: number;
   longitude: number;
+
   houseType: "House" | "Flat" | "Shared" | "Room" | "Apartment" | "Bungalow" | "Villa";
   roomCount: number;
   floorCount: number;

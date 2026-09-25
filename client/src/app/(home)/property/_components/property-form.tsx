@@ -17,7 +17,6 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -37,7 +36,6 @@ import { createProperty, updateProperty } from "@/actions/property";
 import { uploadMultipleToCloudinary } from "@/lib/cloudinaryUpload";
 import { ImagePreview } from "@/components/image-preview";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isFacilityAllowed } from "@/types/facilities";
 import { FacilitiesPicker } from "@/components/property-facilities";
 import BuiltYearFilter from "@/components/built-year";
@@ -50,6 +48,7 @@ import {
   serializePropertyDimension
 } from "@/lib/propertyDimension";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import LocationSearch, { type LocationOption } from "@/components/location-search";
 
 const LocationPickerMap = dynamic(() => import("./location-picker-map"), {
   ssr: false,
@@ -81,9 +80,13 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [locationMode, setLocationMode] = useState<"map" | "manual">("manual");
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
+  const locationSectionRef = useRef<HTMLDivElement>(null);
+  const addressControllerRef = useRef<AbortController | null>(null);
+
+  const [locationLabel, setLocationLabel] = useState("");
+  const [locationMessage, setLocationMessage] = useState("");
 
   const router = useRouter();
 
@@ -105,6 +108,7 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
     houseNumber: "",
     latitude: null,
     longitude: null,
+    locationConfirmed: false,
     closeLandmark: "",
     connectedToRoad: true,
     distanceToRoad: 0,
@@ -132,7 +136,13 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
     resolver: zodResolver(propertyFormSchema),
     defaultValues: {
       ...defaultValues,
-      ...initialValues
+      ...initialValues,
+
+      //An unchanged saved location does not need to be confirmed again.
+      locationConfirmed:
+        isEditing &&
+        propertyFormSchema.pick({ latitude: true, longitude: true }).safeParse(initialValues)
+          .success
     }
   });
 
@@ -143,18 +153,23 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
   const availableTill = form.watch("availableTill");
   const isHouse = propertyType === "House";
 
+  const latitude = form.watch("latitude");
+  const longitude = form.watch("longitude");
+
+  const hasSelectedLocation = propertyFormSchema
+    .pick({ latitude: true, longitude: true })
+    .safeParse({ latitude, longitude }).success;
+
+  useEffect(() => {
+    return () => addressControllerRef.current?.abort();
+  }, []);
+
   const onInvalid: SubmitErrorHandler<PropertyFormValues> = (errors) => {
-    //Address fields can be hidden by the map tab while still being required.
-    if (
-      errors.street ||
-      errors.city ||
-      errors.district ||
-      errors.province ||
-      errors.municipality ||
-      errors.wardNumber ||
-      errors.houseNumber
-    ) {
-      setLocationMode("manual");
+    //We show the location section when the pin is missing or has not been confirmed.
+    if (errors.latitude || errors.longitude || errors.locationConfirmed) {
+      locationSectionRef.current?.scrollIntoView({
+        block: "center"
+      });
     }
 
     toast.error("Please check the listing details", {
@@ -319,7 +334,7 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
 
       //The unit selectors are form fields. We include their values in the
       //existing length and breadth strings before sending them to the backend.
-      const { lengthUnit, breadthUnit, ...propertyData } = data;
+      const { lengthUnit, breadthUnit, locationConfirmed, ...propertyData } = data;
 
       const payload = {
         ...propertyData,
@@ -350,8 +365,8 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
 
         availableTill: serializeDate(data.availableTill, initialValues?.availableTill),
 
-        latitude: data.latitude ?? null,
-        longitude: data.longitude ?? null
+        latitude: data.latitude,
+        longitude: data.longitude
       };
 
       // if (data.propertyType === "Land") {
@@ -383,6 +398,8 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
   }
 
   async function handleLocationSelect(latitude: number, longitude: number) {
+    if (isLoading) return;
+
     // Always preserve the exact user-selected location.
     form.setValue("latitude", latitude, {
       shouldDirty: true,
@@ -394,7 +411,22 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
       shouldValidate: true
     });
 
+    //A search result or a newly selected point must be confirmed by the user.
+    form.setValue("locationConfirmed", false, {
+      shouldDirty: true
+    });
+
+    form.clearErrors("locationConfirmed");
     setResolvedAddress(null);
+    setLocationMessage("");
+
+    //We cancel the previous lookup so an older response cannot replace this address.
+    addressControllerRef.current?.abort();
+
+    const controller = new AbortController();
+    addressControllerRef.current = controller;
+
+    const addressBeforeLookup = form.getValues();
 
     try {
       setIsResolvingAddress(true);
@@ -404,7 +436,9 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
         longitude: longitude.toString()
       });
 
-      const response = await fetch(`${API_URL}/api/v1/geo/reverse?${params.toString()}`);
+      const response = await fetch(`${API_URL}/api/v1/geo/reverse?${params.toString()}`, {
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)])
+      });
 
       if (!response.ok) {
         throw new Error(`Reverse geocoding failed with status ${response.status}`);
@@ -412,54 +446,103 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
 
       const data = await response.json();
 
-      setResolvedAddress(data.displayName ?? null);
-
-      if (data.houseNumber) {
-        form.setValue("houseNumber", data.houseNumber, {
-          shouldDirty: true
-        });
+      if (controller.signal.aborted || addressControllerRef.current !== controller) {
+        return;
       }
 
-      if (data.street) {
-        form.setValue("street", data.street, {
-          shouldDirty: true
-        });
+      setResolvedAddress(typeof data.displayName === "string" ? data.displayName : null);
+
+      //We fill the available address fields, but keep anything the user
+      //has typed while this lookup was in progress. Missing fields stay editable.
+      const addressFields = [
+        "houseNumber",
+        "street",
+        "municipality",
+        "city",
+        "district",
+        "province"
+      ] as const;
+
+      let hasAddressDetails = false;
+
+      for (const key of addressFields) {
+        if (typeof data[key] === "string" && data[key].trim()) {
+          hasAddressDetails = true;
+
+          if (form.getValues(key) === addressBeforeLookup[key]) {
+            form.setValue(key, data[key], {
+              shouldDirty: true,
+              shouldValidate: true
+            });
+          }
+        }
       }
 
-      if (data.wardNumber != null) {
+      if (
+        data.wardNumber != null &&
+        String(data.wardNumber).trim() !== "" &&
+        Number.isInteger(Number(data.wardNumber)) &&
+        Number(data.wardNumber) >= 0 &&
+        Number(data.wardNumber) <= 32767 &&
+        form.getValues("wardNumber") === addressBeforeLookup.wardNumber
+      ) {
         form.setValue("wardNumber", Number(data.wardNumber), {
-          shouldDirty: true
+          shouldDirty: true,
+          shouldValidate: true
         });
       }
 
-      if (data.municipality) {
-        form.setValue("municipality", data.municipality, {
-          shouldDirty: true
-        });
-      }
-
-      if (data.city) {
-        form.setValue("city", data.city, {
-          shouldDirty: true
-        });
-      }
-
-      if (data.district) {
-        form.setValue("district", data.district, {
-          shouldDirty: true
-        });
-      }
-
-      if (data.province) {
-        form.setValue("province", data.province, {
-          shouldDirty: true
-        });
-      }
+      setLocationMessage(
+        hasAddressDetails
+          ? "Please check the address below and correct any missing or inaccurate details."
+          : "We could not find an address for this pin. Enter the address below; your selected location has been kept."
+      );
     } catch (error) {
-      console.error("Reverse geocoding failed:", error);
+      if (controller.signal.aborted || addressControllerRef.current !== controller) {
+        return;
+      }
+
+      setLocationMessage(
+        "We could not find an address for this pin. Enter the address below; your selected location has been kept."
+      );
     } finally {
-      setIsResolvingAddress(false);
+      if (!controller.signal.aborted && addressControllerRef.current === controller) {
+        setIsResolvingAddress(false);
+      }
     }
+  }
+
+  function handleLocationSearch(location: LocationOption) {
+    if (isLoading) return;
+
+    setLocationLabel(location.label);
+    void handleLocationSelect(location.latitude, location.longitude);
+  }
+
+  function clearLocation() {
+    if (isLoading) return;
+
+    addressControllerRef.current?.abort();
+    addressControllerRef.current = null;
+
+    setIsResolvingAddress(false);
+    setLocationLabel("");
+    setResolvedAddress(null);
+    setLocationMessage("");
+
+    form.setValue("latitude", null, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
+
+    form.setValue("longitude", null, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
+
+    form.setValue("locationConfirmed", false, {
+      shouldDirty: true
+    });
   }
 
   return (
@@ -713,214 +796,236 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
             <CardDescription>Where is the property located?</CardDescription>
           </CardHeader>
 
-          <CardContent>
-            <Tabs
-              value={locationMode}
-              onValueChange={(value) => setLocationMode(value as "map" | "manual")}
-              className="w-full"
-            >
-              {/* Tabs at the top */}
-              <TabsList className="mb-6 gap-5">
-                <TabsTrigger value="manual" className="gap-2">
-                  <Icons.keyboard className="size-4" />
-                  Enter manually
-                </TabsTrigger>
-
-                <TabsTrigger value="map" className="gap-2">
-                  <Icons.mapPin className="size-4" />
-                  Select on map
-                </TabsTrigger>
-              </TabsList>
+          <CardContent className="space-y-6">
+            <div ref={locationSectionRef} className="space-y-4">
+              <LocationSearch
+                label={locationLabel}
+                latitude={latitude == null ? "" : String(latitude)}
+                longitude={longitude == null ? "" : String(longitude)}
+                onSelect={handleLocationSearch}
+                onClear={clearLocation}
+                disabled={isLoading}
+                emptyMessage="We couldn’t find this address. Try a nearby area or select the property on the map."
+              />
 
               {/* MAP */}
-              <TabsContent value="map" className="mt-0 space-y-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
-                    Click on the map to mark the exact location of the property.
-                  </p>
-                </div>
+              <p className="text-sm text-muted-foreground">
+                Search for an area or click on the map, then confirm the pin marks the property. You
+                can move the pin to correct its location.
+              </p>
 
-                <LocationPickerMap
-                  latitude={form.watch("latitude")}
-                  longitude={form.watch("longitude")}
-                  onSelect={handleLocationSelect}
+              <LocationPickerMap
+                latitude={latitude}
+                longitude={longitude}
+                disabled={isLoading}
+                onSelect={(latitude, longitude) => {
+                  setLocationLabel("");
+                  void handleLocationSelect(latitude, longitude);
+                }}
+              />
+
+              {isResolvingAddress && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  Finding address...
+                </p>
+              )}
+
+              {locationMessage && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  {locationMessage}
+                </p>
+              )}
+
+              {resolvedAddress && (
+                <p className="text-sm text-muted-foreground">{resolvedAddress}</p>
+              )}
+
+              {(form.formState.errors.latitude || form.formState.errors.longitude) && (
+                <p role="alert" className="text-sm font-medium text-destructive">
+                  {form.formState.errors.latitude?.message ||
+                    form.formState.errors.longitude?.message}
+                </p>
+              )}
+
+              <FormField
+                control={form.control}
+                name="locationConfirmed"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Button
+                        ref={field.ref}
+                        type="button"
+                        variant="outline"
+                        disabled={
+                          !hasSelectedLocation || isResolvingAddress || isLoading || field.value
+                        }
+                        onClick={() => field.onChange(true)}
+                        onBlur={field.onBlur}
+                      >
+                        <Icons.mapPin className="mr-2 size-4" />
+                        {field.value ? "Location confirmed" : "Confirm property location"}
+                      </Button>
+                    </FormControl>
+
+                    <FormDescription>
+                      Confirm the pin is on the property, rather than the centre of the area.
+                    </FormDescription>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* MANUAL */}
+            <div
+              className="space-y-6"
+              onChangeCapture={() => {
+                //When the address changes, we ask the user to check the pin again.
+                form.setValue("locationConfirmed", false, { shouldDirty: true });
+              }}
+            >
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Enter the property address details below.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="district"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>District</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Kathmandu" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
-                {isResolvingAddress && (
-                  <div className="rounded-md border bg-muted/40 px-4 py-3">
-                    <p className="text-sm text-muted-foreground">Finding address...</p>
-                  </div>
-                )}
-
-                {!isResolvingAddress &&
-                  form.watch("latitude") != null &&
-                  form.watch("longitude") != null && (
-                    <div className="rounded-lg border bg-muted/30 p-4">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">Selected location</p>
-
-                          {resolvedAddress && (
-                            <p className="text-sm text-muted-foreground">{resolvedAddress}</p>
-                          )}
-
-                          <p className="text-xs text-muted-foreground">
-                            {Number(form.watch("latitude")).toFixed(6)},{" "}
-                            {Number(form.watch("longitude")).toFixed(6)}
-                          </p>
-                        </div>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setLocationMode("manual")}
-                        >
-                          <Icons.keyboard className="mr-2 size-4" />
-                          Edit address
-                        </Button>
-                      </div>
-                    </div>
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Balaju" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-              </TabsContent>
+                />
+              </div>
 
-              {/* MANUAL */}
-              <TabsContent value="manual" className="mt-0 space-y-6">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
-                    Enter the property address details below.
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="province"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Province</FormLabel>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="district"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>District</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue("locationConfirmed", false, { shouldDirty: true });
+                        }}
+                        value={field.value}
+                      >
                         <FormControl>
-                          <Input placeholder="e.g. Kathmandu" {...field} />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Province" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Balaju" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <SelectContent>
+                          <SelectItem value="Koshi">Koshi</SelectItem>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="province"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Province</FormLabel>
+                          <SelectItem value="Madhesh">Madhesh</SelectItem>
 
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Province" />
-                            </SelectTrigger>
-                          </FormControl>
+                          <SelectItem value="Bagmati">Bagmati</SelectItem>
 
-                          <SelectContent>
-                            <SelectItem value="Koshi">Koshi</SelectItem>
+                          <SelectItem value="Gandaki">Gandaki</SelectItem>
 
-                            <SelectItem value="Madhesh">Madhesh</SelectItem>
+                          <SelectItem value="Lumbini">Lumbini</SelectItem>
 
-                            <SelectItem value="Bagmati">Bagmati</SelectItem>
+                          <SelectItem value="Karnali">Karnali</SelectItem>
 
-                            <SelectItem value="Gandaki">Gandaki</SelectItem>
+                          <SelectItem value="Sudurpaschim">Sudurpaschim</SelectItem>
+                        </SelectContent>
+                      </Select>
 
-                            <SelectItem value="Lumbini">Lumbini</SelectItem>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                            <SelectItem value="Karnali">Karnali</SelectItem>
+                <FormField
+                  control={form.control}
+                  name="municipality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Municipality</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Kathmandu Metro" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                            <SelectItem value="Sudurpaschim">Sudurpaschim</SelectItem>
-                          </SelectContent>
-                        </Select>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="street"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Street / Tole</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Sano Bharyang Marg" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="wardNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ward Number</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g. 4" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name="municipality"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Municipality</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Kathmandu Metro" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="street"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Street / Tole</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Sano Bharyang Marg" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="wardNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ward Number</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="e.g. 4" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="houseNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>House Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 1-2-3" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="houseNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>House Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. 1-2-3" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             {/* Shared field */}
             <div className="mt-6 border-t pt-6">
