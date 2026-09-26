@@ -25,15 +25,38 @@ export async function getListOfProperties(pageNumber: number = 1, limit: number 
 
 export async function getPropertyBySlug(slug: string) {
   try {
-    const response = await fetch(`http://localhost:5000/api/v1/property/${slug}`, {
-      next: { revalidate: 60 } //Cache in seconds to revalidate
-    });
+    const cookieStore = await cookies();
+
+    //We forward the session cookie so that the backend can check whether
+    //the current user owns a private or expired property listing.
+    const response = await fetch(
+      `http://localhost:5000/api/v1/property/${encodeURIComponent(slug)}`,
+      {
+        headers: {
+          Accept: "application/json",
+          Cookie: cookieStore.toString()
+        },
+        cache: "no-store"
+      }
+    );
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      return {
+        error: "Could not load the property listing."
+      };
+    }
 
     const data = await response.json();
 
     return data;
   } catch (error: unknown) {
-    return { error: getErrorMessage(error) };
+    return {
+      error: getErrorMessage(error)
+    };
   }
 }
 
@@ -102,6 +125,9 @@ export async function createProperty(data: any): Promise<CreatePropertyResponse>
       return { success: false, error: result.message || "Failed to list property" };
     }
 
+    //We refresh My Listings after the property has been created successfully.
+    revalidatePath("/property/my-listings");
+
     return { success: true, slug: result.slug };
   } catch (error: any) {
     return { success: false, error: getErrorMessage(error) };
@@ -166,6 +192,7 @@ export async function updateProperty(
     revalidatePath(`/property/${saved.slug}`);
     revalidatePath(`/property/${saved.slug}/edit`);
     revalidatePath("/property/search");
+    revalidatePath("/property/my-listings");
     revalidatePath("/");
 
     return {
@@ -264,6 +291,9 @@ export async function deleteProperty(propertyId: string): Promise<DeleteProperty
           "Could not delete the property listing."
       };
     }
+
+    //We refresh My Listings after the property has been deleted successfully.
+    revalidatePath("/property/my-listings");
 
     return {
       success: true

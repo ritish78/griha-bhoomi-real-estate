@@ -5,6 +5,7 @@ import {
   filterProperties,
   getListOfFeaturedPropertiesByPagination,
   getListOfPropertiesByPagination,
+  getMyProperties,
   getPropertyById,
   getPropertyBySlug,
   getPropertyForEdit,
@@ -13,7 +14,11 @@ import {
   // seedProperty,
   updatePropertyById
 } from "src/controller/property/propertyController";
-import { newPropertySchema, updatePropertySchema } from "src/controller/property/propertySchema";
+import {
+  minePropertiesSchema,
+  newPropertySchema,
+  updatePropertySchema
+} from "src/controller/property/propertySchema";
 import { onlyIfLoggedIn } from "src/middleware/authCheck";
 import { validatePropertySchema, validateRequest } from "src/middleware/validateRequest";
 // import { Property } from "src/model/property";
@@ -385,13 +390,42 @@ router.get("/map/viewport", async (req: Request, res: Response, next: NextFuncti
 });
 
 /**
+ * @route   /api/v1/property/mine
+ * @method  GET
+ * @desc    Get the current user's listings, including private and expired listings
+ * @access  Auth User
+ */
+router.route("/mine").get(onlyIfLoggedIn, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //We get the user id from the session, not from the request query.
+    const currentUserId = req.session.userId;
+    if (!currentUserId) {
+      throw new AuthError("Please login to view your listings!");
+    }
+
+    const { filter, page } = minePropertiesSchema.parse(req.query);
+
+    //These results belong to one user and must not enter the shared cache.
+    res.setHeader("Cache-Control", "private, no-store");
+    const properties = await getMyProperties(currentUserId, filter, page);
+    return res.status(200).json(properties);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * @route               /api/v1/property/:slug
  * @method              GET
  * @desc                Get property using its slug
  * @reqParams           string - slug
  * @access              Public
  */
-router.route("/:slug").get(cache(600), async (req: Request, res: Response, next: NextFunction) => {
+router.route("/:slug").get(async (req: Request, res: Response, next: NextFunction) => {
+  //Owners can view their private and expired listings.
+  //We must not share this response between different users.
+  res.setHeader("Cache-Control", "private, no-store");
+
   const slug = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
 
   if (!slug) {

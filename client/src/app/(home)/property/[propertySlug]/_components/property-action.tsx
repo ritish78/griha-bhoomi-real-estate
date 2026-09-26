@@ -29,9 +29,15 @@ interface PropertyActionsProps {
   propertyId: string;
   slug: string;
   sellerId: string | null;
+  returnToEndpoint?: string;
 }
 
-export default function PropertyActions({ propertyId, slug, sellerId }: PropertyActionsProps) {
+export default function PropertyActions({
+  propertyId,
+  slug,
+  sellerId,
+  returnToEndpoint = "/property/search" //In this implementation, I am setting default to search page like in the current onDelete function.
+}: PropertyActionsProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -78,7 +84,7 @@ export default function PropertyActions({ propertyId, slug, sellerId }: Property
       });
 
       //We replace the current page because the listing no longer exists.
-      router.replace("/property/search");
+      router.replace(returnToEndpoint);
       router.refresh();
     } catch (error) {
       toast.error("Could not delete property", {

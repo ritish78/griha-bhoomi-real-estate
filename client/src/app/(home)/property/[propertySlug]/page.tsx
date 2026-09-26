@@ -45,7 +45,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
   } else {
     property = await getPropertyBySlug(propertySlug);
 
-    if (property.error) {
+    if (property?.error) {
       return <p>Oops! An error occurred! {property.error}</p>;
     }
 

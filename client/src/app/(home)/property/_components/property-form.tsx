@@ -118,11 +118,11 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
     bathroomCount: 0,
     kitchenCount: 0,
     carParking: 0,
+    bikeParking: 0,
     sharedBathroom: false,
     facilities: [],
     evCharging: false,
     furnished: false,
-    bikeParking: 0,
     area: "",
     areaUnit: "sq-ft",
     landType: "",
@@ -353,7 +353,7 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
         breadth: serializePropertyDimension(data.breadth, breadthUnit), // : undefined,
 
         // Do not overwrite the saved bike-parking value during edits.
-        bikeParking: isEditing ? data.bikeParking : data.carParking * 3,
+        bikeParking: data.bikeParking > data.carParking ? data.bikeParking : 3 * data.carParking,
 
         builtAt: data.builtAt
           ? serializeDate(data.builtAt, initialValues?.builtAt)
@@ -1253,8 +1253,24 @@ export function PropertyForm({ editSlug, initialValues }: PropertyFormProps) {
                     <FormItem>
                       <FormLabel>Car Parking</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} />
+                        <Input type="number" min={0} max={32767} step={1} {...field} />
                       </FormControl>
+                      <FormDescription>Number of available car parking spaces.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="bikeParking"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bike Parking</FormLabel>
+                      <FormControl>
+                        <Input type="number" min={0} max={32767} step={1} {...field} />
+                      </FormControl>
+                      <FormDescription>Number of available bike parking spaces.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

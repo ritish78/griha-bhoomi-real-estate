@@ -36,27 +36,37 @@ export const propertyFormSchema = z.object({
   province: z.string().min(2, "Province is required"),
   houseNumber: z.string().optional(),
   closeLandmark: z.string().optional(),
-  latitude: z
-    .number()
-    .min(-90, "Invalid latitude")
-    .max(90, "Invalid latitude")
-    .nullable()
-    .optional(),
-  longitude: z
-    .number()
-    .min(-180, "Invalid longitude")
-    .max(180, "Invalid longitude")
-    .nullable()
-    .optional(),
+  latitude: z.number().min(-90, "Invalid latitude").max(90, "Invalid latitude").nullable(),
+  longitude: z.number().min(-180, "Invalid longitude").max(180, "Invalid longitude").nullable(),
   imageUrl: z.array(z.string()).optional().default([]),
   locationConfirmed: z.boolean().refine((value) => value, "Please confirm the property location!"),
 
   //For House
   houseType: z.string().optional().default("House"),
-  roomCount: z.coerce.number().optional().default(0),
-  bathroomCount: z.coerce.number().optional().default(0),
-  floorCount: z.coerce.number().optional().default(0),
-  kitchenCount: z.coerce.number().optional().default(0),
+  roomCount: z.coerce
+    .number()
+    .min(0, "Please enter number of rooms available!")
+    .max(999, "Please enter valid number of rooms!")
+    .optional()
+    .default(0),
+  bathroomCount: z.coerce
+    .number()
+    .min(0, "Please enter number of bathrooms available!")
+    .max(999, "Please enter valid number of bathrooms!")
+    .optional()
+    .default(0),
+  floorCount: z.coerce
+    .number()
+    .min(0, "Please enter number of floor available!")
+    .max(999, "Please enter valid number of floor!")
+    .optional()
+    .default(0),
+  kitchenCount: z.coerce
+    .number()
+    .min(0, "Please enter number of kitchen available!")
+    .max(999, "Please enter valid number of kitchen!")
+    .optional()
+    .default(0),
   furnished: z.boolean().optional().default(false),
   facing: z.string().optional(),
   carParking: z.coerce.number().optional().default(0),

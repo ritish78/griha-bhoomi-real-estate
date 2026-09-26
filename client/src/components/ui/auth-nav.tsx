@@ -90,6 +90,12 @@ export function AuthNav() {
             Profile
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/property/my-listings">
+            <Icons.house className="mr-2 size-5" />
+            My Listings
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => logout()}
           className="cursor-pointer text-destructive focus:text-destructive focus:bg-red-50 dark:text-red-400 dark:focus:bg-red-950/50 dark:focus:text-red-300"

@@ -1,5 +1,5 @@
 import db from ".";
-import { sql, eq, desc, count, and, gte } from "drizzle-orm";
+import { sql, eq, desc, count, and, gte, getTableColumns } from "drizzle-orm";
 
 import { user } from "src/model/user";
 import { property } from "src/model/property";
@@ -640,3 +640,46 @@ export const preparedGetAddressById = db
   .where(eq(address.id, sql.placeholder("addressId")))
   .limit(1)
   .prepare("get-address-by-id");
+
+//The counts use the same user and time as the listings query.
+export const preparedGetMyPropertyCounts = db
+  .select({
+    all: count(),
+    expired: sql<number>`count(*) FILTER (
+      WHERE ${property.expiresOn} <= ${sql.placeholder("now")}::timestamp
+    )`.mapWith(Number)
+  })
+  .from(property)
+  .where(eq(property.sellerId, sql.placeholder("userId")))
+  .prepare("get-my-property-counts");
+
+//We only return listings created by the current user. Private and expired
+//listings are included because this query is used to manage their listings.
+export const preparedGetMyProperties = db
+  .select({
+    ...getTableColumns(property),
+    street: address.street,
+    municipality: address.municipality,
+    city: address.city,
+    district: address.district,
+    isExpired: sql<boolean>`${property.expiresOn} <= ${sql.placeholder("now")}::timestamp`
+  })
+  .from(property)
+  .leftJoin(address, eq(property.address, address.id))
+  .where(
+    and(
+      eq(property.sellerId, sql.placeholder("userId")),
+      sql`(
+      ${sql.placeholder("filter")}::text = 'all'
+      OR (${sql.placeholder("filter")}::text = 'expired'
+          AND ${property.expiresOn} <= ${sql.placeholder("now")}::timestamp)
+      OR (${sql.placeholder("filter")}::text = 'unexpired'
+          AND ${property.expiresOn} > ${sql.placeholder("now")}::timestamp)
+    )`
+    )
+  )
+  .orderBy(sql`${property.listedAt} DESC NULLS LAST`, desc(property.id))
+  .limit(sql.placeholder("limit"))
+  .offset(sql.placeholder("offset"))
+  .prepare("get-my-properties");
+

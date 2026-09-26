@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 import db from "./src/db";
@@ -259,7 +259,15 @@ async function seedPropertyData() {
       district: propertySeed.district,
       province: propertySeed.province,
       latitude: propertySeed.latitude,
-      longitude: propertySeed.longitude
+      longitude: propertySeed.longitude,
+      //We create the location point using the same coordinates saved in the address.
+      //Longitude comes first, followed by latitude.
+      location: sql`ST_SetSRID(
+        ST_MakePoint(
+          ${propertySeed.longitude}::real,
+          ${propertySeed.latitude}::real
+        ),
+        4326)`
     });
 
     await db.insert(house).values({

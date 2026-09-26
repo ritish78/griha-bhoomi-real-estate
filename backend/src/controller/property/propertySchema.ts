@@ -53,3 +53,8 @@ export const updatePropertySchema = z.object({
       ]
     })
 });
+
+export const minePropertiesSchema = z.object({
+  filter: z.enum(["all", "unexpired", "expired"]).default("all"),
+  page: z.coerce.number().int().min(1).max(999).default(1)
+});
