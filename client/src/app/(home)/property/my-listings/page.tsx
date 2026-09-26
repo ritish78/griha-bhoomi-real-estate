@@ -130,7 +130,7 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
   return (
     <Shell className="pb-12 md:pb-14 bg-slate-50 dark:bg-transparent/5">
       <div className="container max-w-7xl min-w-0 px-0 sm:px-4 py-6 lg:py-10">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-5 lg:mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">My Listings</h1>
             <p className="mt-2 text-muted-foreground">Manage your property listings.</p>
@@ -157,7 +157,7 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
         ) : (
           <>
             {/* We keep the selected filter in the URL so it is preserved when refreshing. */}
-            <nav aria-label="Filter your listings" className="mb-6 flex flex-wrap gap-2">
+            <nav aria-label="Filter your listings" className="mb-4 lg:mb-6 flex flex-wrap gap-2">
               {filters.map((item) => (
                 <Button
                   key={item.value}
@@ -275,36 +275,104 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
                   </div>
                 </Card>
 
-                {/* On smaller screens, we show the same information in compact cards. */}
-                <div className="grid grid-cols-1 gap-4 lg:hidden">
+                {/* On smaller screens, we keep the image and listing details together.
+    On tablets, we show two cards in each row instead of stretching one card. */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:hidden">
                   {result.data.properties.map((property) => (
-                    <Card key={property.id} className="rounded-md overflow-hidden">
-                      <CardContent className="p-4 space-y-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <PropertyDetails property={property} />
+                    <Card
+                      key={property.id}
+                      className="min-w-0 overflow-hidden rounded-md shadow-sm"
+                    >
+                      <div className="flex h-full">
+                        {/* The image fills the left side of the card.
+            Its height follows the content instead of remaining a small thumbnail. */}
+                        <Link
+                          href={`/property/${property.slug}`}
+                          className="relative min-h-44 w-40 shrink-0 self-stretch bg-muted sm:w-36 md:w-28"
+                          aria-label={`View ${property.title}`}
+                        >
+                          {property.imageUrl?.[0] ? (
+                            <Image
+                              src={property.imageUrl[0]}
+                              alt={property.title}
+                              fill
+                              sizes="(min-width: 768px) 112px, (min-width: 640px) 144px, 112px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Icons.house
+                                className="size-8 text-muted-foreground"
+                                aria-hidden="true"
+                              />
+                            </div>
+                          )}
+                        </Link>
 
-                          <PropertyActions
-                            propertyId={property.id}
-                            slug={property.slug}
-                            sellerId={property.sellerId}
-                            returnToEndpoint={returnTo}
-                          />
-                        </div>
+                        <CardContent className="min-w-0 flex-1 p-3">
+                          {/* We keep the actions beside the title without giving them a separate row. */}
+                          <div className="flex items-start justify-between gap-1">
+                            <Link
+                              href={`/property/${property.slug}`}
+                              className="min-w-0 line-clamp-2 break-words text-sm font-semibold leading-5 hover:underline sm:text-base"
+                            >
+                              {property.title}
+                            </Link>
 
-                        <PropertyPrice property={property} />
+                            <div className="-mt-2 -mr-2 shrink-0">
+                              <PropertyActions
+                                propertyId={property.id}
+                                slug={property.slug}
+                                sellerId={property.sellerId}
+                              />
+                            </div>
+                          </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="default" className="p-2">
-                            {property.status}
-                          </Badge>
+                          <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-muted-foreground">
+                            {formatAddress(property) || "Location not provided"}
+                          </p>
 
-                          {property.featured && <FeaturedBadge />}
-                        </div>
+                          {/* Carried on the same line where space allows. */}
+                          <p className="mt-2 break-words text-sm font-semibold tabular-nums sm:text-base">
+                            Rs. {formatPrice(property.price, "en-US")}
+                            {property.toRent && (
+                              <span className="ml-1 text-xs font-normal text-muted-foreground">
+                                / month
+                              </span>
+                            )}
+                          </p>
 
-                        <div className="border-t pt-3">
-                          <PropertyExpiry property={property} />
-                        </div>
-                      </CardContent>
+                          {/* We reuse the existing badge styles without adding new colours. */}
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            <Badge variant="default">{property.status}</Badge>
+
+                            {property.featured && (
+                              <Badge variant="default" className="gap-1 border-0 shadow-sm">
+                                <Icons.award className="size-3.5" aria-hidden="true" />
+                                Featured
+                              </Badge>
+                            )}
+
+                            {property.private && <Badge variant="outline">Private</Badge>}
+                          </div>
+
+                          {/* Expiry stays separate from the listing's Sale, Rent, Hold or Sold status. */}
+                          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 border-t pt-2">
+                            {property.isExpired ? (
+                              <Badge variant="outline">Expired</Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Expires</span>
+                            )}
+
+                            <time
+                              dateTime={property.expiresOn.slice(0, 10)}
+                              className="text-xs tabular-nums text-muted-foreground"
+                            >
+                              {property.expiresOn.slice(0, 10)}
+                            </time>
+                          </div>
+                        </CardContent>
+                      </div>
                     </Card>
                   ))}
                 </div>
