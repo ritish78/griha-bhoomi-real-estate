@@ -56,5 +56,7 @@ export const updatePropertySchema = z.object({
 
 export const minePropertiesSchema = z.object({
   filter: z.enum(["all", "unexpired", "expired"]).default("all"),
+  sortBy: z.enum(["listedAt", "title", "price", "status", "featured", "expiresOn"]).default("listedAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
   page: z.coerce.number().int().min(1).max(999).default(1)
 });

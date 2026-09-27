@@ -399,15 +399,18 @@ router.route("/mine").get(onlyIfLoggedIn, async (req: Request, res: Response, ne
   try {
     //We get the user id from the session, not from the request query.
     const currentUserId = req.session.userId;
+
     if (!currentUserId) {
       throw new AuthError("Please login to view your listings!");
     }
 
-    const { filter, page } = minePropertiesSchema.parse(req.query);
+    const { filter, page, sortBy, sortOrder } = minePropertiesSchema.parse(req.query);
 
     //These results belong to one user and must not enter the shared cache.
     res.setHeader("Cache-Control", "private, no-store");
-    const properties = await getMyProperties(currentUserId, filter, page);
+
+    const properties = await getMyProperties(currentUserId, filter, page, sortBy, sortOrder);
+
     return res.status(200).json(properties);
   } catch (error) {
     next(error);

@@ -39,26 +39,63 @@ type MyPropertiesResult =
   | { success: true; data: z.infer<typeof myPropertiesSchema> }
   | { success: false; status: number; error: string };
 
+export const myPropertySortSchema = z.enum([
+  "listedAt",
+  "title",
+  "price",
+  "status",
+  "featured",
+  "expiresOn"
+]);
+
+export const myPropertySortOrderSchema = z.enum(["asc", "desc"]);
+
+export type MyPropertySortBy = z.infer<typeof myPropertySortSchema>;
+export type MyPropertySortOrder = z.infer<typeof myPropertySortOrderSchema>;
+
 export async function getMyProperties(
   filter: MyPropertyFilter,
-  page: number
+  page: number,
+  sortBy: MyPropertySortBy = "listedAt",
+  sortOrder: MyPropertySortOrder = "desc"
 ): Promise<MyPropertiesResult> {
   try {
     const cookieStore = await cookies();
-    const query = new URLSearchParams({ filter, page: String(page) });
+
+    //We send the selected filter, page and sorting options to the backend.
+    //If sorting is not provided, we show the newest listings first.
+    const query = new URLSearchParams({
+      filter,
+      page: String(page),
+      sortBy,
+      sortOrder
+    });
+
     const response = await fetch(`http://localhost:5000/api/v1/property/mine?${query}`, {
-      headers: { Accept: "application/json", Cookie: cookieStore.toString() },
+      headers: {
+        Accept: "application/json",
+        Cookie: cookieStore.toString()
+      },
       cache: "no-store"
     });
 
     if (!response.ok) {
-      return { success: false, status: response.status, error: "Could not load your listings." };
+      return {
+        success: false,
+        status: response.status,
+        error: "Could not load your listings."
+      };
     }
 
     const body: unknown = await response.json();
-    return { success: true, data: myPropertiesSchema.parse(body) };
+
+    return {
+      success: true,
+      data: myPropertiesSchema.parse(body)
+    };
   } catch (error) {
     console.error("Could not load your listings:", error);
+
     return {
       success: false,
       status: 500,

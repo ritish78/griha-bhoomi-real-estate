@@ -653,33 +653,104 @@ export const preparedGetMyPropertyCounts = db
   .where(eq(property.sellerId, sql.placeholder("userId")))
   .prepare("get-my-property-counts");
 
-//We only return listings created by the current user. Private and expired
-//listings are included because this query is used to manage their listings.
-export const preparedGetMyProperties = db
-  .select({
-    ...getTableColumns(property),
-    street: address.street,
-    municipality: address.municipality,
-    city: address.city,
-    district: address.district,
-    isExpired: sql<boolean>`${property.expiresOn} <= ${sql.placeholder("now")}::timestamp`
-  })
-  .from(property)
-  .leftJoin(address, eq(property.address, address.id))
-  .where(
-    and(
-      eq(property.sellerId, sql.placeholder("userId")),
-      sql`(
-      ${sql.placeholder("filter")}::text = 'all'
-      OR (${sql.placeholder("filter")}::text = 'expired'
-          AND ${property.expiresOn} <= ${sql.placeholder("now")}::timestamp)
-      OR (${sql.placeholder("filter")}::text = 'unexpired'
-          AND ${property.expiresOn} > ${sql.placeholder("now")}::timestamp)
-    )`
-    )
-  )
-  .orderBy(sql`${property.listedAt} DESC NULLS LAST`, desc(property.id))
-  .limit(sql.placeholder("limit"))
-  .offset(sql.placeholder("offset"))
-  .prepare("get-my-properties");
+export type MyPropertySortBy = "listedAt" | "title" | "price" | "status" | "featured" | "expiresOn";
+export type MyPropertySortOrder = "asc" | "desc";
 
+//We map the allowed sorting options to our database columns.
+//We do not use a column name supplied directly by the request.
+const validMyPropertySortOptions = {
+  listedAt: property.listedAt,
+  price: property.price,
+
+  //We ignore capitalization when sorting listing titles alphabetically.
+  title: sql`lower(${property.title})`,
+
+  //The status column is an enum. We convert it to text so that
+  //sorting follows alphabetical order instead of the enum's declared order.
+  status: sql`${property.status}::text`,
+
+  //Older listings may have a null featured value.
+  //We treat those listings the same as listings that are not featured.
+  featured: sql`COALESCE(${property.featured}, false)`,
+
+  expiresOn: property.expiresOn
+};
+
+const prepareGetMyProperties = (sortBy: MyPropertySortBy, sortOrder: MyPropertySortOrder) => {
+  const columnToSort = validMyPropertySortOptions[sortBy];
+
+  //Both directions keep missing values at the end of the results.
+  const propertySortOrder =
+    sortOrder === "asc" ? sql`${columnToSort} ASC NULLS LAST` : sql`${columnToSort} DESC NULLS LAST`;
+
+  //We only return listings created by the current user. Private and expired
+  //listings are included because this query is used to manage their listings.
+  return (
+    db
+      .select({
+        ...getTableColumns(property),
+        street: address.street,
+        municipality: address.municipality,
+        city: address.city,
+        district: address.district,
+        isExpired: sql<boolean>`
+        ${property.expiresOn} <= ${sql.placeholder("now")}::timestamp
+      `
+      })
+      .from(property)
+      .leftJoin(address, eq(property.address, address.id))
+      .where(
+        and(
+          eq(property.sellerId, sql.placeholder("userId")),
+          sql`(
+          ${sql.placeholder("filter")}::text = 'all'
+
+          OR (
+            ${sql.placeholder("filter")}::text = 'expired'
+            AND ${property.expiresOn} <= ${sql.placeholder("now")}::timestamp
+          )
+
+          OR (
+            ${sql.placeholder("filter")}::text = 'unexpired'
+            AND ${property.expiresOn} > ${sql.placeholder("now")}::timestamp
+          )
+        )`
+        )
+      )
+      //We sort all matching listings before selecting the requested page.
+      //The property id keeps the order consistent when sorted values are equal.
+      .orderBy(propertySortOrder, desc(property.id))
+      .limit(sql.placeholder("limit"))
+      .offset(sql.placeholder("offset"))
+      .prepare(`get-my-properties-${sortBy}-${sortOrder}`)
+  );
+};
+
+//We create the allowed prepared statements once when this module is loaded.
+//The controller selects one of these statements for each request.
+export const preparedGetMyProperties = {
+  listedAt: {
+    asc: prepareGetMyProperties("listedAt", "asc"),
+    desc: prepareGetMyProperties("listedAt", "desc")
+  },
+  price: {
+    asc: prepareGetMyProperties("price", "asc"),
+    desc: prepareGetMyProperties("price", "desc")
+  },
+  title: {
+    asc: prepareGetMyProperties("title", "asc"),
+    desc: prepareGetMyProperties("title", "desc")
+  },
+  status: {
+    asc: prepareGetMyProperties("status", "asc"),
+    desc: prepareGetMyProperties("status", "desc")
+  },
+  featured: {
+    asc: prepareGetMyProperties("featured", "asc"),
+    desc: prepareGetMyProperties("featured", "desc")
+  },
+  expiresOn: {
+    asc: prepareGetMyProperties("expiresOn", "asc"),
+    desc: prepareGetMyProperties("expiresOn", "desc")
+  }
+};

@@ -7,10 +7,18 @@ import { Icons } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
 import { formatAddress } from "@/lib/formatAddress";
 import { formatPrice } from "@/lib/formatPrice";
-import { getMyProperties, type MyProperty, type MyPropertyFilter } from "@/lib/getMyProperties";
+import {
+  getMyProperties,
+  myPropertySortSchema,
+  myPropertySortOrderSchema,
+  type MyPropertyFilter
+} from "@/lib/getMyProperties";
+
 import PropertyActions from "../[propertySlug]/_components/property-action";
+import MyListingsTable from "./_components/my-listings-table";
 
 const filters: { value: MyPropertyFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -18,86 +26,12 @@ const filters: { value: MyPropertyFilter; label: string }[] = [
   { value: "expired", label: "Expired" }
 ];
 
-function getListingsUrl(filter: MyPropertyFilter, page = 1) {
-  return `/property/my-listings?${new URLSearchParams({ filter, page: String(page) })}`;
-}
-
-//We use the same Featured badge and award icon as the search property card.
-function FeaturedBadge() {
-  return (
-    <Badge variant="default" className="p-2 border-0 shadow-sm whitespace-nowrap">
-      <Icons.award className="size-4" aria-hidden="true" />
-      <span className="ml-2 font-semibold text-shadow-sm">Featured</span>
-    </Badge>
-  );
-}
-
-function PropertyDetails({ property }: { property: MyProperty }) {
-  return (
-    <div className="flex min-w-0 items-start gap-3">
-      <Link
-        href={`/property/${property.slug}`}
-        className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted"
-      >
-        {property.imageUrl?.[0] ? (
-          <Image
-            src={property.imageUrl[0]}
-            alt={property.title}
-            fill
-            sizes="64px"
-            className="object-cover"
-          />
-        ) : (
-          <span className="flex size-full items-center justify-center" aria-label={property.title}>
-            <Icons.house className="size-6 text-muted-foreground" aria-hidden="true" />
-          </span>
-        )}
-      </Link>
-      <div className="min-w-0 space-y-1">
-        <Link
-          href={`/property/${property.slug}`}
-          className="line-clamp-2 font-semibold hover:underline break-words"
-        >
-          {property.title}
-        </Link>
-        <p className="text-sm text-muted-foreground break-words">
-          {formatAddress(property) || "Location not provided"}
-        </p>
-        {property.private && <Badge variant="outline">Private</Badge>}
-      </div>
-    </div>
-  );
-}
-
-function PropertyPrice({ property }: { property: MyProperty }) {
-  return (
-    <div className="font-semibold tabular-nums">
-      Rs. {formatPrice(property.price, "en-US")}
-      {property.toRent && (
-        <span className="block text-xs font-normal text-muted-foreground">per month</span>
-      )}
-    </div>
-  );
-}
-
-function PropertyExpiry({ property }: { property: MyProperty }) {
-  //Expiry is separate from Sale, Rent, Hold or Sold status.
-  const date = property.expiresOn.slice(0, 10);
-  return (
-    <div className="space-y-1">
-      {property.isExpired && <Badge variant="outline">Expired</Badge>}
-      <p className="text-sm text-muted-foreground">
-        {property.isExpired ? "Expired on " : "Expires on "}
-        <time dateTime={date}>{date}</time>
-      </p>
-    </div>
-  );
-}
-
 interface MyListingsPageProps {
   searchParams: Promise<{
     filter?: string | string[];
     page?: string | string[];
+    sortBy?: string | string[];
+    sortOrder?: string | string[];
   }>;
 }
 
@@ -108,14 +42,33 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
   //If the filter is not provided or is invalid, we show all listings.
   const filter = filters.find((item) => item.value === query.filter)?.value ?? "all";
 
+  //We only accept the sorting options supported by the backend.
+  //By default, we show the newest listings first.
+  const sortBy = myPropertySortSchema.catch("listedAt").parse(query.sortBy);
+
+  const sortOrder = myPropertySortOrderSchema.catch("desc").parse(query.sortOrder);
+
   const requestedPage = typeof query.page === "string" ? Number(query.page) : 1;
 
   const page =
-    Number.isInteger(requestedPage) && requestedPage > 0 && requestedPage <= 1000000
+    Number.isInteger(requestedPage) && requestedPage > 0 && requestedPage <= 999
       ? requestedPage
       : 1;
 
-  const result = await getMyProperties(filter, page);
+  //We preserve sorting when changing the filter or moving between pages.
+  //Changing the filter starts from the first page.
+  function getListingsUrl(selectedFilter: MyPropertyFilter, selectedPage = 1) {
+    const params = new URLSearchParams({
+      filter: selectedFilter,
+      page: String(selectedPage),
+      sortBy,
+      sortOrder
+    });
+
+    return `/property/my-listings?${params.toString()}`;
+  }
+
+  const result = await getMyProperties(filter, page, sortBy, sortOrder);
 
   //The backend gets the current user from their session.
   //If the session has expired, we ask the user to sign in again.
@@ -123,7 +76,7 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
     redirect(`/login?redirect=${encodeURIComponent(getListingsUrl(filter, page))}`);
   }
 
-  //After deleting a listing, we return to the same filter and page.
+  //The Try again link keeps the current filter, page and sorting.
   //The backend adjusts the page if the last listing on that page was deleted.
   const returnTo = getListingsUrl(filter, result.success ? result.data.page : page);
 
@@ -133,6 +86,7 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
         <div className="mb-5 lg:mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">My Listings</h1>
+
             <p className="mt-2 text-muted-foreground">Manage your property listings.</p>
           </div>
 
@@ -193,90 +147,16 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
               </Card>
             ) : (
               <>
-                {/* We show the listings as a table on desktop. */}
-                <Card className="hidden lg:block overflow-hidden rounded-md">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <caption className="sr-only">
-                        Your property listings, featured status and expiry
-                      </caption>
-
-                      <thead className="border-b bg-muted/50">
-                        <tr>
-                          <th scope="col" className="p-4 font-medium text-muted-foreground">
-                            Property
-                          </th>
-                          <th scope="col" className="p-4 font-medium text-muted-foreground">
-                            Price
-                          </th>
-                          <th scope="col" className="p-4 font-medium text-muted-foreground">
-                            Status
-                          </th>
-                          <th scope="col" className="p-4 font-medium text-muted-foreground">
-                            Featured
-                          </th>
-                          <th scope="col" className="p-4 font-medium text-muted-foreground">
-                            Expiry
-                          </th>
-                          <th scope="col" className="p-4 font-medium text-muted-foreground">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {result.data.properties.map((property) => (
-                          <tr
-                            key={property.id}
-                            className="border-b last:border-0 hover:bg-muted/50"
-                          >
-                            <td className="p-4 max-w-xs">
-                              <PropertyDetails property={property} />
-                            </td>
-
-                            <td className="p-4">
-                              <PropertyPrice property={property} />
-                            </td>
-
-                            <td className="p-4">
-                              <Badge variant="default" className="p-2">
-                                {property.status}
-                              </Badge>
-                            </td>
-
-                            <td className="p-4">
-                              {property.featured ? (
-                                <FeaturedBadge />
-                              ) : (
-                                <span className="text-muted-foreground">No</span>
-                              )}
-                            </td>
-
-                            <td className="p-4">
-                              <PropertyExpiry property={property} />
-                            </td>
-
-                            <td className="p-4">
-                              {/* was planning to add edit and delete listing on the table itself. But
-                              went with three dots which is same in /[propertySlug] page */}
-                              {/* <div className="flex items-center"> */}
-                              <PropertyActions
-                                propertyId={property.id}
-                                slug={property.slug}
-                                sellerId={property.sellerId}
-                                returnToEndpoint={returnTo}
-                              />
-                              {/* </div> */}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </Card>
+                {/* We show the Data Table on desktop.
+                    Its sorting dropdown is available on both desktop and mobile. */}
+                <MyListingsTable
+                  properties={result.data.properties}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                />
 
                 {/* On smaller screens, we keep the image and listing details together.
-    On tablets, we show two cards in each row instead of stretching one card. */}
+                    On tablets, we show two cards in each row instead of stretching one card. */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:hidden">
                   {result.data.properties.map((property) => (
                     <Card
@@ -285,9 +165,9 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
                     >
                       <div className="flex h-full">
                         {/* The image fills the left side of the card.
-            Its height follows the content instead of remaining a small thumbnail. */}
+                            Its height follows the content instead of remaining a small thumbnail. */}
                         <Link
-                          href={`/property/${property.slug}`}
+                          href={`/property/${encodeURIComponent(property.slug)}`}
                           className="relative min-h-44 w-40 shrink-0 self-stretch bg-muted sm:w-36 md:w-28"
                           aria-label={`View ${property.title}`}
                         >
@@ -296,7 +176,7 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
                               src={property.imageUrl[0]}
                               alt={property.title}
                               fill
-                              sizes="(min-width: 768px) 112px, (min-width: 640px) 144px, 112px"
+                              sizes="(min-width: 768px) 112px, (min-width: 640px) 144px, 160px"
                               className="object-cover"
                             />
                           ) : (
@@ -313,13 +193,14 @@ export default async function MyListingsPage({ searchParams }: MyListingsPagePro
                           {/* We keep the actions beside the title without giving them a separate row. */}
                           <div className="flex items-start justify-between gap-1">
                             <Link
-                              href={`/property/${property.slug}`}
+                              href={`/property/${encodeURIComponent(property.slug)}`}
                               className="min-w-0 line-clamp-2 break-words text-sm font-semibold leading-5 hover:underline sm:text-base"
                             >
                               {property.title}
                             </Link>
 
                             <div className="-mt-2 -mr-2 shrink-0">
+                              {/* We use the same three-dot menu as the property details page. */}
                               <PropertyActions
                                 propertyId={property.id}
                                 slug={property.slug}

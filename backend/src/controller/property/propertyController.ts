@@ -6,6 +6,8 @@ import db from "src/db";
 
 import {
   getListOfProperties,
+  MyPropertySortBy,
+  MyPropertySortOrder,
   preparedGetMyProperties,
   preparedGetMyPropertyCounts,
   preparedGetPropertyByFeaturedStatus,
@@ -1664,18 +1666,27 @@ export const getSimilarProperties = async (slug: string, currentUserId?: string)
 };
 
 /**
- * @param userId  string - id of the current user from their session
- * @param filter  all, unexpired or expired listings
- * @param page    number - page of listings to return
+ * @param userId     string - id of the current user from their session
+ * @param filter     all, unexpired or expired listings
+ * @param page       number - page of listings to return
+ * @param sortBy     column used to sort the listings
+ * @param sortOrder  asc or desc
  */
 export const getMyProperties = async (
   userId: string,
   filter: "all" | "unexpired" | "expired",
-  page: number
+  page: number,
+  sortBy: MyPropertySortBy = "listedAt",
+  sortOrder: MyPropertySortOrder = "desc"
 ) => {
   const now = new Date().toISOString();
   const limit = 12;
-  const [propertyCounts] = await preparedGetMyPropertyCounts.execute({ userId, now });
+
+  const [propertyCounts] = await preparedGetMyPropertyCounts.execute({
+    userId,
+    now
+  });
+
   const counts = {
     all: propertyCounts.all,
     expired: propertyCounts.expired,
@@ -1685,7 +1696,10 @@ export const getMyProperties = async (
   //If the last listing on a page was deleted, we return the previous page.
   const totalPages = Math.max(1, Math.ceil(counts[filter] / limit));
   const currentPage = Math.min(page, totalPages);
-  const properties = await preparedGetMyProperties.execute({
+
+  //We select the prepared statement for the requested column and direction.
+  //Sorting does not change the counts because the filters remain the same.
+  const properties = await preparedGetMyProperties[sortBy][sortOrder].execute({
     userId,
     filter,
     now,
@@ -1693,5 +1707,10 @@ export const getMyProperties = async (
     offset: (currentPage - 1) * limit
   });
 
-  return { properties, counts, page: currentPage, totalPages };
+  return {
+    properties,
+    counts,
+    page: currentPage,
+    totalPages
+  };
 };

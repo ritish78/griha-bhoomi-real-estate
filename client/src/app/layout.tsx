@@ -9,6 +9,9 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
 import { AuthProvider } from "@/contexts/authContext";
+import { Geist } from "next/font/google";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "GrihaBhoomi",
@@ -29,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
