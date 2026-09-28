@@ -2,6 +2,8 @@ import { formatPrice } from "@/lib/formatPrice";
 import { MapProperty } from "@/types/property";
 import Image from "next/image";
 import Link from "next/link";
+import { Badge } from "../ui/badge";
+import { Icons } from "../icons";
 
 export default function PropertyPopup({ property: p }: { property: MapProperty }) {
   return (
@@ -27,9 +29,19 @@ export default function PropertyPopup({ property: p }: { property: MapProperty }
           </div>
         )}
 
-        <span className="absolute top-2.5 left-2.5 bg-zinc-900 text-white text-[11px] font-medium px-2.5 py-0.5 rounded-full">
-          {p.status}
-        </span>
+        {/*We leave space on the right for the popup's close button.*/}
+        <div className="absolute left-2 right-9 top-2 flex items-start justify-between gap-2 pointer-events-none">
+          {p.featured && (
+            <Badge variant="default" className="p-2 flex mr-auto border-0 shadow-sm">
+              <Icons.award className="mb-1 size-4" aria-hidden="true" />
+              <span className="ml-2 font-semibold text-shadow-sm">Featured</span>
+            </Badge>
+          )}
+
+          <Badge variant="default" className="ml-auto p-2">
+            {p.status}
+          </Badge>
+        </div>
       </div>
 
       <div className="px-3.5 py-3 flex flex-col gap-0.5">

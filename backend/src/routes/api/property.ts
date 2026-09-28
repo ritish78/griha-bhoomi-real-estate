@@ -256,6 +256,24 @@ router.route("/featured").get(cache(300), async (req: Request, res: Response) =>
 });
 
 /**
+ * @route             /api/v1/property/filter/map
+ * @method            GET
+ * @desc              Get map markers using the same filters as property search
+ * @access            Public
+ */
+router.route("/filter/map").get(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //We use the existing filtering function so that cards and markers
+    //follow the same search and visibility conditions.
+    const properties = await filterProperties(req.query, true);
+
+    return res.status(200).json(properties);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * @route               /api/v1/property/filter?keyword=value
  * @eg                  /api/v1/property/filter?keyword=beach OR /api/v1/property?keyword=beach+traditional
  * @method              GET
@@ -263,29 +281,31 @@ router.route("/featured").get(cache(300), async (req: Request, res: Response) =>
  * @reqParams           string - propertyId
  * @access              Public
  */
-router.route("/filter").get(async (req: Request, res: Response) => {
-  const filters = req.query;
-  console.log("The selected filters are: ", filters);
+//We have /filter/map and /filter endpoints and both use the same search filters.
+// /filter returns paginated listings for property cards.
+// /filter/map returns up to 200 matching listings with valid coordinates,
+//regardless of the current card page.
+router.route("/filter").get(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filters = req.query;
 
-  logger.info(
-    `Searched property using filters`,
-    {
-      filters,
-      userId: req.session.userId,
-      userEmail: req.session.email,
-      ip: req.socket.remoteAddress
-    },
-    true
-  );
+    logger.info(
+      "Searched property using filters",
+      {
+        filters,
+        userId: req.session.userId,
+        userEmail: req.session.email,
+        ip: req.socket.remoteAddress
+      },
+      true
+    );
 
-  const propertyList = await filterProperties(filters);
+    const propertyList = await filterProperties(filters);
 
-  //If the user does not provide any search query then the above function
-  //returns -1. In that case, we can redirect the user to `/api/v1/property?page=1`
-  if (propertyList === -1) {
-    return res.redirect("/api/v1/property?page=1");
+    return res.status(200).json(propertyList);
+  } catch (error) {
+    next(error);
   }
-  return res.status(200).send(propertyList);
 });
 
 /**

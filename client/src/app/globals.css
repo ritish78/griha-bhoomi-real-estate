@@ -168,3 +168,46 @@ html[data-theme-reveal="true"]::view-transition-new(root) {
     animation: none;
   }
 }
+
+.property-search-marker {
+  background: transparent;
+  border: 0;
+}
+
+.property-search-marker-label {
+  display: flex;
+  width: max-content;
+  min-width: 72px;
+  max-width: 130px;
+  height: 34px;
+  margin-inline: auto;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 10px;
+  border: 1px solid hsl(var(--primary));
+  border-radius: var(--radius);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 2px 6px rgb(0 0 0 / 15%);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.property-search-marker-label.is-active {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  outline: 2px solid hsl(var(--foreground));
+  outline-offset: 2px;
+}
+
+/*We reuse the same gold colour used by featured property cards.*/
+.property-search-marker-label.is-featured {
+  @apply border-gold bg-gold text-zinc-950;
+}
+
+/*We keep the featured marker gold when its property card is highlighted.*/
+.property-search-marker-label.is-featured.is-active {
+  @apply border-gold bg-gold text-zinc-950 outline-gold;
+}
+

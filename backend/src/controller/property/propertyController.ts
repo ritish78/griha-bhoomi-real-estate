@@ -35,6 +35,7 @@ import { newAddressSchema, updateAddressSchema } from "../address/addressSchema"
 import { updateHouseSchema } from "./houseSchema";
 import { updateLandSchema } from "./landSchema";
 import { user } from "src/model/user";
+import { buildMapBoundsCondition } from "src/utils/buildMapBoundsCondition";
 
 /**
  * @param dummyPropertyData array of property
@@ -477,9 +478,17 @@ export const getPropertyBySlug = async (
  * @param filters   filters object from req.params
  * @returns         Properties[] or -1 if no filter is provided
  */
-export const filterProperties = async (filters) => {
+export const filterProperties = async (filters, forMap: boolean = false) => {
   try {
     const radiusCondition = buildRadiusCondition(filters);
+    const mapBoundsCondition = buildMapBoundsCondition(filters);
+
+    const currentPage = Number(filters.page ?? 1);
+
+    if (!Number.isSafeInteger(currentPage) || currentPage < 1) {
+      throw new BadRequestError("Please provide a valid page number.");
+    }
+
     //These are the fields that the users can search. It can be queried from url
     //so we are not following camel case to name the fields. Users can just type
     //and search using the api without having to remember which letter to capitalize
@@ -558,10 +567,26 @@ export const filterProperties = async (filters) => {
     const mapAddressFilterOptions = new Map();
 
     for (const key in filters) {
-      // These are handled by the spatial condition.
-      // "location" is only a display label.
-      if (["location", "latitude", "longitude", "radius"].includes(key)) {
+      //The location and map bounds are handled by their spatial conditions.
+      //The view and location label are only used by the frontend.
+      if (
+        [
+          "location",
+          "latitude",
+          "longitude",
+          "radius",
+          "minlatitude",
+          "maxlatitude",
+          "minlongitude",
+          "maxlongitude",
+          "view"
+        ].includes(key)
+      ) {
         continue;
+      }
+
+      if (typeof filters[key] !== "string") {
+        throw new BadRequestError("Each search filter must have one value!");
       }
 
       //The search query needs to be within the above `filterOptions`. User might search using `&test=ok`
@@ -608,15 +633,15 @@ export const filterProperties = async (filters) => {
     //if the length of query is 0, that is user has only visited the page
     //we return -1 to the api route handler which will then redirect the user
     //to `/api/v1/property?page=1`
-    if (
-      mapPropertyFilterOptions.size === 0 &&
-      mapHouseFilterOptions.size === 0 &&
-      mapLandFilterOptions.size === 0 &&
-      mapAddressFilterOptions.size === 0 &&
-      !radiusCondition
-    ) {
-      return -1;
-    }
+    // if (
+    //   mapPropertyFilterOptions.size === 0 &&
+    //   mapHouseFilterOptions.size === 0 &&
+    //   mapLandFilterOptions.size === 0 &&
+    //   mapAddressFilterOptions.size === 0 &&
+    //   !radiusCondition
+    // ) {
+    //   return -1;
+    // }
 
     //TODO: If the user provides `keyword` along with other fields of other tables
     //it is neglected. We need to make it search with other fields as well
@@ -633,16 +658,36 @@ export const filterProperties = async (filters) => {
     //   return listOfProperties;
     // }
 
-    const sortField = mapPropertyFilterOptions.get("sortby") || "views";
-    const sortOrder =
-      mapPropertyFilterOptions.get("sortby") && mapPropertyFilterOptions.get("order") == "asc" ? asc : desc;
+    // const sortField = mapPropertyFilterOptions.get("sortby") || "views";
+    // const sortOrder =
+    //   mapPropertyFilterOptions.get("sortby") && mapPropertyFilterOptions.get("order") == "asc" ? asc : desc;
+    //We only allow sorting by columns that are intended for public search.
+    const validPropertySortOptions = {
+      views: property.views,
+      listedAt: property.listedAt,
+      updatedAt: property.updatedAt,
+      price: property.price,
+      title: property.title,
+      status: property.status
+    };
+
+    const requestedSortField = mapPropertyFilterOptions.get("sortby");
+
+    const sortField =
+      typeof requestedSortField === "string" &&
+      Object.prototype.hasOwnProperty.call(validPropertySortOptions, requestedSortField)
+        ? (requestedSortField as keyof typeof validPropertySortOptions)
+        : "views";
+
+    const sortOrder = String(mapPropertyFilterOptions.get("order")).toLowerCase() === "asc" ? asc : desc;
 
     const nowToday = new Date();
     const nowTodayInISOString = nowToday.toISOString();
 
     //To get the number of filtered properties, we use one select() from dizzle where we
     //get the count and also the list of properties from where() clause.
-    const filteredProperties = await db
+    //We build the filtered query once. The cards and map use the same conditions.
+    const filteredPropertyQuery = db
       .select({
         id: property.id,
         title: property.title,
@@ -660,6 +705,13 @@ export const filterProperties = async (filters) => {
         municipality: address.municipality,
         city: address.city,
         district: address.district,
+        latitude: address.latitude,
+        longitude: address.longitude,
+        province: address.province,
+        negotiable: property.negotiable,
+        closeLandmark: property.closeLandmark,
+        listedAt: property.listedAt,
+        updatedAt: property.updatedAt,
         roomCount: house.roomCount,
         bathroomCount: house.bathroomCount,
         houseArea: house.area,
@@ -667,6 +719,8 @@ export const filterProperties = async (filters) => {
         breadth: land.breadth,
         landArea: land.area,
         numberOfFilteredProperties: sql<number>`count(*) over()`
+          .mapWith(Number)
+          .as("number_of_filtered_properties")
         // tsrank: sql`ts_rank(search_vector, to_tsquery('english', '${mapPropertyFilterOptions.get("keyword").replace(" ", " | ")}')) as rank`
       })
       .from(property)
@@ -676,6 +730,7 @@ export const filterProperties = async (filters) => {
       .where(
         and(
           radiusCondition,
+          mapBoundsCondition,
           // mapPropertyFilterOptions.get("keyword")
           //   ? sql`search_vector @@ to_tsquery('english', '${mapPropertyFilterOptions.get("keyword").replace(" ", " | ")}')`
           //   : undefined,
@@ -851,10 +906,66 @@ export const filterProperties = async (filters) => {
             ? ilike(address.province, `%${mapAddressFilterOptions.get("province")}%`)
             : undefined
         )
+      );
+    // .orderBy(desc(property.featured), sortOrder(property[sortField]))
+    // .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
+    // .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
+
+    if (forMap) {
+      const mapPropertyLimit = 200;
+
+      //The map uses all matching results up to the marker limit.
+      //It does not use the current page of property cards.
+      const matchingProperties = filteredPropertyQuery.as("matching_properties");
+
+      const mapProperties = await db
+        .select({
+          id: matchingProperties.id,
+          title: matchingProperties.title,
+          slug: matchingProperties.slug,
+          price: matchingProperties.price,
+          status: matchingProperties.status,
+          propertyType: matchingProperties.propertyType,
+          toRent: matchingProperties.toRent,
+          negotiable: matchingProperties.negotiable,
+          closeLandmark: matchingProperties.closeLandmark,
+          imageUrl: matchingProperties.imageUrl,
+          featured: matchingProperties.featured,
+          street: matchingProperties.street,
+          municipality: matchingProperties.municipality,
+          city: matchingProperties.city,
+          district: matchingProperties.district,
+          province: matchingProperties.province,
+          latitude: matchingProperties.latitude,
+          longitude: matchingProperties.longitude
+        })
+        .from(matchingProperties)
+        .where(
+          and(
+            gte(matchingProperties.latitude, -90),
+            lte(matchingProperties.latitude, 90),
+            gte(matchingProperties.longitude, -180),
+            lte(matchingProperties.longitude, 180)
+          )
+        )
+        .orderBy(sql`${matchingProperties.featured} DESC NULLS LAST`, asc(matchingProperties.id))
+        //The extra row tells us whether more matching markers exist.
+        .limit(mapPropertyLimit + 1);
+
+      return {
+        properties: mapProperties.slice(0, mapPropertyLimit),
+        hasMore: mapProperties.length > mapPropertyLimit
+      };
+    }
+
+    const filteredProperties = await filteredPropertyQuery
+      .orderBy(
+        sql`${property.featured} DESC NULLS LAST`,
+        sortOrder(validPropertySortOptions[sortField]),
+        asc(property.id)
       )
-      .orderBy(desc(property.featured), sortOrder(property[sortField]))
       .limit(PROPERTY_COUNT_LIMIT_PER_PAGE)
-      .offset(Number(filters.page ? filters.page - 1 : 0) * PROPERTY_COUNT_LIMIT_PER_PAGE);
+      .offset((currentPage - 1) * PROPERTY_COUNT_LIMIT_PER_PAGE);
 
     // console.log("Filtered properties", filteredProperties);
 
@@ -889,7 +1000,7 @@ export const filterProperties = async (filters) => {
      */
 
     return {
-      currentPageNumber: filters.page ? Number(filters.page) : 1,
+      currentPageNumber: currentPage,
       numberOfPages:
         filteredProperties.length > 0
           ? Math.ceil(filteredProperties[0].numberOfFilteredProperties / PROPERTY_COUNT_LIMIT_PER_PAGE)

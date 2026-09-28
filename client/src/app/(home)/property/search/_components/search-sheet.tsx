@@ -31,6 +31,7 @@ import {
 import CountRange, { COUNT_FILTERS } from "./count-range";
 import LocationSearch from "../../../../../components/location-search";
 import BuiltYearFilter from "@/components/built-year";
+import { AppliedFiltersProvider, getAppliedSearchFilters } from "./applied-search-filters";
 
 type Patch = Record<string, string>;
 
@@ -503,6 +504,10 @@ function FilterLayout({ initialQuery, children }: { initialQuery: string; childr
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  //We summarize the applied URL filters, not unsaved changes in the drawer.
+  const appliedFilters = getAppliedSearchFilters(readFilters(initialQuery));
+
+  // const showMap = new URLSearchParams(initialQuery).get("view") === "map";
 
   function update(patch: Patch) {
     setError(null);
@@ -534,6 +539,14 @@ function FilterLayout({ initialQuery, children }: { initialQuery: string; childr
         }
       }
 
+      //Selecting or clearing a searched location removes the previous map area.
+      //Otherwise, both location conditions could hide valid results.
+      if ("latitude" in patch || "longitude" in patch) {
+        for (const key of ["minlatitude", "maxlatitude", "minlongitude", "maxlongitude"]) {
+          next.delete(key);
+        }
+      }
+
       return next;
     });
   }
@@ -544,7 +557,8 @@ function FilterLayout({ initialQuery, children }: { initialQuery: string; childr
     // Keep the current result ordering.
     const appliedParams = new URLSearchParams(initialQuery);
 
-    for (const key of ["sortby", "order"]) {
+    //We keep the selected result ordering and list/map view.
+    for (const key of ["sortby", "order", "view"]) {
       const value = appliedParams.get(key);
       if (value) next.set(key, value);
     }
@@ -602,39 +616,45 @@ function FilterLayout({ initialQuery, children }: { initialQuery: string; childr
   };
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="sticky top-24 hidden max-h-[calc(100dvh-7rem)] overflow-y-auto rounded-xl border bg-card p-5 lg:block">
-        <h2 className="mb-5 text-lg font-semibold">Search filters</h2>
+    <AppliedFiltersProvider appliedFilters={appliedFilters} openFilters={() => setOpen(true)}>
+      <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="sticky top-24 hidden max-h-[calc(100dvh-7rem)] overflow-y-auto rounded-xl border bg-card p-5 lg:block">
+          <h2 className="mb-5 text-lg font-semibold">Search filters</h2>
 
-        <FilterForm {...formProps} />
-      </aside>
+          <FilterForm {...formProps} />
+        </aside>
 
-      <div className="min-w-0 space-y-5" aria-busy={pending}>
-        <div className="lg:hidden">
-          <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <SlidersHorizontal className="size-4" />
-                Search and filters
-              </Button>
-            </DrawerTrigger>
+        <div className="min-w-0 space-y-5" aria-busy={pending}>
+          <div className="lg:hidden">
+            <Drawer open={open} onOpenChange={setOpen}>
+              <DrawerTrigger asChild>
+                <Button type="button" variant="outline" className="gap-2">
+                  <SlidersHorizontal className="size-4" aria-hidden="true" />
 
-            <DrawerContent>
-              <DrawerHeader>
-                <DrawerTitle>Search filters</DrawerTitle>
-                <DrawerDescription>Find properties that match your needs.</DrawerDescription>
-              </DrawerHeader>
+                  {appliedFilters.length > 0
+                    ? `Filters (${appliedFilters.length})`
+                    : "Search and filters"}
+                </Button>
+              </DrawerTrigger>
 
-              <div className="px-5 pb-5">
-                <FilterForm {...formProps} />
-              </div>
-            </DrawerContent>
-          </Drawer>
+              <DrawerContent className="max-h-[90dvh]">
+                <DrawerHeader>
+                  <DrawerTitle>Search filters</DrawerTitle>
+
+                  <DrawerDescription>Find properties that match your needs.</DrawerDescription>
+                </DrawerHeader>
+
+                <div className="min-h-0 overflow-y-auto px-5 pb-5">
+                  <FilterForm {...formProps} />
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </div>
+
+          {children}
         </div>
-
-        {children}
       </div>
-    </div>
+    </AppliedFiltersProvider>
   );
 }
 

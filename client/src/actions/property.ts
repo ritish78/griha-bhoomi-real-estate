@@ -82,7 +82,8 @@ export async function getFilteredListOfProperties(filters: string, limit: number
     const response = await fetch(
       `http://localhost:5000/api/v1/property/filter?${filters}&limit=${limit}`,
       {
-        next: { revalidate: 60 } //Cache in seconds to revalidate
+        // next: { revalidate: 60 } //Cache in seconds to revalidate
+        cache: "no-store"
       }
     );
 

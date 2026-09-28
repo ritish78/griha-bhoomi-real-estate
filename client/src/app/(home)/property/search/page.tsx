@@ -1,15 +1,19 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+
 import { getFilteredListOfProperties } from "@/actions/property";
-import { ListOfPropertiesResponse } from "@/types/property";
-import PropertyListPage from "../_components/properties-list-page";
-import PaginationButton from "@/components/pagination-button";
 import { Shell } from "@/components/shell";
+import {
+  getFilteredMapProperties,
+  type FilteredMapProperties
+} from "@/lib/getFilteredMapProperties";
+import type { ListOfPropertiesResponse } from "@/types/property";
+
 import SearchSheet from "./_components/search-sheet";
-import { Metadata } from "next";
+import SearchResults from "./_components/search-results";
 
 export interface SearchPropertyPageProps {
-  params: Promise<{ [key: string]: string | string[] | undefined }>;
-  searchParams: Promise<Record<string, string | number | null>>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export const metadata: Metadata = {
@@ -17,63 +21,70 @@ export const metadata: Metadata = {
   description: "Search your perfect properties at GrihaBhoomi"
 };
 
-function createQueryString(
-  params: Record<string, string | number | null>,
-  newPage: number
-): string {
-  const newSearchParams = new URLSearchParams();
+export default async function SearchPropertyPage({ searchParams }: SearchPropertyPageProps) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+
+  //Each search field has one value. We also keep the selected view in the URL.
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && key !== "page") {
-      newSearchParams.append(key, String(value));
+    if (typeof value === "string") {
+      query.set(key, value);
     }
   }
-  newSearchParams.set("page", String(newPage));
-  return newSearchParams.toString();
-}
 
-export default async function SearchPropertyPage(props: SearchPropertyPageProps) {
-  const searchParams = await props.searchParams;
-  const pageNumber = Number(searchParams.page) || 1;
+  const requestedPage = Number(query.get("page") || 1);
 
-  // Validate page number
-  if (pageNumber <= 0 || isNaN(pageNumber)) {
-    redirect("/property/search?page=1");
+  if (!Number.isSafeInteger(requestedPage) || requestedPage < 1) {
+    query.set("page", "1");
+    redirect(`/property/search?${query.toString()}`);
   }
 
-  const queryString = createQueryString(searchParams, pageNumber);
+  query.set("page", String(requestedPage));
 
-  let listOfFilteredProperty: ListOfPropertiesResponse =
-    await getFilteredListOfProperties(queryString);
+  const showMap = query.get("view") === "map";
+
+  //The view only controls the frontend layout.
+  const filters = new URLSearchParams(query);
+  filters.delete("view");
+
+  const emptyMapProperties: FilteredMapProperties = {
+    properties: [],
+    hasMore: false
+  };
+
+  //The cards are paginated. The map independently requests matching markers.
+  //Both requests receive the same search filters.
+  const [propertyResponse, mapProperties] = await Promise.all([
+    getFilteredListOfProperties(filters.toString()),
+    showMap ? getFilteredMapProperties(filters.toString()) : Promise.resolve(emptyMapProperties)
+  ]);
+
+  const listOfFilteredProperty: ListOfPropertiesResponse = propertyResponse;
 
   if ("error" in listOfFilteredProperty) {
     return (
       <Shell className="pb-12 md:pb-14">
-        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold text-destructive">Oops! An error occurred</h2>
-            <p className="text-muted-foreground">{listOfFilteredProperty.error}</p>
-          </div>
+        <div className="rounded-md border bg-card p-8 text-center">
+          <h1 className="text-2xl font-bold">Could not load properties</h1>
+
+          <p className="mt-2 text-muted-foreground">{listOfFilteredProperty.error}</p>
         </div>
       </Shell>
     );
   }
 
-  // Redirect if page number exceeds total pages
+  //We preserve the filters and view when correcting an unavailable page.
   if (
-    listOfFilteredProperty.currentPageNumber > listOfFilteredProperty.numberOfPages &&
+    requestedPage > listOfFilteredProperty.numberOfPages &&
     listOfFilteredProperty.numberOfPages > 0
   ) {
-    redirect(
-      `/property/search?${createQueryString(searchParams, listOfFilteredProperty.numberOfPages || 1)}`
-    );
+    query.set("page", String(listOfFilteredProperty.numberOfPages));
+    redirect(`/property/search?${query.toString()}`);
   }
 
-  const hasResults = listOfFilteredProperty.properties.length > 0;
-  const totalResults = listOfFilteredProperty.properties.length;
-
   return (
-    <Shell className="pb-12 md:pb-14">
-      <div className="space-y-8">
+    <Shell className="bg-slate-50 pb-12 dark:bg-transparent/5 md:pb-14">
+      <div className="min-w-0 space-y-6">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold md:text-3xl">Find your next property</h1>
 
@@ -83,43 +94,7 @@ export default async function SearchPropertyPage(props: SearchPropertyPageProps)
         </div>
 
         <SearchSheet>
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-semibold">Search results</h2>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                Showing {totalResults} {totalResults === 1 ? "property" : "properties"}
-                {listOfFilteredProperty.numberOfPages > 1 &&
-                  ` · Page ${pageNumber} of ${listOfFilteredProperty.numberOfPages}`}
-              </p>
-            </div>
-
-            {hasResults ? (
-              <>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] items-stretch gap-4">
-                  <PropertyListPage propertyList={listOfFilteredProperty} />
-                </div>
-
-                {listOfFilteredProperty.numberOfPages > 1 && (
-                  <div className="flex justify-center pt-4">
-                    <PaginationButton
-                      searchParams={searchParams}
-                      totalPages={listOfFilteredProperty.numberOfPages}
-                      page={pageNumber}
-                    />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="rounded-xl border border-dashed px-6 py-16 text-center">
-                <h3 className="text-lg font-semibold">No matching properties</h3>
-
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Try widening your price or room range, or reset your filters and apply again.
-                </p>
-              </div>
-            )}
-          </div>
+          <SearchResults propertyList={listOfFilteredProperty} mapProperties={mapProperties} />
         </SearchSheet>
       </div>
     </Shell>
